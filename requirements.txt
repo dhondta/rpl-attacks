@@ -1,0 +1,10 @@
+cffi
+cairocffi
+fabric3
+jinja2
+makesense
+matplotlib
+networkx
+pandas
+sh
+scipy
