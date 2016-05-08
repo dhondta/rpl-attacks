@@ -1,5 +1,8 @@
-RPL Attack Framework
-====================
+RPL Attacks Framework
+=====================
+
+This project is aimed to provide a simple and convenient way to generate simulations and deploy malicious motes for a Wireless Sensor Network (WSN) that uses Routing Protocol for Low-power and lossy devices (RPL) as its network layer. With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants or using an own external RPL library.
+
 
 Installation
 ------------
@@ -30,7 +33,7 @@ Installation
 
 4. Install Cooja plugin RadioLoggerHeadless
 
- Refer to [this Git repository](https://github.com/cetic/cooja-radiologger-headless)
+ Please refer to [this Git repository](https://github.com/cetic/cooja-radiologger-headless).
 
 
 Configuration
