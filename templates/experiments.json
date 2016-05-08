@@ -1,0 +1,9 @@
+{
+  "test": {
+    "title": "Test simulation",
+    "goal": "Create a new dummy test simulation",
+    "notes": "Nothing special",
+    "number_motes": 5,
+    "target": "wismote"
+  }
+}
