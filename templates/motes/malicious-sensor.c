@@ -33,7 +33,7 @@
 
 #include <string.h>
 
-#define DEBUG {{ debug }}
+#define DEBUG DEBUG_FULL
 #include "net/ip/uip-debug.h"
 #include "dev/watchdog.h"
 #include "dev/leds.h"

@@ -1,43 +1,61 @@
 importPackage(java.io);
 
-serial_log_file = new FileWriter("serial.log");
-power_tracker_file = new FileWriter("powertracker.log", false);
-power_tracker = mote.getSimulation().getCooja().getStartedPlugin("PowerTracker");
+// get plugin instances
+visualizer = mote.getSimulation().getCooja().getStartedPlugin("VisualizerScreenshot");
+timeline = mote.getSimulation().getCooja().getStartedPlugin("Timeline");
+powertracker = mote.getSimulation().getCooja().getStartedPlugin("PowerTracker");
 
-function time_prefix(val){
-  var i = 0;
-  var array1 = val.split("\n");
-  for (i = 0; i &lt; array1.length; i++) { array1[i] = time + array1[i]; }
-  val = array1.join("\n");
-}
+// create log file handlers
+log.log("Opening log file writers...\n");
+log_serial = new FileWriter("./data/serial.log");        // open serial log file
+log_rpl = new FileWriter("./data/rpl.log");           // open RPL messages log file
+log_edges = new FileWriter("./data/edges.log");       // open RPL DAG log file
+log_power = new FileWriter("./data/powertracker.log", false);
+log_timeline = new FileWriter("./data/timeline.log", false);
 
-function print_stats() {
-  stats = power_tracker.radioStatistics();
-  log.log("PowerTracker: Extracted statistics:\n" + stats + "\n");
-  time_prefix(stats);
-  power_tracker_file.write(stats);
-  power_tracker_file.flush();
-}
+// re-frame visualizer view
+visualizer.resetViewport = 1;
+visualizer.repaint();
 
+// set timeout and declare variables
 TIMEOUT({{ timeout }}, log.testOK());
-counter = 0;
-powertracker_frequency = {{ powertracker_frequency }};
-if (power_tracker == null) { log.log("No PowerTracker plugin\n"); }
+var c = 0, i = 0, period = {{ sampling_period }};
 
+// now, start the test
+log.log("Starting stript...\n");
 while(1) {
-  serial_log_file.write(time + " ID:" + id.toString() + " " + msg + "\n");
-  serial_log_file.flush();
   try {
+    // first, log to serial file
+    line = time + "\tID:" + id.toString() + "\t" + msg + "\n"
+    if (msg.startsWith("#L ")) {
+      edges_serial.write(line);
+      edges_serial.flush();
+    } else if (msg.startsWith("RPL: ")) {
+      rpl_serial.write(line);
+      rpl_serial.flush();
+    } else {
+      log_serial.write(line);
+      log_serial.flush();
+    }
     YIELD();
-    if (counter &lt; time){
-      log.log(counter);
-      if (power_tracker != null) { print_stats(); }
-      counter += powertracker_frequency;
+    // then, log power statistics
+    if (c < time) {
+      log_power.write(powertracker.radioStatistics());
+      log_power.flush();
+      log_timeline.write(timeline.extractStatistics());
+      log_timeline.flush();
+      visualizer.takeScreenshot("./data/network_" + ("0" + i).slice(-3) + ".png", 0, 0);
+      c += period;
+      i += 1;
     }
   } catch (e) {
-    serial_log_file.close();
-    power_tracker_file.close();
-    throw('test script killed');
-    log.testOK();
+    log_serial.close();
+    log_rpl.close();
+    log_edges.close();
+    log_power.close();
+    log_timeline.close();
+    log.log("File writers closed\n");
+    break;
   }
 }
+log.log("Done.");

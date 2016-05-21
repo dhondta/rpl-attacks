@@ -1,0 +1,10 @@
+{
+  "hello-flood": {
+    "RPL_CONF_DIO_INTERVAL_MIN": 1,
+    "RPL_CONF_DIO_INTERVAL_DOUBLINGS": 1,
+    "RPL_DAG_MC_ETX_DIVISOR": 1
+  },
+  "sinkhole": {
+    "RPL_CONF_MIN_HOPRANKINC": 128
+  }
+}

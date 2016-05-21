@@ -4,10 +4,8 @@
   <project EXPORT="discard">[CONTIKI_DIR]/tools/cooja/apps/mspsim</project>
   <project EXPORT="discard">[CONTIKI_DIR]/tools/cooja/apps/avrora</project>
   <project EXPORT="discard">[CONTIKI_DIR]/tools/cooja/apps/powertracker</project>
-  <project EXPORT="discard">[CONTIKI_DIR]/tools/cooja/apps/mobility</project>
   <project EXPORT="discard">[CONTIKI_DIR]/tools/cooja/apps/serial_socket</project>
-  <project EXPORT="discard">[CONTIKI_DIR]/tools/cooja/apps/collect-view</project>
-  <project EXPORT="discard">[CONTIKI_DIR]/tools/cooja/apps/radiologger-headless</project>
+  <project EXPORT="discard">[CONTIKI_DIR]/tools/cooja/apps/visualizer_screenshot</project>
   <simulation>
     <title>{{ title }}</title>
     <randomseed>generated</randomseed>
@@ -22,12 +20,11 @@
     <events>
       <logoutput>40000</logoutput>
     </events>
-    {% for mote_type in mote_types %}
-    <motetype>
-      org.contikios.cooja.mspmote.Z1MoteType
+    {% for mote_type in mote_types %}<motetype>
+      org.contikios.cooja.mspmote.{{ target }}MoteType
       <identifier>{{ mote_type.name }}</identifier>
       <description>{{ mote_type.description }}</description>
-      <firmware EXPORT="copy">{{ mote_type.name }}.z1</firmware>
+      <firmware EXPORT="copy">[CONFIG_DIR]/motes/{{ mote_type.name }}.z1</firmware>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.RimeAddress</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.IPAddress</moteinterface>
@@ -42,8 +39,7 @@
       <moteinterface>org.contikios.cooja.mspmote.interfaces.MspSerial</moteinterface>
       <moteinterface>org.contikios.cooja.mspmote.interfaces.MspDebugOutput</moteinterface>
     </motetype>
-    {% endfor %}
-    {% for mote in motes %}
+    {% endfor %}{% for mote in motes %}
     <mote>
       <breakpoints />
       <interface_config>
@@ -65,6 +61,19 @@
     {% endfor %}
   </simulation>
   <plugin>
+    org.contikios.cooja.plugins.ScriptRunner
+    <plugin_config>
+      <scriptfile>[CONFIG_DIR]/script.js</scriptfile>
+      <active>true</active>
+      <split>250</split>
+    </plugin_config>
+    <width>790</width>
+    <height>450</height>
+    <location_x>1050</location_x>
+    <location_y>0</location_y>
+    <z>2</z>
+  </plugin>
+  <plugin>
     org.contikios.cooja.plugins.SimControl
     <width>280</width>
     <height>120</height>
@@ -82,7 +91,17 @@
     <z>2</z>
   </plugin>
   <plugin>
-    org.contikios.cooja.plugins.Visualizer
+    PowerTracker
+    <plugin_config>
+    </plugin_config>
+    <width>450</width>
+    <height>240</height>
+    <location_x>680</location_x>
+    <location_y>450</location_y>
+    <z>2</z>
+  </plugin>
+  <plugin>
+    VisualizerScreenshot
     <plugin_config>
       <moterelations>true</moterelations>
       <skin>org.contikios.cooja.plugins.skins.IDVisualizerSkin</skin>
@@ -90,13 +109,13 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.MoteTypeVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>1.499184161158007 0.0 0.0 1.499184161158007 210.64327407171538 170.52665756027235</viewport>
+      <viewport>1.5 0.0 0.0 1.5 210.0 170.0</viewport>
     </plugin_config>
     <width>400</width>
     <height>400</height>
     <location_x>1</location_x>
     <location_y>1</location_y>
-    <z>2</z>
+    <z>1</z>
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.LogListener
@@ -109,6 +128,22 @@
     <height>240</height>
     <location_x>1130</location_x>
     <location_y>450</location_y>
+    <z>2</z>
+  </plugin>
+  <plugin>
+    org.contikios.cooja.plugins.RadioLogger
+    <plugin_config>
+      <split>450</split>
+      <formatted_time />
+      <showdups>false</showdups>
+      <hidenodests>false</hidenodests>
+      <analyzers name="6lowpan-pcap" />
+      <pcap_file EXPORT="discard">[CONFIG_DIR]/data/output.pcap</pcap_file>
+    </plugin_config>
+    <width>650</width>
+    <height>450</height>
+    <location_x>400</location_x>
+    <location_y>0</location_y>
     <z>2</z>
   </plugin>
   <plugin>
@@ -125,6 +160,7 @@
     <location_x>0</location_x>
     <location_y>690</location_y>
     <z>2</z>
+    <zoomfactor>500.0</zoomfactor>
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.Notes
@@ -139,58 +175,6 @@
     <location_x>1</location_x>
     <location_y>400</location_y>
     <z>1</z>
-  </plugin>
-  <plugin>
-    org.contikios.cooja.plugins.RadioLogger
-    <plugin_config>
-      <split>450</split>
-      <formatted_time />
-      <showdups>false</showdups>
-      <hidenodests>false</hidenodests>
-    </plugin_config>
-    <width>650</width>
-    <height>450</height>
-    <location_x>400</location_x>
-    <location_y>0</location_y>
-    <z>2</z>
-  </plugin>
-  <plugin>
-    be.cetic.cooja.plugins.RadioLoggerHeadless
-    <plugin_config>
-      <formatted_time />
-      <showdups>false</showdups>
-      <hidenodests>false</hidenodests>
-      <analyzers name="6lowpan-pcap" />
-      <pcap_file EXPORT="discard">output.pcap</pcap_file>
-    </plugin_config>
-    <width>0</width>
-    <height>0</height>
-    <location_x>0</location_x>
-    <location_y>0</location_y>
-    <z>1</z>
-  </plugin>
-  <plugin>
-    org.contikios.cooja.plugins.ScriptRunner
-    <plugin_config>
-      <script>{{ script }}</script>
-      <active>true</active>
-      <split>350</split>
-    </plugin_config>
-    <width>790</width>
-    <height>450</height>
-    <location_x>1050</location_x>
-    <location_y>0</location_y>
-    <z>2</z>
-  </plugin>
-  <plugin>
-    PowerTracker
-    <plugin_config>
-    </plugin_config>
-    <width>450</width>
-    <height>240</height>
-    <location_x>680</location_x>
-    <location_y>450</location_y>
-    <z>2</z>
   </plugin>
 </simconf>
 

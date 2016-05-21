@@ -11,9 +11,15 @@ CONTIKI_WITH_IPV6 = 1
 UIP_CONF_IPV6=1
 CFLAGS += -DUIP_IPV6_RPL
 
-run:
-	java -mx512m -jar $(CONTIKI)/tools/cooja/dist/cooja.jar -nogui=simulation.csc -contiki=$(CONTIKI)
+run-without-malicious:
+	java -mx512m -jar $(CONTIKI)/tools/cooja/dist/cooja.jar -hidden=simulation_without_malicious.csc -contiki=$(CONTIKI)
 
-cooja:
-	make TARGET=cooja simulation.csc
+run-with-malicious:
+	java -mx512m -jar $(CONTIKI)/tools/cooja/dist/cooja.jar -hidden=simulation_with_malicious.csc -contiki=$(CONTIKI)
+
+cooja-without-malicious:
+	make TARGET=cooja simulation_without_malicious.csc
+
+cooja-with-malicious:
+	make TARGET=cooja simulation_with_malicious.csc
 

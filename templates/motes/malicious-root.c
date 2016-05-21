@@ -33,7 +33,7 @@
 
 #include <string.h>
 
-#define DEBUG {{ debug }}
+#define DEBUG DEBUG_FULL
 #include "net/ip/uip-debug.h"
 #include "dev/watchdog.h"
 #include "dev/leds.h"
@@ -46,34 +46,15 @@
 
 #define MAX_PAYLOAD_LEN 120
 
+{{ constants }}
+
 static struct uip_udp_conn *server_conn;
 static char buf[MAX_PAYLOAD_LEN];
 static uint16_t len;
 static uip_ipaddr_t ipaddr;
 /*---------------------------------------------------------------------------*/
-PROCESS(dodag_root_process, "DODAG root process");
-AUTOSTART_PROCESSES(&dodag_root_process);
-/*---------------------------------------------------------------------------*/
-static void tcpip_handler(void) {
-  memset(buf, 0, MAX_PAYLOAD_LEN);
-  if(uip_newdata()) {
-    leds_on(LEDS_RED);
-    len = uip_datalen();
-    memcpy(buf, uip_appdata, len);
-    PRINTF("%u bytes from [", len);
-    PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
-    PRINTF("]:%u\n", UIP_HTONS(UIP_UDP_BUF->srcport));
-    uip_ipaddr_copy(&server_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
-    server_conn->rport = UIP_UDP_BUF->srcport;
-
-    uip_udp_packet_send(server_conn, buf, len);
-    /* Restore server connection to allow data from any node */
-    uip_create_unspecified(&server_conn->ripaddr);
-    server_conn->rport = 0;
-  }
-  leds_off(LEDS_RED);
-  return;
-}
+PROCESS(hello_flooder_process, "HELLO flooder process");
+AUTOSTART_PROCESSES(&hello_flooder_process);
 /*---------------------------------------------------------------------------*/
 #if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
 static void print_stats() {
@@ -124,9 +105,10 @@ void create_dag() {
   }
 }
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(dodag_root_process, ev, data) {
+PROCESS_THREAD(hello_flooder_process, ev, data) {
   PROCESS_BEGIN();
-  PRINTF("Starting UDP server\n");
+  PRINTF("Starting HELLO flooder\n");
+
 #if BUTTON_SENSOR_ON
   PRINTF("Button 1: Print RIME stats\n");
 #endif
@@ -138,16 +120,7 @@ PROCESS_THREAD(dodag_root_process, ev, data) {
 
   PRINTF("Listen port: 3000, TTL=%u\n", server_conn->ttl);
 
-  while(1) {
-    PROCESS_YIELD();
-    if(ev == tcpip_event) {
-      tcpip_handler();
-#if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
-    } else if(ev == sensors_event && data == &button_sensor) {
-      print_stats();
-#endif
-    }
-  }
+  while(1) { PROCESS_YIELD(); }
 
   PROCESS_END();
 }

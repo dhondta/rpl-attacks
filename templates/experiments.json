@@ -1,9 +1,19 @@
 {
   "test": {
-    "title": "Test simulation",
-    "goal": "Create a new dummy test simulation",
-    "notes": "Nothing special",
-    "number_motes": 5,
-    "target": "wismote"
+    "simulation": {
+      "title": "Test simulation",
+      "goal": "Create a new simulation",
+      "notes": "",
+      "number_motes": 5,
+      "target": "z1",
+      "duration": 60
+    },
+    "malicious": {
+      "type": "sensor",
+      "building-blocks": [
+        "hello-flood",
+        "sinkhole"
+      ]
+    }
   }
 }

@@ -31,9 +31,23 @@ Installation
  sudo pip3 install -r requirements.txt
  ```
 
-4. Install Cooja plugin RadioLoggerHeadless
+4. Setup Cooja
 
- Please refer to [this Git repository](https://github.com/cetic/cooja-radiologger-headless).
+ ```
+ ../rpl-attacks$ fab setup
+ ```
+
+5. [Facultative] Create a default configuration file (see next section for details about this file)
+
+ ```
+ ../rpl-attacks$ fab config
+ ```
+
+or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
+
+ ```
+ ../rpl-attacks$ fab config:/opt/contiki,~/simulations
+ ```
 
 
 Configuration
@@ -69,13 +83,15 @@ Commands are used by typing ``fab:...``
 
 > This will clean the simulation directory named 'name'.
 
-- **`cooja`**`:name`
+- **`cooja`**`:name[, with-malicious-mote]`
 
-> This will open Cooja and load simulation named 'name'.
+> This will open Cooja and load simulation named 'name' in its version with or without the malicious mote.
+>
+>  `with-malicious-mote`: flag for starting the simulation with/without the malicious mote [default: false]
 
 - **`launch`**`:name`
 
-> This will start simulation in Cooja in no-GUI mode.
+> This will start simulation in Cooja in hidden-GUI mode.
 
 - **`make`**`:name[, make-target, external-rpl-library]`
 
@@ -106,6 +122,10 @@ Commands are used by typing ``fab:...``
 - **`plot`**`:name`
 
 > This will generate plots from parsed results.
+
+- **`make_all`**`:simulation-campaign-json-file`
+
+> This will generate a campaign of simulations from a JSON file formatted and execute the chain `clean`|`new`|`make` for each simulation. See ``./templates/experiments.json`` for simulation campaign JSON format.
 
 - **`run_all`**`:simulation-campaign-json-file`
 
