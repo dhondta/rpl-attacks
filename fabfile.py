@@ -86,7 +86,7 @@ def make(name, target="z1", ext_lib=None):
                 try:
                     local("make motes/malicious TARGET=%s" % target)
                 except Exception as e:
-                    logger.error(str(e))
+                    logging.error(str(e))
             if ext_lib is not None:
                 # then, clean temporary files
                 remove_folder(os.path.join(CONTIKI_FOLDER, 'core', 'net', 'rpl'))
@@ -105,18 +105,18 @@ def make(name, target="z1", ext_lib=None):
 
 
 @task
-def new(name, n=NBR_MOTES, mtype="sensor", blocks=None, duration=None, title=None, goal=None, notes=None, debug=None):
+def new(name, n=NBR_MOTES, mtype="sensor", blocks=None, duration=None, title=None, goal=None, notes=None):
     logging.debug(" > Creating simulation...")
     # create experiment's directories
     path = get_path(EXPERIMENT_FOLDER, name)
     get_path(EXPERIMENT_FOLDER, name, 'motes')
     # select the right malicious mote template and duplicate the simulation file
     copy_files(TEMPLATES_FOLDER, TEMPLATES_FOLDER,
-               ('motes/malicious-{}.c'.format(mtype), 'malicious.c'),
+               ('motes/malicious-{}.c'.format(mtype), 'motes/malicious.c'),
                ('simulation.csc', 'simulation_without_malicious.csc'),
                ('simulation.csc', 'simulation_with_malicious.csc'))
     # create experiment's files from templates
-    render_templates(path, TEMPLATES, n, blocks, duration, title, goal, notes, debug)
+    render_templates(path, TEMPLATES, n, blocks, duration, title, goal, notes)
     # then clean the templates folder from previously created files
     remove_files(TEMPLATES_FOLDER,
                  'motes/malicious.c',
@@ -130,25 +130,6 @@ def parse(name):
     # create parsing folders
     path = get_path(EXPERIMENT_FOLDER, name, 'data')
     get_path(EXPERIMENT_FOLDER, name, 'results')
-#    powertracker2csv(path)
-    message(path)
-
-
-@task
-def plot(name):
-    logging.debug(" > Plotting results...")
-    path = get_path(EXPERIMENT_FOLDER, name)
-    pt.overhead(path)
-    pt.dashboard(path)
-    pt.protocol_repartition_depth(path)
-    pt.protocol_repartition_aggregated(path)
-    pt.protocol_repartition(path)
-    pt.pdr(path)
-    pt.pdr_depth(path)
-    pt.strobes(path)
-    pt.strobes_depth(path)
-    pt.energy(path)
-    pt.energy_depth(path)
 
 
 # ****************************** TASKS ON EXPERIMENTS CAMPAIGN ******************************
@@ -166,7 +147,6 @@ def make_all(exp_file="templates/experiments"):
             notes=params.get("simulation").get("notes"),
             duration=params.get("simulation").get("duration"),
             n=params.get("simulation").get("number_motes"),
-            debug=params.get("simulation").get("debug"),
             mtype=params.get("malicious").get("type"),
             blocks=params.get("malicious").get("building-blocks"))
         ext_lib = params.get("malicious").get("external_library")
@@ -190,6 +170,7 @@ def run_all(exp_file="templates/experiments"):
 # ****************************** SETUP TASKS FOR CONTIKI AND COOJA ******************************
 @task
 def config(contiki_folder='~/contiki', experiments_folder='~/Experiments'):
+    logging.debug("CREATING CONFIGURATION FILE AT '~/.rpl-attacks.conf'")
     with open(os.path.expanduser('~/.rpl-attacks.conf'), 'w') as f:
         f.write('[RPL Attacks Framework Configuration]\n')
         f.write('contiki_folder = {}\n'.format(contiki_folder))
@@ -200,6 +181,7 @@ def config(contiki_folder='~/contiki', experiments_folder='~/Experiments'):
 def prepare(exp_file):
     if not exp_file.endswith('.json'):
         exp_file += '.json'
+    logging.debug("CREATING NEW EXPERIMENT CAMPAIGN AT '{}'".format(os.path.join(EXPERIMENT_FOLDER, exp_file)))
     copy_files(TEMPLATES_FOLDER, EXPERIMENT_FOLDER, ('experiments.json', exp_file))
 
 

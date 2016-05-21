@@ -33,7 +33,7 @@ def copy_folder(src_path, dst_path):
 def move_folder(src_path, dst_path, new_folder_name=None):
     """
     This helper function is aimed to copy a folder from a source path to a destination path,
-     eventually renaming the folder to be moved. This fails silently if the source path exists.
+     eventually renaming the folder to be moved. If it fails, it does it silently.
 
     :param src_path: absolute or relative source path
     :param dst_path: absolute or relative destination root path
@@ -49,10 +49,11 @@ def move_folder(src_path, dst_path, new_folder_name=None):
 
 def remove_files(path, *files):
     """
+    This helper function is aimed to remove specified files. If a file does not exist,
+     it fails silently.
 
-
-    :param path:
-    :param files:
+    :param path: absolute or relative source path
+    :param files: filenames of files to be removed
     """
     for file in files:
         try:
@@ -62,19 +63,34 @@ def remove_files(path, *files):
 
 
 def remove_folder(path):
+    """
+    This helper function is aimed to remove an entire folder. If the folder does not exist,
+     it fails silently.
+
+    :param path: absolute or relative source path
+    """
     try:
         sh.rm('-r', path)
     except:
         pass
 
 
-def render_templates(path, templates, n, blocks, duration, title, goal, notes, debug):
+def render_templates(path, templates, n, blocks, duration, title, goal, notes):
+    """
+    This function is aimed to adapt the input templates dictionary with provided parameters.
+
+    :param path: experiment folder path
+    :param templates: dictionary of the templates to be deployed
+    :param n: number of motes
+    :param blocks: build blocks to be included in the current experiment
+    :param duration: duration of the simulation
+    :param title: title of the simulation
+    :param goal: goal description for the simulation
+    :param notes: additional notes for the simulation
+    """
     # generate the list of motes (first one is the root, last one is the malicious mote)
     motes = generate_motes(int(n or NBR_MOTES))
     # fill in the different templates
-    templates["motes/root.c"]["debug"] = ["DEBUG_NONE", "DEBUG_FULL"][debug or 0]
-    templates["motes/sensor.c"]["debug"] = ["DEBUG_NONE", "DEBUG_FULL"][debug or 0]
-    templates["motes/malicious.c"]["debug"] = ["DEBUG_NONE", "DEBUG_FULL"][debug or 0]
     templates["motes/malicious.c"]["constants"] = "\n".join(["#define {} {}".format(*c) for c in get_constants(blocks).items()]) or ""
     templates["script.js"]["timeout"] = 1000 * int(duration or templates["script.js"]["timeout"])
     templates["script.js"]["sampling_period"] = templates["script.js"]["timeout"] // 100
