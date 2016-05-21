@@ -178,7 +178,7 @@ def config(contiki_folder='~/contiki', experiments_folder='~/Experiments'):
 
 
 @task
-def prepare(exp_file):
+def prepare(exp_file='my_simulation'):
     if not exp_file.endswith('.json'):
         exp_file += '.json'
     logging.debug("CREATING NEW EXPERIMENT CAMPAIGN AT '{}'".format(os.path.join(EXPERIMENT_FOLDER, exp_file)))
