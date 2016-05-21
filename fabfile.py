@@ -159,12 +159,17 @@ def make_all(exp_file="templates/experiments"):
 
 
 @task
+def run(name):
+    logging.info("PROCESSING EXPERIMENT '{}'".format(name))
+    launch(name)
+    parse(name)
+
+
+@task
 def run_all(exp_file="templates/experiments"):
     make_all(exp_file)
     for name in get_experiments(exp_file).keys():
-        logging.info("PROCESSING EXPERIMENT '{}'".format(name))
-        launch(name)
-        parse(name)
+        run(name)
 
 
 # ****************************** SETUP TASKS FOR CONTIKI AND COOJA ******************************
