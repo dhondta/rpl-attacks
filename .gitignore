@@ -60,3 +60,7 @@ docs/_build/
 # PyBuilder
 target/
 
+# RPL-Attacks
+makesense
+.cooja_addons_installed
+templates/rpl
