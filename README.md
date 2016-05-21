@@ -10,7 +10,7 @@ Installation
 1. Clone this repository
 
  ```
- git clone ...
+ git clone https://github.com/dhondta/rpl-attacks.git
  ```
 
 2. Install system requirements
@@ -77,7 +77,7 @@ experiments_folder = ~/simulations
 Commands
 --------
 
-Commands are used by typing ``fab:...``
+Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-flood``).
 
 - **`clean`**`:name`
 
