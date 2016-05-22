@@ -28,11 +28,11 @@ while(1) {
     // first, log to serial file
     line = time + "\tID:" + id.toString() + "\t" + msg + "\n"
     if (msg.startsWith("#L ")) {
-      edges_serial.write(line);
-      edges_serial.flush();
+      log_edges.write(line);
+      log_edges.flush();
     } else if (msg.startsWith("RPL: ")) {
-      rpl_serial.write(line);
-      rpl_serial.flush();
+      log_rpl.write(line);
+      log_rpl.flush();
     } else {
       log_serial.write(line);
       log_serial.flush();

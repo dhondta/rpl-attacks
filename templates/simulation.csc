@@ -21,10 +21,10 @@
       <logoutput>40000</logoutput>
     </events>
     {% for mote_type in mote_types %}<motetype>
-      org.contikios.cooja.mspmote.{{ target }}MoteType
+      org.contikios.cooja.mspmote.{{ target_capitalized }}MoteType
       <identifier>{{ mote_type.name }}</identifier>
       <description>{{ mote_type.description }}</description>
-      <firmware EXPORT="copy">[CONFIG_DIR]/motes/{{ mote_type.name }}.z1</firmware>
+      <firmware EXPORT="copy">[CONFIG_DIR]/motes/{{ mote_type.name }}.{{ target }}</firmware>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.RimeAddress</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.IPAddress</moteinterface>
