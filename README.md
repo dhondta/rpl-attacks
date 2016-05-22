@@ -41,6 +41,8 @@ Installation
 Configuration
 -------------
 
+**This section only applies if you want to tune Contiki's source folder and/or your experiments folder.**
+
 Create a default configuration file
 
  ```
@@ -63,7 +65,7 @@ Parameters :
 
 >  [default: ~/Experiments]
 
-These parameters can be tuned by editing ``~/.rpl-attacks.conf``. These are written in a section named "RPL Attacks Framework Configuration".
+These parameters can be later tuned by editing ``~/.rpl-attacks.conf``. These are written in a section named "RPL Attacks Framework Configuration".
 
 Example configuration file :
 
@@ -108,13 +110,13 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 > This will clean the simulation directory named 'name'.
 
-- **`config`**`[:contiki-folder, experiments-folder`]
+- **`config`**`[:contiki_folder, experiments_folder`]
 
 > This will create a configuration file with the given parameters at `~/.rpl-attacks.conf`.
 >
->  `contiki-folder`: path to Contiki installation [default: ~/contiki]
+>  `contiki_folder`: path to Contiki installation [default: ~/contiki]
 >
->  `experiments-folder`: path to your experiments [default: Experiments]
+>  `experiments_folder`: path to your experiments [default: Experiments]
 
 - **`cooja`**`:name[, with-malicious-mote]`
 
