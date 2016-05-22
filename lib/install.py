@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-import os
+from os.path import expanduser, join
 
 
 def modify_cooja(cooja_dir):
@@ -12,7 +12,7 @@ def modify_cooja(cooja_dir):
     :return: None
     """
     pattern = 'if (args.length > 0 && args[0].startsWith("-nogui="))'
-    cooja_file = os.path.join(cooja_dir, 'java', 'org', 'contikios', 'cooja', 'Cooja.java')
+    cooja_file = join(cooja_dir, 'java', 'org', 'contikios', 'cooja', 'Cooja.java')
     with open('src/Cooja.java.snippet') as f:
         code = f.read().strip()
     with open(cooja_file) as f:
@@ -28,6 +28,18 @@ def modify_cooja(cooja_dir):
         f.write('\n'.join(buffer))
 
 
+def register_new_path_in_profile():
+    msp430_path_adapted = False
+    with open(expanduser('~/.profile')) as f:
+        for line in f.readlines():
+            if 'export PATH=/usr/local/msp430/bin:$PATH' in line:
+                msp430_path_adapted = True
+    if not msp430_path_adapted:
+        with open(expanduser('~/.profile'), 'a') as f:
+            f.write("\n\n# msp430-gcc (GCC) 4.6.3\n# export PATH=/usr/bin/msp430-gcc/bin:$PATH\n"
+                    "# msp430-gcc (GCC) 4.7.0\nexport PATH=/usr/local/msp430/bin:$PATH")
+
+
 def update_cooja_build(cooja_dir):
     """
     This function adds a line for the 'visualizer_screenshot' plugin in the 'clean' and 'jar' sections
@@ -36,7 +48,7 @@ def update_cooja_build(cooja_dir):
     :param cooja_dir: Cooja's directory
     :return: None
     """
-    cooja_build = os.path.join(cooja_dir, 'build.xml')
+    cooja_build = join(cooja_dir, 'build.xml')
     with open(cooja_build) as f:
         source = f.read()
     buffer, tmp, is_in_jar_block, is_in_clean_block = [], [], False, False
@@ -66,7 +78,7 @@ def update_cooja_user_properties():
 
     :return: None
     """
-    cooja_user_properties = os.path.join(os.path.expanduser('~'), '.cooja.user.properties')
+    cooja_user_properties = join(expanduser('~'), '.cooja.user.properties')
     with open(cooja_user_properties) as f:
         source = f.read()
     buffer = []

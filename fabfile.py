@@ -14,7 +14,7 @@ def clean(name):
 
 @task
 def cooja(name, with_malicious=False):
-    logging.debug("STARTING COOJA WITH EXPERIMENT '{}'".format(name))
+    logging.info("STARTING COOJA WITH EXPERIMENT '{}'".format(name))
     path = get_path(EXPERIMENT_FOLDER, name)
     get_path(EXPERIMENT_FOLDER, name, 'data')
     with hide(*HIDDEN_ALL):
@@ -129,7 +129,7 @@ def make_all(exp_file="experiments"):
 @task
 @expand_file(EXPERIMENT_FOLDER, 'json')
 def prepare(exp_file='my_simulation'):
-    logging.debug("CREATING NEW EXPERIMENT CAMPAIGN AT '{}'".format(exp_file))
+    logging.info("CREATING NEW EXPERIMENT CAMPAIGN AT '{}'".format(exp_file))
     copy_files(TEMPLATES_FOLDER, dirname(exp_file), ('experiments.json', exp_file))
 
 
@@ -143,7 +143,7 @@ def run_all(exp_file="experiments"):
 # ****************************** SETUP TASKS FOR CONTIKI AND COOJA ******************************
 @task
 def config(contiki_folder='~/contiki', experiments_folder='~/Experiments'):
-    logging.debug("CREATING CONFIGURATION FILE AT '~/.rpl-attacks.conf'")
+    logging.info("CREATING CONFIGURATION FILE AT '~/.rpl-attacks.conf'")
     with open(expanduser('~/.rpl-attacks.conf'), 'w') as f:
         f.write('[RPL Attacks Framework Configuration]\n')
         f.write('contiki_folder = {}\n'.format(contiki_folder))
@@ -160,26 +160,46 @@ def test():
 
 @task
 def setup():
+    # Install
+    cooja_addons_installed = False
     try:
         with open('.cooja_addons_installed') as f:
             f.read()
-        logging.debug("COOJA ADD-ONS ALREADY INSTALLED")
-        return
+        logging.info("COOJA ADD-ONS ALREADY INSTALLED")
+        cooja_addons_installed = True
     except IOError:
         with open('.cooja_addons_installed', 'w') as f:
             f.write("")
-    logging.debug("INSTALLING COOJA ADD-ONS")
+    if not cooja_addons_installed:
+        logging.info("INSTALLING COOJA ADD-ONS")
+        with hide(*HIDDEN_ALL):
+            modify_cooja(COOJA_FOLDER)
+            update_cooja_build(COOJA_FOLDER)
+            update_cooja_user_properties()
+            visualizer = join(COOJA_FOLDER, 'apps', 'visualizer_screenshot')
+            if not exists(visualizer):
+                copy_folder('src/visualizer_screenshot', visualizer)
+            with lcd(COOJA_FOLDER):
+                with settings(warn_only=True):
+                    local("ant clean")
+                local("ant jar")
     with hide(*HIDDEN_ALL):
-        modify_cooja(COOJA_FOLDER)
-        update_cooja_build(COOJA_FOLDER)
-        update_cooja_user_properties()
-        visualizer = join(COOJA_FOLDER, 'apps', 'visualizer_screenshot')
-        if not exists(visualizer):
-            copy_folder('src/visualizer_screenshot', visualizer)
-        with lcd(COOJA_FOLDER):
-            with settings(warn_only=True):
-                local("ant clean")
-            local("ant jar")
+        msp430_version_output = local('msp430-gcc --version', capture=True)
+    if 'msp430-gcc (GCC) 4.7.0 20120322' not in msp430_version_output:
+        if input("In order to extend msp430x memory support, it is necessary to upgrade msp430-gcc.\n"
+                 "Would you like to upgrade it now ? (yes|no) [default: no] ") == "yes":
+            logging.info("UPGRADING msp430-gcc FROM VERSION 4.6.3 TO 4.7.0")
+            with lcd('src/'):
+                logging.warning(" > Upgrade now starts, this may take up to 30 minutes...")
+                sudo('./upgrade-msp430.sh')
+                sudo('rm -r tmp/')
+                local('export PATH=/usr/local/msp430/bin:$PATH')
+                register_new_path_in_profile()
+        else:
+            logging.info("UPGRADE OF LIBRARY msp430-gcc ABORTED")
+            logging.warning("You may experience problems of mote memory size at compilation")
+    else:
+        logging.info("LIBRARY msp430-gcc IS UP-TO-DATE (4.7.0)")
 
 
 # **************************************** MAGIC TASK ****************************************
