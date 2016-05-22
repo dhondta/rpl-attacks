@@ -118,7 +118,7 @@ def run(name):
 
 # ****************************** TASKS ON SIMULATION CAMPAIGN ******************************
 @task
-@expand_file(TEMPLATES_FOLDER, 'json')
+@expand_file(EXPERIMENT_FOLDER, 'json')
 def make_all(exp_file="experiments"):
     global reuse_bin_path
     for name, params in get_experiments(exp_file).items():
@@ -134,7 +134,7 @@ def prepare(exp_file='my_simulation'):
 
 
 @task
-@expand_file(TEMPLATES_FOLDER, 'json')
+@expand_file(EXPERIMENT_FOLDER, 'json')
 def run_all(exp_file="experiments"):
     for name in get_experiments(exp_file).keys():
         run(name)

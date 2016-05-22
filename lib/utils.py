@@ -124,6 +124,7 @@ def get_experiments(exp_file):
         exp_file += ".json"
     if not os.path.exists(exp_file):
         logging.critical("Simulation campaign JSON file does not exist !")
+        logging.warning("Make sure you've generated a JSON simulation campaign file by using 'prepare' fabric command.")
         exit(2)
     with open(exp_file) as f:
         experiments = json.load(f)
