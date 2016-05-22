@@ -5,7 +5,8 @@ import logging
 # logging configuration
 LOG_LEVEL = logging.INFO
 logging.basicConfig(format=' %(levelname)s [%(name)s] (%(filename)s:%(lineno)d) - %(message)s', level=LOG_LEVEL)
-HIDDEN = ['warnings', 'stdout', 'stderr', 'running']
+HIDDEN_ALL = ['warnings', 'stdout', 'stderr', 'running']
+HIDDEN_KEEP_STDERR = ['warnings', 'stdout', 'running']
 try:
     import coloredlogs
     coloredlogs.install(logging.DEBUG)
