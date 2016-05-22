@@ -49,7 +49,7 @@ Create a default configuration file
  ../rpl-attacks$ fab config
  ```
 
-or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
+ or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
 
  ```
  ../rpl-attacks$ fab config:/opt/contiki,~/simulations
@@ -85,7 +85,7 @@ Quick Start
  ../rpl-attacks$ fab prepare
  ```
 
-or create a simulation campaign file with a custom name
+ or create a simulation campaign file with a custom name
 
  ```
  ../rpl-attacks$ fab prepare:test-campaign
