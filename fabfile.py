@@ -7,7 +7,7 @@ TEMPLATES = OrderedDict([
     ("motes/root.c", {}),
     ("motes/sensor.c", {}),
     ("motes/malicious.c", {}),
-    ("Makefile", {"contiki": CONTIKI_FOLDER, "target": "z1"}),
+    ("Makefile", {"contiki": CONTIKI_FOLDER}),
     ("script.js", {"timeout": 300}),  # seconds
     ("simulation.csc", {
         "title": "Simulation",
@@ -32,7 +32,7 @@ TEMPLATES = OrderedDict([
 @task
 def clean(name):
     logging.debug(" > Cleaning folder...")
-    with hide(*HIDDEN):
+    with hide(*HIDDEN_ALL):
         with lcd(EXPERIMENT_FOLDER):
             local("rm -rf {}".format(name))
 
@@ -41,42 +41,61 @@ def clean(name):
 def cooja(name, with_malicious=False):
     logging.debug("STARTING COOJA WITH EXPERIMENT '{}'".format(name))
     path = get_path(EXPERIMENT_FOLDER, name)
-    with hide(*HIDDEN):
+    get_path(EXPERIMENT_FOLDER, name, 'data')
+    with hide(*HIDDEN_ALL):
         with lcd(path):
             local("make cooja-with{}-malicious".format("" if with_malicious else "out"))
 
 
 @task
-def launch(name):
-    logging.debug(" > Running both simulations (with and without the malicious mote)...")
+def make(name, **kwargs):
+    global reuse_bin_path
+    params = validated_parameters(kwargs)
+    logging.debug(" > Creating simulation...")
+    # create experiment's directories
     path = get_path(EXPERIMENT_FOLDER, name)
-    with hide(*HIDDEN):
-        get_path(EXPERIMENT_FOLDER, name, 'data')
-        with lcd(path):
-            local("make run-without-malicious")
-            local("make run-with-malicious")
-        remove_files(path,
-                     'COOJA.log',
-                     'COOJA.testlog')
-
-
-@task
-def make(name, target="z1", ext_lib=None):
+    get_path(EXPERIMENT_FOLDER, name, 'motes')
+    # select the right malicious mote template and duplicate the simulation file
+    copy_files(TEMPLATES_FOLDER, TEMPLATES_FOLDER,
+               ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'),
+               ('simulation.csc', 'simulation_without_malicious.csc'),
+               ('simulation.csc', 'simulation_with_malicious.csc'))
+    # create experiment's files from templates
+    render_templates(path, TEMPLATES, **params)
+    # then clean the templates folder from previously created files
+    remove_files(TEMPLATES_FOLDER,
+                 'motes/malicious.c',
+                 'simulation_without_malicious.csc',
+                 'simulation_with_malicious.csc')
     logging.debug(" > Making motes...")
     path = get_path(EXPERIMENT_FOLDER, name)
-    with hide(*HIDDEN):
+    if ext_lib and not os.path.exists(ext_lib):
+        logging.error("External library does not exist !")
+        logging.critical("Make aborded.")
+        return
+    with hide(*HIDDEN_ALL):
         with lcd(path):
-            local("make motes/root TARGET=%s" % target)
-            local("make motes/sensor TARGET=%s" % target)
-            # after compiling, clean artifacts
-            remove_files(path,
-                         'contiki-{}.a'.format(target),
-                         'contiki-{}.map'.format(target),
-                         'symbols.c',
-                         'symbols.h',
-                         'motes/root.c',
-                         'motes/sensor.c')
-            remove_folder(os.path.join(path, 'obj_{}'.format(target)))
+            # for every simulation, root and sensor compilation is the same ;
+            #  then, if these were not previously compiled, proceed
+            if reuse_bin_path is None:
+                local("make motes/root TARGET={}".format(params["target"]))
+                local("make motes/sensor TARGET={}".format(params["target"]))
+                # after compiling, clean artifacts
+                remove_files(path,
+                             'contiki-{}.a'.format(params["target"]),
+                             'contiki-{}.map'.format(params["target"]),
+                             'symbols.c',
+                             'symbols.h',
+                             'motes/root.c',
+                             'motes/sensor.c')
+                remove_folder(os.path.join(path, 'obj_{}'.format(params["target"])))
+                reuse_bin_path = path
+            # otherwise, reuse them by copying the compiled files to the current experiment folder
+            else:
+                copy_files(reuse_bin_path, path, "motes/root.{}".format(params["target"]),
+                           "motes/sensor.{}".format(params["target"]))
+    with hide(*HIDDEN_KEEP_STDERR):
+        with lcd(path):
             if ext_lib is not None:
                 # backup original RPL library and replace it with attack's library
                 get_path('.tmp')
@@ -84,7 +103,7 @@ def make(name, target="z1", ext_lib=None):
                 copy_folder(ext_lib, os.path.join(CONTIKI_FOLDER, 'core', 'net', 'rpl'))
             with settings(warn_only=True, abort_exception=Exception):
                 try:
-                    local("make motes/malicious TARGET=%s" % target)
+                    local("make motes/malicious TARGET={}".format(params["target"]))
                 except Exception as e:
                     logging.error(str(e))
             if ext_lib is not None:
@@ -93,81 +112,46 @@ def make(name, target="z1", ext_lib=None):
                 move_folder('.tmp/rpl', os.path.join(CONTIKI_FOLDER, 'core', 'net'))
                 remove_folder('.tmp')
             remove_files(path,
-                         'contiki-{}.a'.format(target),
-                         'contiki-{}.map'.format(target),
+                         'contiki-{}.a'.format(params["target"]),
+                         'contiki-{}.map'.format(params["target"]),
                          'symbols.c',
                          'symbols.h',
                          'motes/malicious.c')
-            remove_folder(os.path.join(path, 'obj_{}'.format(target)))
+            remove_folder(os.path.join(path, 'obj_{}'.format(params["target"])))
         with lcd(COOJA_FOLDER):
             local("ant clean")
             local("ant jar")
 
 
-@task
-def new(name, n=NBR_MOTES, mtype="sensor", blocks=None, duration=None, title=None, goal=None, notes=None):
-    logging.debug(" > Creating simulation...")
-    # create experiment's directories
-    path = get_path(EXPERIMENT_FOLDER, name)
-    get_path(EXPERIMENT_FOLDER, name, 'motes')
-    # select the right malicious mote template and duplicate the simulation file
-    copy_files(TEMPLATES_FOLDER, TEMPLATES_FOLDER,
-               ('motes/malicious-{}.c'.format(mtype), 'motes/malicious.c'),
-               ('simulation.csc', 'simulation_without_malicious.csc'),
-               ('simulation.csc', 'simulation_with_malicious.csc'))
-    # create experiment's files from templates
-    render_templates(path, TEMPLATES, n, blocks, duration, title, goal, notes)
-    # then clean the templates folder from previously created files
-    remove_files(TEMPLATES_FOLDER,
-                 'motes/malicious.c',
-                 'simulation_without_malicious.csc',
-                 'simulation_with_malicious.csc')
-
-
-@task
-def parse(name):
-    logging.debug(" > Parsing logs...")
-    # create parsing folders
-    path = get_path(EXPERIMENT_FOLDER, name, 'data')
-    get_path(EXPERIMENT_FOLDER, name, 'results')
-
-
-# ****************************** TASKS ON EXPERIMENTS CAMPAIGN ******************************
+# ****************************** TASKS ON SIMULATION CAMPAIGN ******************************
 @task
 def make_all(exp_file="templates/experiments"):
+    global reuse_bin_path
+    reuse_bin_path = None
     for name, params in get_experiments(exp_file).items():
         logging.info("CREATING EXPERIMENT '{}'".format(name))
         clean(name)
-        if params.get("simulation") is None or params.get("malicious") is None:
-            logging.error("Experiments JSON is not correctly formatted !")
-            continue
-        new(name,
-            title=params.get("simulation").get("title"),
-            goal=params.get("simulation").get("goal"),
-            notes=params.get("simulation").get("notes"),
-            duration=params.get("simulation").get("duration"),
-            n=params.get("simulation").get("number_motes"),
-            mtype=params.get("malicious").get("type"),
-            blocks=params.get("malicious").get("building-blocks"))
-        ext_lib = params.get("malicious").get("external_library")
-        if ext_lib and not os.path.exists(ext_lib):
-            logging.error("External library does not exist !")
-            continue
-        make(name,
-             target=params.get("simulation").get("target") or "z1",
-             ext_lib=ext_lib)
+        make(name, **validated_parameters(params))
 
 
 @task
 def run(name):
     logging.info("PROCESSING EXPERIMENT '{}'".format(name))
-    launch(name)
-    parse(name)
+    path = get_path(EXPERIMENT_FOLDER, name)
+    with hide(*HIDDEN_ALL):
+        get_path(EXPERIMENT_FOLDER, name, 'data')
+        get_path(EXPERIMENT_FOLDER, name, 'results')
+        with lcd(path):
+            logging.debug(" > Running both simulations (with and without the malicious mote)...")
+            local("make run-without-malicious")
+            local("make run-with-malicious")
+        remove_files(path,
+                     'COOJA.log',
+                     'COOJA.testlog')
 
 
 @task
 def run_all(exp_file="templates/experiments"):
-    make_all(exp_file)
     for name in get_experiments(exp_file).keys():
         run(name)
 
@@ -201,7 +185,7 @@ def setup():
         with open('.cooja_addons_installed', 'w') as f:
             f.write("")
     logging.debug("INSTALLING COOJA ADD-ONS")
-    with hide(*HIDDEN):
+    with hide(*HIDDEN_ALL):
         modify_cooja(COOJA_FOLDER)
         update_cooja_build(COOJA_FOLDER)
         update_cooja_user_properties()
