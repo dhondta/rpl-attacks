@@ -10,8 +10,8 @@ log.log("Opening log file writers...\n");
 log_serial = new FileWriter("./data/serial.log");        // open serial log file
 log_rpl = new FileWriter("./data/rpl.log");           // open RPL messages log file
 log_edges = new FileWriter("./data/edges.log");       // open RPL DAG log file
-log_power = new FileWriter("./data/powertracker.log", false);
-log_timeline = new FileWriter("./data/timeline.log", false);
+log_power = new FileWriter("./data/powertracker.log");
+log_timeline = new FileWriter("./data/timeline.log");
 
 // re-frame visualizer view
 visualizer.resetViewport = 1;
@@ -42,9 +42,9 @@ while(1) {
     if (c < time) {
       log_power.write(powertracker.radioStatistics());
       log_power.flush();
-      log_timeline.write(timeline.extractStatistics());
-      log_timeline.flush();
-      visualizer.takeScreenshot("./data/network_" + ("0" + i).slice(-3) + ".png", 0, 0);
+      //log_timeline.write(timeline.extractStatistics());
+      //log_timeline.flush();
+      //visualizer.takeScreenshot("./data/network_" + ("0" + i).slice(-3) + ".png", 0, 0);
       c += period;
       i += 1;
     }
