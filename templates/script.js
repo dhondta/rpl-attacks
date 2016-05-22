@@ -7,10 +7,10 @@ powertracker = mote.getSimulation().getCooja().getStartedPlugin("PowerTracker");
 
 // create log file handlers
 log.log("Opening log file writers...\n");
-log_serial = new FileWriter("./data/serial.log");        // open serial log file
-log_rpl = new FileWriter("./data/rpl.log");           // open RPL messages log file
-log_edges = new FileWriter("./data/edges.log");       // open RPL DAG log file
-log_power = new FileWriter("./data/powertracker.log");
+log_serial = new FileWriter("./data/serial.log");                // open serial log file
+log_rpl = new FileWriter("./data/rpl.log");                      // open RPL messages log file
+log_relationships = new FileWriter("./data/relationships.log");  // open mote relationships log file
+log_power = new FileWriter("./data/powertracker.log");           // open power tracker logfile
 log_timeline = new FileWriter("./data/timeline.log");
 
 // re-frame visualizer view
