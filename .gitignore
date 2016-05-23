@@ -61,10 +61,10 @@ target/
 
 # RPL-Attacks
 makesense
-.cooja_addons_installed
 templates/rpl
 .idea
 config-notes.txt
 templates/simulation_with_malicious.csc
 templates/simulation_without_malicious.csc
 templates/motes/malicious.c
+tmp
