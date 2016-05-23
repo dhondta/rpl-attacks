@@ -28,8 +28,8 @@ while(1) {
     // first, log to serial file
     line = time + "\tID:" + id.toString() + "\t" + msg + "\n"
     if (msg.startsWith("#L ")) {
-      log_edges.write(line);
-      log_edges.flush();
+      log_relationships.write(line);
+      log_relationships.flush();
     } else if (msg.startsWith("RPL: ")) {
       log_rpl.write(line);
       log_rpl.flush();
@@ -51,10 +51,11 @@ while(1) {
   } catch (e) {
     log_serial.close();
     log_rpl.close();
-    log_edges.close();
+    log_relationships.close();
     log_power.close();
     log_timeline.close();
     log.log("File writers closed\n");
+    if (c == 0) { log.testFailed(); } else { break; }
     break;
   }
 }
