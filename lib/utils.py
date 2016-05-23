@@ -85,6 +85,7 @@ def get_building_blocks():
     with open(os.path.join(TEMPLATES_FOLDER, 'building-blocks.json')) as f:
         blocks = json.load(f)
     logging.error(blocks.keys())
+    print(blocks)
     return blocks.keys()
 
 

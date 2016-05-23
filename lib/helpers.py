@@ -1,56 +1,9 @@
 # -*- coding: utf8 -*-
 import logging
 import sh
+from os.path import join
 
-from functools import wraps
-from os.path import dirname, join
-
-
-# **************************************** PATH-RELATED DECORATORS ****************************************
-def expand_file(inside=None, ensure_ext=None):
-    """
-    This decorator expands the path to the specified filename. If this filename is not already a path,
-     expand it to specified folder 'inside'. If an extension is to be ensured, check and add it if relevant.
-
-    :param fn: input filename
-    :param inside: folder to expand in order to build filename's path (if not already specified in filename)
-    :param ensure_ext: extension to be ensured for the file
-    :return: the actual path to the specified filename
-    """
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            fn = args[0]
-            if dirname(fn) == '':
-                fn = join(inside, fn)
-            if ensure_ext and not fn.endswith("." + ensure_ext):
-                fn += "." + ensure_ext
-            args = (fn,) + args[1:]
-            return f(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
-def expand_folder(nargs):
-    """
-    This decorator expands folder paths (up to the nth arguments) if these are in the form
-     of a tuple.
-
-    :param nargs: number of heading arguments on which the wrapper is to be applied
-    """
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            margs = []
-            for i in range(nargs):
-                if isinstance(args[i], (tuple, list)):
-                    margs.append(join(*args[i]))
-                else:
-                    margs.append(args[i])
-            args = tuple(margs) + args[nargs:]
-            return f(*args, **kwargs)
-        return wrapper
-    return decorator
+from .decorators import expand_folder
 
 
 # **************************************** FILE-RELATED HELPERS ****************************************
@@ -101,7 +54,7 @@ def move_folder(src_path, dst_path, new_folder_name=None):
         dst_path = join(dst_path, new_folder_name).rstrip("/")
     try:
         sh.mv(src_path, dst_path)
-    except:
+    except sh.ErrorReturnCode_1:
         pass
 
 
@@ -117,7 +70,7 @@ def remove_files(path, *files):
     for file in files:
         try:
             sh.rm(join(path, file))
-        except:
+        except sh.ErrorReturnCode_1:
             pass
 
 
@@ -131,5 +84,5 @@ def remove_folder(path):
     """
     try:
         sh.rm('-r', path)
-    except:
+    except sh.ErrorReturnCode_1:
         pass
