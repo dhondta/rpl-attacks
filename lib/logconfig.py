@@ -2,20 +2,32 @@
 import logging
 
 
+# colorize logging
+try:
+    import coloredlogs
+    coloredlogs_installed = True
+except ImportError:
+    coloredlogs_installed = False
+    print("(Install 'coloredlogs' for colored logging)")
+
+
 # logging configuration
-LOG_LEVEL = logging.INFO
-logging.basicConfig(format=' %(levelname)s [%(name)s] (%(filename)s:%(lineno)d) - %(message)s', level=LOG_LEVEL)
+def set_logging(lvl='info'):
+    lvl = {
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'debug': logging.DEBUG,
+    }.get(lvl, logging.INFO)
+    logging.basicConfig(format=' %(levelname)s [%(name)s] (%(filename)s:%(lineno)d) - %(message)s', level=lvl)
+    coloredlogs.install(lvl)
+set_logging()
+
 
 # fabric verbose lists of options
 HIDDEN_ALL = ['warnings', 'stdout', 'stderr', 'running']
 HIDDEN_KEEP_STDERR = ['warnings', 'stdout', 'running']
 
-# colorize logging
-try:
-    import coloredlogs
-    coloredlogs.install(logging.DEBUG)
-except ImportError:
-    print("(Install 'coloredlogs' for colored logging)")
 
 # silent sh module's logging
 logger = logging.getLogger('sh.command')

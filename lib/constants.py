@@ -1,31 +1,32 @@
 # -*- coding: utf8 -*-
-import os
 try:  # for Python2
     import ConfigParser as configparser
 except ImportError:  # for Python3
     import configparser
 from jinja2 import Environment, FileSystemLoader
+from os import makedirs
+from os.path import abspath, dirname, exists, expanduser, join, pardir
 
 from collections import OrderedDict
 
 
 # configuration parsing and main constants setting
 confparser = configparser.ConfigParser()
-confparser.read(os.path.expanduser('~/.rpl-attacks.conf'))
+confparser.read(expanduser('~/.rpl-attacks.conf'))
 try:
-    CONTIKI_FOLDER = os.path.expanduser(confparser.get("RPL Attacks Framework Configuration", "contiki_folder"))
+    CONTIKI_FOLDER = expanduser(confparser.get("RPL Attacks Framework Configuration", "contiki_folder"))
 except (configparser.NoOptionError, configparser.NoSectionError):
-    CONTIKI_FOLDER = os.path.abspath(os.path.expanduser('~/contiki'))
-COOJA_FOLDER = os.path.join(CONTIKI_FOLDER, "tools", "cooja")
+    CONTIKI_FOLDER = abspath(expanduser('~/contiki'))
+COOJA_FOLDER = join(CONTIKI_FOLDER, "tools", "cooja")
 try:
-    EXPERIMENT_FOLDER = os.path.expanduser(confparser.get("RPL Attacks Framework Configuration", "experiments_folder"))
+    EXPERIMENT_FOLDER = expanduser(confparser.get("RPL Attacks Framework Configuration", "experiments_folder"))
 except (configparser.NoOptionError, configparser.NoSectionError):
-    EXPERIMENT_FOLDER = os.path.expanduser('~/Experiments')
+    EXPERIMENT_FOLDER = expanduser('~/Experiments')
 del confparser
-if not os.path.exists(EXPERIMENT_FOLDER):
-    os.makedirs(EXPERIMENT_FOLDER)
-FRAMEWORK_FOLDER = os.path.join(os.path.dirname(__file__), os.path.pardir)
-TEMPLATES_FOLDER = os.path.join(FRAMEWORK_FOLDER, "templates")
+if not exists(EXPERIMENT_FOLDER):
+    makedirs(EXPERIMENT_FOLDER)
+FRAMEWORK_FOLDER = join(dirname(__file__), pardir)
+TEMPLATES_FOLDER = join(FRAMEWORK_FOLDER, "templates")
 TEMPLATE_ENV = Environment(loader=FileSystemLoader(TEMPLATES_FOLDER))
 
 
@@ -69,3 +70,31 @@ TEMPLATES = OrderedDict([
         ],
     }),
 ])
+
+EXPERIMENT_STRUCTURE = {
+    "Makefile": False,
+    "simulation_with_malicious.csc": False,
+    "simulation_without_malicious.csc": False,
+    "script.js": False,
+    "motes": {
+        "root.*": False,
+        "sensor.*": False,
+        "malicious.*": False,
+    }
+}
+
+BANNER = """   ___  ___  __     ___  __  __           __          ____                                   __
+  / _ \/ _ \/ /    / _ |/ /_/ /____ _____/ /__ ___   / __/______ ___ _  ___ _    _____  ____/ /__
+ / , _/ ___/ /__  / __ / __/ __/ _ `/ __/  '_/(_-<  / _// __/ _ `/  ' \/ -_) |/|/ / _ \/ __/  '_/
+/_/|_/_/  /____/ /_/ |_\__/\__/\_,_/\__/_/\_\/___/ /_/ /_/  \_,_/_/_/_/\__/|__,__/\___/_/ /_/\_\.
+                                                                                                 """
+
+COMMAND_DOCSTRING = """
+{}
+
+Arguments:
+{}
+
+Examples:
+{}
+"""

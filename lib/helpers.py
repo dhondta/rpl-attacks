@@ -6,6 +6,21 @@ from os.path import join
 from .decorators import expand_folder
 
 
+# ********************* SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y *******************
+def std_input(txt="Are you sure ? (yes|no) [default: no] "):
+    """
+    This helper function is aimed to simplify user input regarding raw_input() (Python 2.X) and input()
+     (Python 3.Y).
+
+    :param txt: text to be displayed at user input
+    :return: user input
+    """
+    try:
+        return raw_input(txt)
+    except NameError:
+        return input(txt)
+
+
 # **************************************** FILE-RELATED HELPERS ****************************************
 @expand_folder(2)
 def copy_files(src_path, dst_path, *files):
@@ -19,12 +34,14 @@ def copy_files(src_path, dst_path, *files):
     for file in files:
         if isinstance(file, tuple):
             src, dst = file
-        elif isinstance(file, [str, bytes]):
+        elif isinstance(file, (str, bytes)):
             src, dst = 2 * [file]
         else:
             logging.warning("File {} was not copied from {} to {}".format(file, src_path, dst_path))
             continue
-        sh.cp(join(src_path, src), join(dst_path, dst))
+        src, dst = join(src_path, src), join(dst_path, dst)
+        if src != dst:
+            sh.cp(src, dst)
 
 
 @expand_folder(2)
@@ -35,7 +52,8 @@ def copy_folder(src_path, dst_path):
     :param src_path: absolute or relative source path
     :param dst_path: absolute or relative destination path
     """
-    sh.cp('-R', src_path, dst_path)
+    if src_path != dst_path:
+        sh.cp('-R', src_path, dst_path)
 
 
 @expand_folder(2)
@@ -53,7 +71,8 @@ def move_folder(src_path, dst_path, new_folder_name=None):
     if new_folder_name is not None:
         dst_path = join(dst_path, new_folder_name).rstrip("/")
     try:
-        sh.mv(src_path, dst_path)
+        if src_path != dst_path:
+            sh.mv(src_path, dst_path)
     except sh.ErrorReturnCode_1:
         pass
 
@@ -86,3 +105,32 @@ def remove_folder(path):
         sh.rm('-r', path)
     except sh.ErrorReturnCode_1:
         pass
+
+
+# *********************************** SIMULATION CONFIG HELPERS *************************************
+@expand_folder(1)
+def read_config(path, sep=' = '):
+    config = {}
+    try:
+        with open(join(path, 'simulation.conf')) as f:
+            for line in f.readlines():
+                try:
+                    k, v = [x.strip() for x in line.split(sep)]
+                    try:
+                        v = eval(v)
+                    except (SyntaxError, NameError):
+                        pass
+                    config[k] = v
+                except ValueError:
+                    continue
+    except OSError:
+        logging.error("Configuration file 'simulation.conf' does not exist !")
+    return config
+
+
+@expand_folder(1)
+def write_config(path, config, sep=' = '):
+    width = max([len(k) for k in config.keys()])
+    with open(join(path, 'simulation.conf'), 'w') as f:
+        for k, v in config.items():
+            f.write('{}{}{}\n'.format(k.ljust(width), sep, v))

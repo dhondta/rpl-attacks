@@ -1,6 +1,7 @@
 cffi
 cairocffi
 fabric3
+funcsigs
 jinja2
 makesense
 matplotlib

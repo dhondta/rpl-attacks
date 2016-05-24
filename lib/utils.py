@@ -3,10 +3,12 @@ import copy
 import json
 import logging
 import math
-import os
 import random
+from os import listdir, makedirs
+from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, splitext
 
-from .constants import CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_FOLDER, TEMPLATES_FOLDER, TEMPLATE_ENV, TEMPLATES
+from .constants import CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
+                       EXPERIMENT_FOLDER, TEMPLATES_FOLDER, TEMPLATE_ENV
 
 
 # **************************************** PROTECTED FUNCTIONS ****************************************
@@ -40,7 +42,7 @@ def _generate_mote(motes, mote_id, mote_type,
             return {"id": mote_id, "type": mote_type, "x": float(x), "y": float(y), "z": 0}
 
 
-# ******************************************* GET FUNCTIONS *******************************************
+# *********************************************** GET FUNCTIONS ************************************************
 def generate_motes(n=DEFAULTS["number-motes"], max_from_root=DEFAULTS["maximum-range-from-root"]):
     """
     This function generates a WSN with 1 root, n legitimate motes and 1 malicious mote
@@ -70,8 +72,8 @@ def get_available_platforms():
     :return: List of strings representing the available platforms
     """
     platforms = []
-    for item in os.listdir(os.path.join(CONTIKI_FOLDER, 'platform')):
-        if os.path.isdir(os.path.join(CONTIKI_FOLDER, 'platform', item)):
+    for item in listdir(join(CONTIKI_FOLDER, 'platform')):
+        if isdir(join(CONTIKI_FOLDER, 'platform', item)):
             platforms.append(item)
     return platforms
 
@@ -82,7 +84,7 @@ def get_building_blocks():
 
     :return: List of strings representing the available building blocks
     """
-    with open(os.path.join(TEMPLATES_FOLDER, 'building-blocks.json')) as f:
+    with open(join(TEMPLATES_FOLDER, 'building-blocks.json')) as f:
         blocks = json.load(f)
     logging.error(blocks.keys())
     print(blocks)
@@ -118,12 +120,12 @@ def get_experiments(exp_file):
     :param exp_file: input JSON simulation campaign file
     :return: dictionary with the parsed experiments and their parameters
     """
-    if os.path.dirname(exp_file) == '':
-        exp_file = os.path.join(EXPERIMENT_FOLDER, exp_file)
-    exp_file = os.path.expanduser(exp_file)
+    if dirname(exp_file) == '':
+        exp_file = join(EXPERIMENT_FOLDER, exp_file)
+    exp_file = expanduser(exp_file)
     if not exp_file.endswith(".json"):
         exp_file += ".json"
-    if not os.path.exists(exp_file):
+    if not exists(exp_file):
         logging.critical("Simulation campaign JSON file does not exist !")
         logging.warning("Make sure you've generated a JSON simulation campaign file by using 'prepare' fabric command.")
         exit(2)
@@ -160,32 +162,88 @@ def get_parameter(dictionary, section, key, condition, reason=None):
         return param
 
 
-def get_path(*args):
+def get_path(*args, **kwargs):
     """
     This function joins input arguments to make a path and create it.
 
     :param args: intermediary subfolder names
     :return: path string
     """
-    path = os.path.join(*args)
-    if not os.path.exists(path):
-        os.makedirs(path)
+    create = kwargs.get('create')
+    path = join(*args)
+    if create and not exists(path):
+        makedirs(path)
     return path
 
 
+# *********************************************** LIST FUNCTIONS ***********************************************
+def list_campaigns():
+    """
+    This function gets the list of existing simulation campaign JSON files.
+
+    :return: list of JSON files
+    """
+    return sorted([basename(f) for f in listdir(EXPERIMENT_FOLDER) \
+                   if isfile(join(EXPERIMENT_FOLDER, f)) and f.endswith('.json') and \
+                   is_valid_campaign(join(EXPERIMENT_FOLDER, f))])
+
+
+def list_experiments():
+    """
+    This function gets the list of existing experiments.
+
+    :return: list of experiments
+    """
+    return sorted([d for d in listdir(EXPERIMENT_FOLDER) \
+                   if isdir(join(EXPERIMENT_FOLDER, d)) and not d.startswith('.') and \
+                   check_structure(join(EXPERIMENT_FOLDER, d))])
+
+
 # ************************************** TEMPLATE AND PARAMETER FUNCTIONS **************************************
-def render_templates(path, **params):
+def check_structure(path, files=None):
+    """
+    This function checks if the file structure given by the dictionary files exists at the input path.
+
+    :param path: path to be checked for the file structure
+    :param files: file structure as a dictionary
+    :return: True if the file structure is respected, otherwise False
+    """
+    files = files or copy.deepcopy(EXPERIMENT_STRUCTURE)
+    for item in listdir(path):
+        wildcard = '{}.*'.format(splitext(item)[0])
+        match = item if item in files.keys() else (wildcard if wildcard in files.keys() else None)
+        if match is None:
+            continue
+        if isinstance(files[match], bool):
+            files[match] = True
+        else:
+            files[match] = check_structure(join(path, match), files[match])
+    return all(files.values())
+
+
+def is_valid_campaign(path):
+    """
+    This function checks if the given JSON file is a valid campaign file.
+
+    :param path: JSON file to be checked
+    :return: True if valid file, otherwise False
+    """
+    try:
+        # TODO: check JSON file structure
+        with open(path) as f:
+            json.load(f)
+        return True
+    except ValueError:
+        return False
+
+
+def render_templates(path, only_malicious=False, **params):
     """
     This function is aimed to adapt and render the base templates dictionary with provided parameters.
 
     :param path: experiment folder path
-    :param templates: dictionary of the templates to be deployed
-    :param n: number of motes
-    :param blocks: build blocks to be included in the current experiment
-    :param duration: duration of the simulation
-    :param title: title of the simulation
-    :param goal: goal description for the simulation
-    :param notes: additional notes for the simulation
+    :param only_malicious: flag to indicate if all the templates have to be deployed or only malicious's one
+    :param params: dictionary with all the parameters for the experiment
     """
     templates = copy.deepcopy(TEMPLATES)
     # generate the list of motes (first one is the root, last one is the malicious mote)
@@ -193,6 +251,10 @@ def render_templates(path, **params):
     # fill in the different templates with input parameters
     templates["motes/malicious.c"]["constants"] = "\n".join(["#define {} {}".format(*c) \
         for c in get_constants(params["blocks"]).items()])
+    if only_malicious:
+        template_malicious = "motes/malicious.c"
+        write_template(path, template_malicious, **templates[template_malicious])
+        return
     templates["script.js"]["timeout"] = 1000 * params["duration"]
     templates["script.js"]["sampling_period"] = templates["script.js"]["timeout"] // 100
     simulation_template = templates.pop("simulation.csc")
@@ -210,10 +272,21 @@ def render_templates(path, **params):
     del templates["simulation_without_malicious.csc"]["mote_types"][-1]  # remove malicious mote
     # render the list of templates
     for template_name, kwargs in templates.items():
-        logging.debug(" > Setting template file: {}".format(template_name))
-        template = TEMPLATE_ENV.get_template(template_name).render(**kwargs)
-        with open(os.path.join(path, template_name), "w") as f:
-            f.write(template)
+        write_template(path, template_name, **kwargs)
+
+
+def write_template(path, template_name, **kwargs):
+    """
+    This function fills in a template and copy it to its destination.
+
+    :param path: folder where the template is to be copied
+    :param template_name: template's key in the templates dictionary
+    :param kwargs: parameters associated to this template
+    """
+    logging.debug(" > Setting template file: {}".format(template_name))
+    template = TEMPLATE_ENV.get_template(template_name).render(**kwargs)
+    with open(join(path, template_name), "w") as f:
+        f.write(template)
 
 
 def validated_parameters(dictionary):
@@ -245,7 +318,7 @@ def validated_parameters(dictionary):
     params["blocks"] = get_parameter(dictionary, "malicious", "building-blocks",
         [lambda x: x in get_available_platforms()])
     params["ext_lib"] = get_parameter(dictionary, "malicious", "external-library",
-        lambda x: x is None or os.path.exists(x), "does not exist")
+        lambda x: x is None or exists(x), "does not exist")
     # area dimensions and limits
     params["dmin"] = get_parameter(dictionary, "simulation", "minimum-distance-between-motes",
         lambda x: isinstance(x, (int, float)) and x > 0, "is not an integer greater than 0")
