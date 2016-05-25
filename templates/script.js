@@ -19,10 +19,11 @@ visualizer.repaint();
 
 // set timeout and declare variables
 TIMEOUT({{ timeout }}, log.testOK());
-var c = 0, i = 0, period = {{ sampling_period }};
+var c = 0, i = 0, period = {{ sampling_period }}, screenshot = false;
 
 // now, start the test
 log.log("Starting stript...\n");
+visualizer.takeScreenshot("./data/network_" + ("0" + i).slice(-3) + ".png", 0, 0);
 while(1) {
   try {
     // first, log to serial file
@@ -30,6 +31,7 @@ while(1) {
     if (msg.startsWith("#L ")) {
       log_relationships.write(line);
       log_relationships.flush();
+      screenshot = true;
     } else if (msg.startsWith("RPL: ")) {
       log_rpl.write(line);
       log_rpl.flush();
@@ -44,9 +46,11 @@ while(1) {
       log_power.flush();
       //log_timeline.write(timeline.extractStatistics());
       //log_timeline.flush();
-      //visualizer.takeScreenshot("./data/network_" + ("0" + i).slice(-3) + ".png", 0, 0);
+      if (screenshot) {
+        visualizer.takeScreenshot("./data/network_" + ("0" + i).slice(-3) + ".png", 0, 0);
+        i += 1;
+      }
       c += period;
-      i += 1;
     }
   } catch (e) {
     log_serial.close();

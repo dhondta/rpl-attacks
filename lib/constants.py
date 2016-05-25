@@ -29,9 +29,8 @@ FRAMEWORK_FOLDER = join(dirname(__file__), pardir)
 TEMPLATES_FOLDER = join(FRAMEWORK_FOLDER, "templates")
 TEMPLATE_ENV = Environment(loader=FileSystemLoader(TEMPLATES_FOLDER))
 
-
 # simulation default parameters
-MIN_DIST_BETWEEN_MOTES = 15.0
+MIN_DIST_BETWEEN_MOTES = 20.0
 MAX_DIST_BETWEEN_MOTES = 50.0
 DEFAULTS = {
     "area-square-side": 200.0,
@@ -76,11 +75,14 @@ EXPERIMENT_STRUCTURE = {
     "simulation_with_malicious.csc": False,
     "simulation_without_malicious.csc": False,
     "script.js": False,
+    ".simulation.conf": False,
+    "data": {},
     "motes": {
         "root.*": False,
         "sensor.*": False,
         "malicious.*": False,
-    }
+    },
+    "results": {},
 }
 
 BANNER = """   ___  ___  __     ___  __  __           __          ____                                   __
@@ -88,13 +90,18 @@ BANNER = """   ___  ___  __     ___  __  __           __          ____          
  / , _/ ___/ /__  / __ / __/ __/ _ `/ __/  '_/(_-<  / _// __/ _ `/  ' \/ -_) |/|/ / _ \/ __/  '_/
 /_/|_/_/  /____/ /_/ |_\__/\__/\_,_/\__/_/\_\/___/ /_/ /_/  \_,_/_/_/_/\__/|__,__/\___/_/ /_/\_\.
                                                                                                  """
-
-COMMAND_DOCSTRING = """
-{}
-
+COMMAND_DOCSTRING = {
+    "description": """
+    {}
+""",
+    "arguments": """
 Arguments:
 {}
-
+""", "examples": """
 Examples:
 {}
 """
+}
+
+# Multi-processing constants
+TASK_EXPIRATION = 5  # seconds

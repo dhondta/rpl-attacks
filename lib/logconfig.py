@@ -13,14 +13,18 @@ except ImportError:
 
 # logging configuration
 def set_logging(lvl='info'):
-    lvl = {
-        'info': logging.INFO,
-        'warning': logging.WARNING,
-        'error': logging.ERROR,
-        'debug': logging.DEBUG,
-    }.get(lvl, logging.INFO)
+    try:
+        lvl = {
+            'info': logging.INFO,
+            'warning': logging.WARNING,
+            'error': logging.ERROR,
+            'debug': logging.DEBUG,
+        }[lvl]
+    except KeyError:
+        return False
     logging.basicConfig(format=' %(levelname)s [%(name)s] (%(filename)s:%(lineno)d) - %(message)s', level=lvl)
     coloredlogs.install(lvl)
+    return True
 set_logging()
 
 

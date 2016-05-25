@@ -2,13 +2,14 @@
 from fabric.api import hide, lcd, local, settings, sudo
 from inspect import getmembers, isfunction
 from os import listdir
-from os.path import dirname, exists, expanduser, isdir, join
+from os.path import dirname, exists, expanduser, join, splitext
 from sys import modules
 
+from .behaviors import MultiprocessedCommand
 from .constants import CONTIKI_FOLDER, COOJA_FOLDER, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, TEMPLATES_FOLDER
 from .decorators import command, expand_file, report_bad_input, stderr
-from .helpers import copy_files, copy_folder, move_folder, read_config, remove_files, remove_folder, \
-                     std_input, write_config
+from .helpers import copy_files, copy_folder, move_files, move_folder, remove_files, remove_folder, \
+                     std_input, read_config, write_config
 from .install import check_cooja, modify_cooja, register_new_path_in_profile, \
                      update_cooja_build, update_cooja_user_properties
 from .logconfig import logging, HIDDEN_ALL
@@ -23,8 +24,8 @@ def get_commands():
 
 
 # ****************************** TASKS ON INDIVIDUAL EXPERIMENT ******************************
-@command(examples=["my-simulation"], autocomplete=lambda: list_experiments())
 @report_bad_input
+@command(examples=["my-simulation"], autocomplete=lambda: list_experiments())
 def do_clean(name, ask=True):
     """
     Remove an experiment.
@@ -33,7 +34,7 @@ def do_clean(name, ask=True):
     :param ask: ask confirmation
     """
     if not exists(join(EXPERIMENT_FOLDER, name)):
-        logging.debug(" > Folder does not exist !")
+        logging.warning(" > Folder does not exist !")
     elif ask and std_input() == "yes":
         logging.debug(" > Cleaning folder...")
         with hide(*HIDDEN_ALL):
@@ -41,8 +42,8 @@ def do_clean(name, ask=True):
                 local("rm -rf {}".format(name))
 
 
-@command(examples=["my-simulation true"], autocomplete=lambda: list_experiments())
 @report_bad_input
+@command(examples=["my-simulation true"], autocomplete=lambda: list_experiments())
 def do_cooja(name, with_malicious=False):
     """
     Start an experiment in Cooja with/without the malicious mote.
@@ -58,8 +59,8 @@ def do_cooja(name, with_malicious=False):
             local("make cooja-with{}-malicious".format("" if with_malicious else "out"))
 
 
-@command(examples=["my-simulation", "my-simulation target=z1 debug=true"], autocomplete=lambda: list_experiments())
 @report_bad_input
+@command(examples=["my-simulation", "my-simulation target=z1 debug=true"], autocomplete=lambda: list_experiments())
 def do_make(name, **kwargs):
     """
     Make a new experiment.
@@ -69,9 +70,9 @@ def do_make(name, **kwargs):
     """
     global reuse_bin_path
     if exists(join(EXPERIMENT_FOLDER, name)):
-        logging.debug(" > Folder already exists !")
+        logging.warning(" > Folder already exists !")
         if std_input("Proceed anyway ? (yes|no) [default: no] ") != "yes":
-            return
+            exit(0)
     logging.info("CREATING EXPERIMENT '{}'".format(name))
     logging.debug(" > Validating parameters...")
     params = validated_parameters(kwargs)
@@ -144,8 +145,8 @@ def do_make(name, **kwargs):
             remove_folder((path, 'obj_{}'.format(params["target"])))
 
 
-@command(examples=["my-simulation"], autocomplete=lambda: list_experiments())
 @report_bad_input
+@command(examples=["my-simulation"], autocomplete=lambda: list_experiments())
 def do_remake(name):
     """
     Remake the malicious mote of an experiment.
@@ -153,9 +154,12 @@ def do_remake(name):
 
     :param name: experiment name
     """
+    path = get_path(EXPERIMENT_FOLDER, name)
+    if not exists(path):
+        logging.error("Experiment '{}' does not exist !".format(name))
+        exit(2)
     logging.info("REMAKING MALICIOUS MOTE FOR EXPERIMENT '{}'".format(name))
     logging.debug(" > Retrieving parameters...")
-    path = get_path(EXPERIMENT_FOLDER, name)
     params = read_config(path)
     ext_lib = params.get("ext_lib")
     logging.debug(" > Recompiling malicious mote...")
@@ -194,29 +198,49 @@ def do_remake(name):
             remove_folder((path, 'obj_{}'.format(params["target"])))
 
 
-@command(examples=["my-simulation"], autocomplete=lambda: list_experiments())
 @report_bad_input
+@command(examples=["my-simulation"], autocomplete=lambda: list_experiments(), behavior=MultiprocessedCommand)
 def do_run(name):
     """
     Run an experiment.
 
     :param name: experiment name
     """
-    logging.info("PROCESSING EXPERIMENT '{}'".format(name))
     path = get_path(EXPERIMENT_FOLDER, name)
+    if not exists(path):
+        logging.error("Experiment '{}' does not exist !".format(name))
+        return False
+    logging.info("PROCESSING EXPERIMENT '{}'".format(name))
+    check_structure(path, remove=True)
+    data, results = join(path, 'data'), join(path, 'results')
     with hide(*HIDDEN_ALL):
-        with lcd(path):
-            logging.debug(" > Running both simulations (with and without the malicious mote)...")
-            local("make run-without-malicious")
-            local("make run-with-malicious")
-        remove_files(path,
-                     'COOJA.log',
-                     'COOJA.testlog')
+        for sim in ["without", "with"]:
+            with lcd(path):
+                logging.debug(" > Running simulation {} the malicious mote...".format(sim))
+                local("make run-{}-malicious".format(sim), capture=True)
+            remove_files(path,
+                         'COOJA.log',
+                         'COOJA.testlog')
+            # once the execution is over, gather the screenshots into a single GIF and keep the first and
+            #  the last screenshots ; move these to the results folder
+            with lcd(data):
+                local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
+            network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data) \
+                              if fn.startswith('network_')}
+            move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))
+            net_start_old = network_images[min(network_images.keys())]
+            net_start, ext = splitext(net_start_old)
+            net_start_new = 'wsn-{}-malicious_start{}'.format(sim, ext)
+            net_end_old = network_images[max(network_images.keys())]
+            net_end, ext = splitext(net_end_old)
+            net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
+            move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
+            remove_files(data, *network_images.values())
 
 
 # ****************************** COMMANDS ON SIMULATION CAMPAIGN ******************************
-@command(examples=["my-simulation-campaign"], autocomplete=lambda: list_campaigns())
 @expand_file(EXPERIMENT_FOLDER, 'json')
+@command(examples=["my-simulation-campaign"], autocomplete=lambda: list_campaigns())
 def do_drop(exp_file='experiments'):
     """
     Remove a campaign of experiments.
@@ -229,8 +253,8 @@ def do_drop(exp_file='experiments'):
         remove_files(EXPERIMENT_FOLDER, exp_file)
 
 
-@command(examples=["my-simulation-campaign"], autocomplete=lambda: list_campaigns())
 @expand_file(EXPERIMENT_FOLDER, 'json')
+@command(examples=["my-simulation-campaign"], autocomplete=lambda: list_campaigns())
 def do_make_all(exp_file="experiments"):
     """
     Make a campaign of experiments.
@@ -244,8 +268,8 @@ def do_make_all(exp_file="experiments"):
         do_make(name, **params)
 
 
-@command(examples=["my-simulation-campaign"], autocomplete=lambda: list_campaigns())
 @expand_file(EXPERIMENT_FOLDER, 'json')
+@command(examples=["my-simulation-campaign"], autocomplete=lambda: list_campaigns())
 def do_prepare(exp_file='experiments'):
     """
     Create a campaign of experiments from a template.
@@ -257,8 +281,8 @@ def do_prepare(exp_file='experiments'):
     copy_files(TEMPLATES_FOLDER, dirname(exp_file), ('experiments.json', exp_file))
 
 
-@command(examples=["my-simulation-campaign"], autocomplete=lambda: list_campaigns())
 @expand_file(EXPERIMENT_FOLDER, 'json')
+@command(examples=["my-simulation-campaign"], autocomplete=lambda: list_campaigns())
 def do_run_all(exp_file="experiments"):
     """
     Run a campaign of experiments.
@@ -271,7 +295,7 @@ def do_run_all(exp_file="experiments"):
 
 
 # ************************************** INFORMATION COMMANDS *************************************
-@command(examples=["experiments", "campaigns"], autocomplete=["campaigns", "experiments"])
+@command(examples=["experiments", "campaigns"], autocomplete=["campaigns", "experiments"], reexec_on_emptyline=True)
 def do_list(item_type=None):
     """
     List all available items of a specified type.
@@ -302,7 +326,6 @@ def do_config(contiki_folder='~/contiki', experiments_folder='~/Experiments'):
         f.write('[RPL Attacks Framework Configuration]\n')
         f.write('contiki_folder = {}\n'.format(contiki_folder))
         f.write('experiments_folder = {}\n'.format(experiments_folder))
-do_config.description = "Create a configuration file at ~/.rpl-attacks.conf for RPL Attacks Framework."
 
 
 @command()
@@ -321,26 +344,39 @@ def do_setup():
     """
     Setup the framework.
     """
+    logging.info("SETTING UP OF THE FRAMEWORK")
+    recompile = False
     # install Cooja modifications
     if not check_cooja(COOJA_FOLDER):
-        logging.info("INSTALLING COOJA ADD-ONS")
+        logging.debug(" > Installing Cooja add-ons...")
         # modify Cooja.java and adapt build.xml and ~/.cooja.user.properties
         modify_cooja(COOJA_FOLDER)
         update_cooja_build(COOJA_FOLDER)
         update_cooja_user_properties()
-        # install VisualizerScreenshot plugin in Cooja
-        visualizer = join(COOJA_FOLDER, 'apps', 'visualizer_screenshot')
-        if not exists(visualizer):
-            logging.debug(" > Installing VisualizerScreenshot Cooja plugin...")
-            copy_folder('src/visualizer_screenshot', visualizer)
-        # recompile Cooja for making the changes take effect
+        recompile = True
+    # install VisualizerScreenshot plugin in Cooja
+    visualizer = join(COOJA_FOLDER, 'apps', 'visualizer_screenshot')
+    if not exists(visualizer):
+        logging.debug(" > Installing VisualizerScreenshot Cooja plugin...")
+        copy_folder('src/visualizer_screenshot', visualizer)
+        recompile = True
+    # recompile Cooja for making the changes take effect
+    if recompile:
         with lcd(COOJA_FOLDER):
             logging.debug(" > Recompiling Cooja...")
             with settings(warn_only=True):
                 local("ant clean")
                 local("ant jar")
     else:
-        logging.info("COOJA IS UP-TO-DATE")
+        logging.debug(" > Cooja is up-to-date")
+    # install imagemagick
+    with hide(*HIDDEN_ALL):
+        imagemagick_apt_output = local('apt-cache policy imagemagick', capture=True)
+        if 'Unable to locate package' in imagemagick_apt_output:
+            logging.debug(" > Installing imagemagick package...")
+            sudo("apt-get install imagemagick -y &")
+        else:
+            logging.debug(" > Imagemagick is installed")
     # install msp430 (GCC) upgrade
     with hide(*HIDDEN_ALL):
         msp430_version_output = local('msp430-gcc --version', capture=True)
@@ -349,7 +385,7 @@ def do_setup():
               "Would you like to upgrade it now ? (yes|no) [default: no] "
         answer = std_input(txt)
         if answer == "yes":
-            logging.info("UPGRADING msp430-gcc FROM VERSION 4.6.3 TO 4.7.0")
+            logging.debug(" > Upgrading msp430-gcc from version 4.6.3 to 4.7.0...")
             logging.warning("If you encounter problems with this upgrade, please refer to:\n"
                             "https://github.com/contiki-os/contiki/wiki/MSP430X")
             with lcd('src/'):
@@ -359,10 +395,10 @@ def do_setup():
                 local('export PATH=/usr/local/msp430/bin:$PATH')
                 register_new_path_in_profile()
         else:
-            logging.info("UPGRADE OF LIBRARY msp430-gcc ABORTED")
+            logging.warning("Upgrade of library msp430-gcc aborted")
             logging.warning("You may experience problems of mote memory size at compilation")
     else:
-        logging.info("LIBRARY msp430-gcc IS UP-TO-DATE (4.7.0)")
+        logging.debug(" > Library msp430-gcc is up-to-date (version 4.7.0)")
 
 
 # **************************************** MAGIC COMMAND ****************************************

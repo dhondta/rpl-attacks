@@ -1,16 +1,16 @@
 # -*- coding: utf8 -*-
+from cmd import Cmd
 from funcsigs import signature
 from functools import wraps
 from os.path import dirname, join
-from six.moves import zip_longest
+from sys import exit
 
-from .console import FrameworkConsole
-from .constants import COMMAND_DOCSTRING
+from .behaviors import DefaultCommand
 from .logconfig import logging
 
 
 # ************************************* GENERIC COMMAND DECORATORS **************************************
-def command(examples=None, autocomplete=None):
+def command(**kwargs):
     """
     This decorator checks if 'f' has a its first argument of the type FrameworkConsole in order to
      return the function with the right arguments.
@@ -18,34 +18,22 @@ def command(examples=None, autocomplete=None):
     If first argument is a FrameworkConsole, args[1] is split as if it were input as a raw_input argument.
      Otherwise, arguments are used normally.
 
-    :param description: command description
-    :param arguments: list of command argument descriptions
     :param examples: list of usage examples
     :param autocomplete: list of choices to be displayed when typing 2 x <TAB>
+    :param behavior: attribute to be associated to the decorated function for handling a particular behavior
     :return: the decorator function
     """
     def decorator(f):
-        f.cmd = True
-        shortname = f.__name__.split("_")[-1]
-        parts = f.__doc__.split(':param ')
-        description = parts[0].strip()
-        arguments = [" ".join([l.strip() for l in x.split(":")[-1].split('\n')]) for x in parts[1:]]
-        arg_descrs = [' - {}:\t{}'.format(n, d or "[no description]") \
-                      for n, d in list(zip_longest(signature(f).parameters.keys(), arguments or []))]
-        args_examples = [' >>> {} {}'.format(shortname, e) for e in (examples or [])]
-        if arguments is None and examples is None:
-            f.doc = "\n{}\n".format(description)
-        else:
-            f.doc = COMMAND_DOCSTRING \
-                .format(description, '\n'.join(arg_descrs), '\n'.join(args_examples or []))
-        if autocomplete is not None:
-            setattr(f, 'complete_{}'.format(shortname), FrameworkConsole.complete_template(autocomplete))
+        # set command attributes
+        kwargs.setdefault('behavior', DefaultCommand)
+        for kw, arg in kwargs.items():
+            setattr(f, kw, arg)
 
         @wraps(f)
         def wrapper(*args, **kwargs):
             try:
                 return f(*args[1].split(), **kwargs) \
-                    if len(args) > 1 and isinstance(args[0], FrameworkConsole) else f(*args, **kwargs)
+                    if len(args) > 1 and isinstance(args[0], Cmd) else f(*args, **kwargs)
             except KeyboardInterrupt:
                 pass
         return wrapper
@@ -112,6 +100,7 @@ def report_bad_input(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         sig = signature(f)
+        args = () if args == ('',) else args
         # first, exclude variable arguments and keyword-arguments
         novar_args = [p for p in sig.parameters.values() if not str(p).startswith('*')]
         # then, retrieve arguments without default values

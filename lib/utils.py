@@ -1,14 +1,15 @@
 # -*- coding: utf8 -*-
-import copy
-import json
-import logging
-import math
-import random
+from copy import deepcopy
+from json import load
+from math import sqrt
 from os import listdir, makedirs
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, splitext
+from random import choice, randint
 
 from .constants import CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
                        EXPERIMENT_FOLDER, TEMPLATES_FOLDER, TEMPLATE_ENV
+from .helpers import remove_files
+from .logconfig import logging
 
 
 # **************************************** PROTECTED FUNCTIONS ****************************************
@@ -32,11 +33,11 @@ def _generate_mote(motes, mote_id, mote_type,
     """
     while True:
         d = float("Inf")
-        x = random.randint(-max_x, max_x)
-        r = random.randint(abs(x), max_x)
-        y = random.choice([-1, 1]) * math.sqrt(r ** 2 - x ** 2)
+        x = randint(-max_x, max_x)
+        r = randint(abs(x), max_x)
+        y = choice([-1, 1]) * sqrt(r ** 2 - x ** 2)
         for n in motes:
-            d = min(d, math.sqrt((x - n['x'])**2 + (y - n['y'])**2))
+            d = min(d, sqrt((x - n['x'])**2 + (y - n['y'])**2))
         if (dmin < d < dmax and max_from_root is not None and d <= max_from_root) or \
                 (dmin < d < dmax and max_from_root is None):
             return {"id": mote_id, "type": mote_type, "x": float(x), "y": float(y), "z": 0}
@@ -54,7 +55,7 @@ def generate_motes(n=DEFAULTS["number-motes"], max_from_root=DEFAULTS["maximum-r
     malicious = None
     for i in range(n):
         # this is aimed to randomly add the malicious mote not far from the root
-        if malicious is None and random.randint(1, n // (i + 1)) == 1:
+        if malicious is None and randint(1, n // (i + 1)) == 1:
             malicious = _generate_mote(motes, n + 1, "malicious", max_from_root)
             motes.append(malicious)
         # now generate a position for the current mote
@@ -85,7 +86,7 @@ def get_building_blocks():
     :return: List of strings representing the available building blocks
     """
     with open(join(TEMPLATES_FOLDER, 'building-blocks.json')) as f:
-        blocks = json.load(f)
+        blocks = load(f)
     logging.error(blocks.keys())
     print(blocks)
     return blocks.keys()
@@ -99,7 +100,7 @@ def get_constants(blocks):
     :return: corresponding constants
     """
     with open('./templates/building-blocks.json') as f:
-        available_blocks = json.load(f)
+        available_blocks = load(f)
     constants = {}
     for block in blocks:
         try:
@@ -130,7 +131,7 @@ def get_experiments(exp_file):
         logging.warning("Make sure you've generated a JSON simulation campaign file by using 'prepare' fabric command.")
         exit(2)
     with open(exp_file) as f:
-        experiments = json.load(f)
+        experiments = load(f)
     return experiments
 
 
@@ -200,24 +201,25 @@ def list_experiments():
 
 
 # ************************************** TEMPLATE AND PARAMETER FUNCTIONS **************************************
-def check_structure(path, files=None):
+def check_structure(path, files=None, remove=False):
     """
     This function checks if the file structure given by the dictionary files exists at the input path.
 
     :param path: path to be checked for the file structure
     :param files: file structure as a dictionary
+    :param remove: if this flag is True, non-matching files are removed
     :return: True if the file structure is respected, otherwise False
     """
-    files = files or copy.deepcopy(EXPERIMENT_STRUCTURE)
+    files = deepcopy(EXPERIMENT_STRUCTURE) if files is None else files
     for item in listdir(path):
         wildcard = '{}.*'.format(splitext(item)[0])
         match = item if item in files.keys() else (wildcard if wildcard in files.keys() else None)
         if match is None:
+            if remove:
+                remove_files(path, item)
             continue
-        if isinstance(files[match], bool):
-            files[match] = True
-        else:
-            files[match] = check_structure(join(path, match), files[match])
+        files[match] = True if isinstance(files[match], bool) else \
+            check_structure(join(path, match), deepcopy(files[match]), remove)
     return all(files.values())
 
 
@@ -231,7 +233,7 @@ def is_valid_campaign(path):
     try:
         # TODO: check JSON file structure
         with open(path) as f:
-            json.load(f)
+            load(f)
         return True
     except ValueError:
         return False
@@ -245,7 +247,7 @@ def render_templates(path, only_malicious=False, **params):
     :param only_malicious: flag to indicate if all the templates have to be deployed or only malicious's one
     :param params: dictionary with all the parameters for the experiment
     """
-    templates = copy.deepcopy(TEMPLATES)
+    templates = deepcopy(TEMPLATES)
     # generate the list of motes (first one is the root, last one is the malicious mote)
     motes = generate_motes(params["n"])
     # fill in the different templates with input parameters
@@ -265,9 +267,9 @@ def render_templates(path, only_malicious=False, **params):
     simulation_template["transmitting_range"] = params["tx_range"]
     simulation_template["target"] = params["target"]
     simulation_template["target_capitalized"] = params["target"].capitalize()
-    templates["simulation_with_malicious.csc"] = copy.deepcopy(simulation_template)
+    templates["simulation_with_malicious.csc"] = deepcopy(simulation_template)
     templates["simulation_with_malicious.csc"]["motes"] = motes
-    templates["simulation_without_malicious.csc"] = copy.deepcopy(simulation_template)
+    templates["simulation_without_malicious.csc"] = deepcopy(simulation_template)
     templates["simulation_without_malicious.csc"]["motes"] = motes[:-1]
     del templates["simulation_without_malicious.csc"]["mote_types"][-1]  # remove malicious mote
     # render the list of templates
@@ -332,7 +334,7 @@ def validated_parameters(dictionary):
         lambda x: isinstance(x, (int, float)) and params["dmin"] < x <= params["tx_range"],
         "is not an integer between {:.0f} and {:.0f}".format(params["dmin"], params["tx_range"]))
     params["area_side"] = get_parameter(dictionary, "simulation", "area-square-side",
-        lambda x: isinstance(x, (int, float)) and x >= math.sqrt(2.0) * params["dmin"],
+        lambda x: isinstance(x, (int, float)) and x >= sqrt(2.0) * params["dmin"],
         "is not an integer or a float greater or equal to sqrt(2)*{:.0f}".format(params["dmin"]))
     params["max_range"] = get_parameter(dictionary, "malicious", "maximum-range-from-root",
         lambda x: isinstance(x, (int, float)) and params["dmin"] <= x <= params["area_side"],

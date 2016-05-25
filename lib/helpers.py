@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+import ast
 import logging
 import sh
 from os.path import join
@@ -25,7 +26,7 @@ def std_input(txt="Are you sure ? (yes|no) [default: no] "):
 @expand_folder(2)
 def copy_files(src_path, dst_path, *files):
     """
-    This helper function is aimed to copy files from a source path to a destination path
+    This helper function is aimed to copy files from a source path to a destination path.
 
     :param src_path: absolute or relative source path
     :param dst_path: absolute or relative destination path
@@ -47,13 +48,35 @@ def copy_files(src_path, dst_path, *files):
 @expand_folder(2)
 def copy_folder(src_path, dst_path):
     """
-    This helper function is aimed to copy an entire folder from a source path to a destination path
+    This helper function is aimed to copy an entire folder from a source path to a destination path.
 
     :param src_path: absolute or relative source path
     :param dst_path: absolute or relative destination path
     """
     if src_path != dst_path:
         sh.cp('-R', src_path, dst_path)
+
+
+@expand_folder(2)
+def move_files(src_path, dst_path, *files):
+    """
+    This helper function is aimed to move files from a source path to a destination path.
+
+    :param src_path: absolute or relative source path
+    :param dst_path: absolute or relative destination path
+    :param files: tuples with the following format (source_filename, destination_filename)
+    """
+    for file in files:
+        if isinstance(file, tuple):
+            src, dst = file
+        elif isinstance(file, (str, bytes)):
+            src, dst = 2 * [file]
+        else:
+            logging.warning("File {} was not moved from {} to {}".format(file, src_path, dst_path))
+            continue
+        src, dst = join(src_path, src), join(dst_path, dst)
+        if src != dst:
+            sh.mv(src, dst)
 
 
 @expand_folder(2)
@@ -66,8 +89,6 @@ def move_folder(src_path, dst_path, new_folder_name=None):
     :param dst_path: absolute or relative destination root path
     :param new_folder_name: new name for the source path's folder
     """
-    src_path = join(*src_path) if isinstance(src_path, (tuple, list)) else src_path
-    dst_path = join(*dst_path) if isinstance(dst_path, (tuple, list)) else dst_path
     if new_folder_name is not None:
         dst_path = join(dst_path, new_folder_name).rstrip("/")
     try:
@@ -112,25 +133,25 @@ def remove_folder(path):
 def read_config(path, sep=' = '):
     config = {}
     try:
-        with open(join(path, 'simulation.conf')) as f:
+        with open(join(path, '.simulation.conf')) as f:
             for line in f.readlines():
                 try:
                     k, v = [x.strip() for x in line.split(sep)]
-                    try:
-                        v = eval(v)
-                    except (SyntaxError, NameError):
-                        pass
-                    config[k] = v
                 except ValueError:
                     continue
+                try:
+                    v = ast.literal_eval(v)
+                except ValueError:
+                    pass
+                config[k] = v
     except OSError:
-        logging.error("Configuration file 'simulation.conf' does not exist !")
+        logging.error("Configuration file '.simulation.conf' does not exist !")
     return config
 
 
 @expand_folder(1)
 def write_config(path, config, sep=' = '):
     width = max([len(k) for k in config.keys()])
-    with open(join(path, 'simulation.conf'), 'w') as f:
+    with open(join(path, '.simulation.conf'), 'w') as f:
         for k, v in config.items():
             f.write('{}{}{}\n'.format(k.ljust(width), sep, v))
