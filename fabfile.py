@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from lib import *
+from fabric.api import local, task
+
+from lib.commands import get_commands
 
 
 @task
 def console():
-    FrameworkConsole().cmdloop()
+    """ Open framework's console. """
+    local('python main.py')
 
 
-for name in [n for n, o in getmembers(modules[__name__], isfunction) if hasattr(o, 'behavior')]:
-    short_name = '_'.join(name.split('_')[1:])
-    exec('{}.__name__ = "{}"'.format(name, short_name))
-    exec('{} = task({})'.format(short_name, name))
+for name, func in get_commands(exclude=['list']):
+    globals()[name] = task(func)

@@ -1,15 +1,17 @@
 # -*- coding: utf8 -*-
 from copy import deepcopy
+from jinja2 import Environment, FileSystemLoader
 from json import load
 from math import sqrt
 from os import listdir, makedirs
-from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, splitext
+from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
 from random import choice, randint
+from re import findall
 
-from .constants import CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
-                       EXPERIMENT_FOLDER, TEMPLATES_FOLDER, TEMPLATE_ENV
+from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
+                       EXPERIMENT_FOLDER, TEMPLATES_FOLDER
 from .helpers import remove_files
-from .logconfig import logging
+from .logconfig import logger
 
 
 # **************************************** PROTECTED FUNCTIONS ****************************************
@@ -87,9 +89,7 @@ def get_building_blocks():
     """
     with open(join(TEMPLATES_FOLDER, 'building-blocks.json')) as f:
         blocks = load(f)
-    logging.error(blocks.keys())
-    print(blocks)
-    return blocks.keys()
+    return blocks
 
 
 def get_constants(blocks):
@@ -99,19 +99,60 @@ def get_constants(blocks):
     :param blocks: input building blocks
     :return: corresponding constants
     """
-    with open('./templates/building-blocks.json') as f:
-        available_blocks = load(f)
-    constants = {}
+    available_blocks, constants = get_building_blocks(), {}
     for block in blocks:
-        try:
-            for constant, value in available_blocks[block].items():
-                if constant in constants.keys():
-                    logging.warning(" > Building-block '{}': '{}' is already set to {}".format(block, constant, value))
-                else:
-                    constants[constant] = value
-        except KeyError:
-            logging.error(" > Building-block '{}' does not exist !".format(block))
+        for constant, value in available_blocks[block].items():
+            if constant in constants.keys():
+                logger.warning(" > Building-block '{}': '{}' is already set to {}".format(block, constant, value))
+            else:
+                constants[constant] = value
     return constants
+
+
+def get_contiki_includes(target):
+    files = [f.format(target) if 'platform' in f else f for f in CONTIKI_FILES]
+    includes = [x for x in set(files) if not x.startswith('-')]
+    excludes = [x[1:] for x in list(set(files) - set(includes))]
+    matches = {'cpu': [], 'dev': []}
+    for makefile in ['Makefile.{}'.format(target), 'Makefile.common']:
+        try:
+            with open(join(CONTIKI_FOLDER, 'platform', target, makefile)) as f:
+                for line in f.readlines():
+                    for item in matches.keys():
+                        if item in line:
+                            matches[item].extend(findall(item + r'\/([a-zA-Z0-9]+)(?:\s+|\/)', line))
+        except IOError:
+            pass
+    for item in matches.keys():
+        if len(matches[item]) == 0:
+            includes = [f.format('').rstrip('/') if item in f else f for f in includes]
+        else:
+            includes = [f for f in includes if item not in f]
+            for match in set(matches[item]):
+                includes.append(join(item, match))
+    folders = {}
+    for exclude in excludes:
+        folder, fn = split(exclude)
+        folders.setdefault(folder, [])
+        folders[folder].append(fn)
+    for folder, excluded_files in folders.items():
+        if folder not in includes:
+            continue
+        includes.remove(folder)
+        for item in listdir(join(CONTIKI_FOLDER, folder)):
+            if item not in excluded_files:
+                includes.append(join(folder, item))
+    return includes
+
+
+def get_experiment_path(name):
+    """
+    This function is a simple shortcut for getting an experiment path.
+
+    :param name: name of the experiment (can also be an absolute path)
+    :return: path string
+    """
+    return get_path(EXPERIMENT_FOLDER, name)
 
 
 def get_experiments(exp_file):
@@ -127,9 +168,9 @@ def get_experiments(exp_file):
     if not exp_file.endswith(".json"):
         exp_file += ".json"
     if not exists(exp_file):
-        logging.critical("Simulation campaign JSON file does not exist !")
-        logging.warning("Make sure you've generated a JSON simulation campaign file by using 'prepare' fabric command.")
-        exit(2)
+        logger.critical("Simulation campaign JSON file does not exist !")
+        logger.warning("Make sure you've generated a JSON simulation campaign file by using 'prepare' fabric command.")
+        return
     with open(exp_file) as f:
         experiments = load(f)
     return experiments
@@ -143,7 +184,7 @@ def get_parameter(dictionary, section, key, condition, reason=None):
     :param section: section in the dictionary
     :param key: key of the related parameter
     :param condition: validation condition
-    :param message: message to be displayed in case of test failure
+    :param reason: message to be displayed in case of test failure
     :return: validated parameter
     """
     param = (dictionary.get(section) or {}).get(key) or DEFAULTS.get(key)
@@ -151,14 +192,14 @@ def get_parameter(dictionary, section, key, condition, reason=None):
         buffer = []
         for p in param:
             if not condition[0](p):
-                logging.warning("Parameter [{} -> {}] '{}' does not exist (removed)".format(section, key, p))
+                logger.warning("Parameter [{} -> {}] '{}' does not exist (removed)".format(section, key, p))
             else:
                 buffer.append(p)
         return buffer
     else:
         if not condition(param):
             print(param)
-            logging.warning("Parameter [{} -> {}] {} (set to default: {})".format(section, key, reason, DEFAULTS[key]))
+            logger.warning("Parameter [{} -> {}] {} (set to default: {})".format(section, key, reason, DEFAULTS[key]))
             param = DEFAULTS[key]
         return param
 
@@ -248,6 +289,7 @@ def render_templates(path, only_malicious=False, **params):
     :param params: dictionary with all the parameters for the experiment
     """
     templates = deepcopy(TEMPLATES)
+    env = Environment(loader=FileSystemLoader(join(path, 'templates')))
     # generate the list of motes (first one is the root, last one is the malicious mote)
     motes = generate_motes(params["n"])
     # fill in the different templates with input parameters
@@ -255,8 +297,9 @@ def render_templates(path, only_malicious=False, **params):
         for c in get_constants(params["blocks"]).items()])
     if only_malicious:
         template_malicious = "motes/malicious.c"
-        write_template(path, template_malicious, **templates[template_malicious])
+        write_template(path, env, template_malicious, **templates[template_malicious])
         return
+    templates["Makefile"]["target"] = params["target"]
     templates["script.js"]["timeout"] = 1000 * params["duration"]
     templates["script.js"]["sampling_period"] = templates["script.js"]["timeout"] // 100
     simulation_template = templates.pop("simulation.csc")
@@ -273,21 +316,22 @@ def render_templates(path, only_malicious=False, **params):
     templates["simulation_without_malicious.csc"]["motes"] = motes[:-1]
     del templates["simulation_without_malicious.csc"]["mote_types"][-1]  # remove malicious mote
     # render the list of templates
-    for template_name, kwargs in templates.items():
-        write_template(path, template_name, **kwargs)
+    for name, kwargs in templates.items():
+        write_template(path, env, name, **kwargs)
 
 
-def write_template(path, template_name, **kwargs):
+def write_template(path, env, name, **kwargs):
     """
     This function fills in a template and copy it to its destination.
 
     :param path: folder where the template is to be copied
+    :param templates_env: template environment
     :param template_name: template's key in the templates dictionary
     :param kwargs: parameters associated to this template
     """
-    logging.debug(" > Setting template file: {}".format(template_name))
-    template = TEMPLATE_ENV.get_template(template_name).render(**kwargs)
-    with open(join(path, template_name), "w") as f:
+    logger.debug(" > Setting template file: {}".format(name))
+    template = env.get_template(name).render(**kwargs)
+    with open(join(path, name), "w") as f:
         f.write(template)
 
 
@@ -318,7 +362,7 @@ def validated_parameters(dictionary):
     params["mtype"] = get_parameter(dictionary, "malicious", "type",
         lambda x: x in ["root", "sensor"], "is not 'root' or 'sensor'")
     params["blocks"] = get_parameter(dictionary, "malicious", "building-blocks",
-        [lambda x: x in get_available_platforms()])
+        [lambda x: x in get_building_blocks()])
     params["ext_lib"] = get_parameter(dictionary, "malicious", "external-library",
         lambda x: x is None or exists(x), "does not exist")
     # area dimensions and limits

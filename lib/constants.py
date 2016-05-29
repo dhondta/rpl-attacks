@@ -3,12 +3,13 @@ try:  # for Python2
     import ConfigParser as configparser
 except ImportError:  # for Python3
     import configparser
-from jinja2 import Environment, FileSystemLoader
 from os import makedirs
 from os.path import abspath, dirname, exists, expanduser, join, pardir
 
 from collections import OrderedDict
 
+
+VERSION = '1.2'
 
 # configuration parsing and main constants setting
 confparser = configparser.ConfigParser()
@@ -27,7 +28,6 @@ if not exists(EXPERIMENT_FOLDER):
     makedirs(EXPERIMENT_FOLDER)
 FRAMEWORK_FOLDER = join(dirname(__file__), pardir)
 TEMPLATES_FOLDER = join(FRAMEWORK_FOLDER, "templates")
-TEMPLATE_ENV = Environment(loader=FileSystemLoader(TEMPLATES_FOLDER))
 
 # simulation default parameters
 MIN_DIST_BETWEEN_MOTES = 20.0
@@ -90,6 +90,7 @@ BANNER = """   ___  ___  __     ___  __  __           __          ____          
  / , _/ ___/ /__  / __ / __/ __/ _ `/ __/  '_/(_-<  / _// __/ _ `/  ' \/ -_) |/|/ / _ \/ __/  '_/
 /_/|_/_/  /____/ /_/ |_\__/\__/\_,_/\__/_/\_\/___/ /_/ /_/  \_,_/_/_/_/\__/|__,__/\___/_/ /_/\_\.
                                                                                                  """
+
 COMMAND_DOCSTRING = {
     "description": """
     {}
@@ -103,5 +104,28 @@ Examples:
 """
 }
 
+MIN_TERM_SIZE = (40, len(BANNER.split('\n')[0]) + 10)
+
 # Multi-processing constants
-TASK_EXPIRATION = 5  # seconds
+TASK_EXPIRATION = 60  # seconds
+CONTIKI_FILES = [
+    "core",
+    "dev/{}",
+    "platform/{}",
+    "cpu/{}",
+    "tools",
+    "Makefile.include",
+    "-tools/code-style",
+    "-tools/coffee-manager",
+    "-tools/collect-view",
+    "-tools/cooja",
+    "-tools/csc",
+    "-tools/cygwin",
+    "-tools/mspsim",
+    "-tools/powertrace",
+    "-tools/release-tools",
+    "-tools/wpcapslip",
+    "-tools/avr-makecoffeedata",
+    "-tools/avr-makefsdata",
+    "-tools/avr-make-symbols",
+]

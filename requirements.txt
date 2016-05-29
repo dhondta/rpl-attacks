@@ -1,5 +1,7 @@
-cffi
 cairocffi
+cffi
+cmd2
+dill
 fabric3
 funcsigs
 jinja2

@@ -42,7 +42,7 @@ def modify_cooja(cooja_dir):
         buffer.append(line)
     with open(cooja_file, 'w') as f:
         f.write('\n'.join(buffer))
-    logging.debug(" > Cooja.java modified")
+    logger.debug(" > Cooja.java modified")
 
 
 def register_new_path_in_profile():
@@ -60,7 +60,7 @@ def register_new_path_in_profile():
         with open(expanduser('~/.profile'), 'a') as f:
             f.write("\n\n# msp430-gcc (GCC) 4.6.3\n# export PATH=/usr/bin/msp430-gcc/bin:$PATH\n"
                     "# msp430-gcc (GCC) 4.7.0\nexport PATH=/usr/local/msp430/bin:$PATH")
-    logging.debug(" > PATH adapted for msp430-gcc (GCC) 4.7.0 support")
+    logger.debug(" > PATH adapted for msp430-gcc (GCC) 4.7.0 support")
 
 
 def update_cooja_build(cooja_dir):
@@ -95,7 +95,7 @@ def update_cooja_build(cooja_dir):
         buffer.append(line)
     with open(cooja_build, 'w') as f:
         f.write('\n'.join(buffer))
-    logging.debug(" > Cooja's build.xml modified")
+    logger.debug(" > Cooja's build.xml modified")
 
 
 def update_cooja_user_properties():
@@ -117,4 +117,4 @@ def update_cooja_user_properties():
         buffer.append(line)
     with open(cooja_user_properties, 'w') as f:
         f.write('\n'.join(buffer))
-    logging.debug(" > Cooja user properties modified")
+    logger.debug(" > Cooja user properties modified")

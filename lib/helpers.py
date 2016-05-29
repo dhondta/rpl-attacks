@@ -1,14 +1,32 @@
 # -*- coding: utf8 -*-
 import ast
-import logging
 import sh
-from os.path import join
+from os import makedirs
+from os.path import exists, expanduser, join, split
+from termcolor import colored
 
-from .decorators import expand_folder
+from .logconfig import logger
+
+
+def __expand_folders(*folders):
+    """
+    This private function expands folder paths if these are in the form of a tuple.
+
+    :param folders: tuples to be joined and expanded as paths
+    :return: the expanded paths
+    """
+    paths = []
+    for folder in folders:
+        if isinstance(folder, (tuple, list)):
+            path = join(*folder)
+        else:
+            path = folder
+        paths.append(expanduser(path))
+    return paths[0] if len(paths) == 1 else paths
 
 
 # ********************* SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y *******************
-def std_input(txt="Are you sure ? (yes|no) [default: no] "):
+def std_input(txt="Are you sure ? (yes|no) [default: no] ", color='yellow'):
     """
     This helper function is aimed to simplify user input regarding raw_input() (Python 2.X) and input()
      (Python 3.Y).
@@ -16,6 +34,7 @@ def std_input(txt="Are you sure ? (yes|no) [default: no] "):
     :param txt: text to be displayed at user input
     :return: user input
     """
+    txt = txt if color is None else colored(txt, color)
     try:
         return raw_input(txt)
     except NameError:
@@ -23,7 +42,6 @@ def std_input(txt="Are you sure ? (yes|no) [default: no] "):
 
 
 # **************************************** FILE-RELATED HELPERS ****************************************
-@expand_folder(2)
 def copy_files(src_path, dst_path, *files):
     """
     This helper function is aimed to copy files from a source path to a destination path.
@@ -32,32 +50,43 @@ def copy_files(src_path, dst_path, *files):
     :param dst_path: absolute or relative destination path
     :param files: tuples with the following format (source_filename, destination_filename)
     """
+    src_path, dst_path = __expand_folders(src_path, dst_path)
     for file in files:
         if isinstance(file, tuple):
             src, dst = file
         elif isinstance(file, (str, bytes)):
             src, dst = 2 * [file]
         else:
-            logging.warning("File {} was not copied from {} to {}".format(file, src_path, dst_path))
+            logger.warning("File {} was not copied from {} to {}".format(file, src_path, dst_path))
             continue
         src, dst = join(src_path, src), join(dst_path, dst)
         if src != dst:
             sh.cp(src, dst)
 
 
-@expand_folder(2)
-def copy_folder(src_path, dst_path):
+def copy_folder(src_path, dst_path, includes=None):
     """
     This helper function is aimed to copy an entire folder from a source path to a destination path.
 
     :param src_path: absolute or relative source path
     :param dst_path: absolute or relative destination path
     """
+    src_path, dst_path = __expand_folders(src_path, dst_path)
     if src_path != dst_path:
-        sh.cp('-R', src_path, dst_path)
+        if includes is not None:
+            dst_path = join(dst_path, split(src_path)[-1])
+            if not exists(dst_path):
+                makedirs(dst_path)
+            for include in includes:
+                head, tail = split(include)
+                sub_dst_path = join(dst_path, head)
+                if not exists(sub_dst_path):
+                    makedirs(sub_dst_path)
+                sh.cp('-R', join(src_path, include), sub_dst_path)
+        else:
+            sh.cp('-R', src_path, dst_path)
 
 
-@expand_folder(2)
 def move_files(src_path, dst_path, *files):
     """
     This helper function is aimed to move files from a source path to a destination path.
@@ -66,20 +95,20 @@ def move_files(src_path, dst_path, *files):
     :param dst_path: absolute or relative destination path
     :param files: tuples with the following format (source_filename, destination_filename)
     """
+    src_path, dst_path = __expand_folders(src_path, dst_path)
     for file in files:
         if isinstance(file, tuple):
             src, dst = file
         elif isinstance(file, (str, bytes)):
             src, dst = 2 * [file]
         else:
-            logging.warning("File {} was not moved from {} to {}".format(file, src_path, dst_path))
+            logger.warning("File {} was not moved from {} to {}".format(file, src_path, dst_path))
             continue
         src, dst = join(src_path, src), join(dst_path, dst)
         if src != dst:
             sh.mv(src, dst)
 
 
-@expand_folder(2)
 def move_folder(src_path, dst_path, new_folder_name=None):
     """
     This helper function is aimed to copy a folder from a source path to a destination path,
@@ -89,6 +118,7 @@ def move_folder(src_path, dst_path, new_folder_name=None):
     :param dst_path: absolute or relative destination root path
     :param new_folder_name: new name for the source path's folder
     """
+    src_path, dst_path = __expand_folders(src_path, dst_path)
     if new_folder_name is not None:
         dst_path = join(dst_path, new_folder_name).rstrip("/")
     try:
@@ -98,7 +128,6 @@ def move_folder(src_path, dst_path, new_folder_name=None):
         pass
 
 
-@expand_folder(1)
 def remove_files(path, *files):
     """
     This helper function is aimed to remove specified files. If a file does not exist,
@@ -107,6 +136,7 @@ def remove_files(path, *files):
     :param path: absolute or relative source path
     :param files: filenames of files to be removed
     """
+    path = __expand_folders(path)
     for file in files:
         try:
             sh.rm(join(path, file))
@@ -114,7 +144,6 @@ def remove_files(path, *files):
             pass
 
 
-@expand_folder(1)
 def remove_folder(path):
     """
     This helper function is aimed to remove an entire folder. If the folder does not exist,
@@ -122,6 +151,7 @@ def remove_folder(path):
 
     :param path: absolute or relative source path
     """
+    path = __expand_folders(path)
     try:
         sh.rm('-r', path)
     except sh.ErrorReturnCode_1:
@@ -129,7 +159,6 @@ def remove_folder(path):
 
 
 # *********************************** SIMULATION CONFIG HELPERS *************************************
-@expand_folder(1)
 def read_config(path, sep=' = '):
     config = {}
     try:
@@ -145,11 +174,10 @@ def read_config(path, sep=' = '):
                     pass
                 config[k] = v
     except OSError:
-        logging.error("Configuration file '.simulation.conf' does not exist !")
+        logger.error("Configuration file '.simulation.conf' does not exist !")
     return config
 
 
-@expand_folder(1)
 def write_config(path, config, sep=' = '):
     width = max([len(k) for k in config.keys()])
     with open(join(path, '.simulation.conf'), 'w') as f:
