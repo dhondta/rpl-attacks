@@ -9,7 +9,7 @@ from terminaltables import SingleTable
 from .behaviors import MultiprocessedCommand
 from .constants import CONTIKI_FOLDER, COOJA_FOLDER, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, TEMPLATES_FOLDER
 from .decorators import CommandMonitor, command, stderr
-from .helpers import copy_files, copy_folder, move_files, move_folder, remove_files, remove_folder, \
+from .helpers import copy_files, copy_folder, move_files, remove_files, remove_folder, \
                      std_input, read_config, write_config
 from .install import check_cooja, modify_cooja, register_new_path_in_profile, \
                      update_cooja_build, update_cooja_user_properties
@@ -75,6 +75,7 @@ def cooja(name, with_malicious=False, **kwargs):
 
     :param name: experiment name
     :param with_malicious: use the simulation WITH the malicious mote or not
+    :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
     with hide(*HIDDEN_ALL):
         with lcd(kwargs['path']):
@@ -87,13 +88,18 @@ def __make(name, ask=True, **kwargs):
 
     :param name: experiment name (or path to the experiment, if expanded in the 'command' decorator)
     :param ask: ask confirmation
+    :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     global reuse_bin_path
-    path = kwargs.pop('path')
+    path = kwargs['path']
     logger.debug(" > Validating parameters...")
     params = validated_parameters(kwargs)
     ext_lib = params.get("ext_lib")
+    if ext_lib and not exists(ext_lib):
+        logger.error("External library does not exist !")
+        logger.critical("Make aborded.")
+        return False
     logger.debug(" > Creating simulation...")
     # create experiment's directories and config file
     get_path(path, create=True)
@@ -102,20 +108,21 @@ def __make(name, ask=True, **kwargs):
     get_path(path, 'results', create=True)
     write_config(path, params)
     # select the right malicious mote template and duplicate the simulation file
-    copy_folder(TEMPLATES_FOLDER, path)
-    tmp = get_path(path, 'templates')
-    copy_files(tmp, tmp,
+    templates = get_path(path, 'templates', create=True)
+    get_path(templates, 'motes', create=True)
+    copy_files(TEMPLATES_FOLDER, templates,
+               ('motes/root.c', 'motes/root.c'),
+               ('motes/sensor.c', 'motes/sensor.c'),
                ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'),
+               ('Makefile', 'Makefile'),
                ('simulation.csc', 'simulation_without_malicious.csc'),
-               ('simulation.csc', 'simulation_with_malicious.csc'))
+               ('simulation.csc', 'simulation_with_malicious.csc'),
+               ('script.js', 'script.js'))
     # create experiment's files from templates
     render_templates(path, **params)
     # then clean the temporary folder with templates
-    remove_folder(tmp)
-    if ext_lib and not exists(ext_lib):
-        logger.error("External library does not exist !")
-        logger.critical("Make aborded.")
-        return False
+    remove_folder(templates)
+    # now compile
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with lcd(path):
             # for every simulation, root and sensor compilation is the same ;
@@ -140,9 +147,9 @@ def __make(name, ask=True, **kwargs):
             if ext_lib is not None:
                 copy_folder(ext_lib, (path, 'contiki', 'core', 'net', 'rpl'))
             logger.debug(" > Making 'malicious.{}'...".format(params["target"]))
-            stderr(local)("make motes/malicious TARGET={}".format(params["target"]), capture=True)
+            stderr(local)("make motes/malicious CONTIKI={}".format(join(path, 'contiki')), capture=True)
             local('make clean')
-            remove_files(path, 'motes/malicious.c')
+            remove_folder((path, 'contiki'))
 _make = CommandMonitor(__make)
 make = command(
     autocomplete=lambda: list_experiments(),
@@ -162,45 +169,42 @@ def __remake(name, **kwargs):
      (meaning that it lets all simulation's files unchanged except ./motes/malicious.[target])
 
     :param name: experiment name
+    :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
+    path = kwargs['path']
     logger.debug(" > Retrieving parameters...")
-    path = kwargs.pop('path')
     params = read_config(path)
     ext_lib = params.get("ext_lib")
-    logger.debug(" > Recompiling malicious mote...")
-    # remove former compiled malicious mote and prepare the template
-    remove_files('motes/malicious.c')
-    copy_files(TEMPLATES_FOLDER, TEMPLATES_FOLDER,
-               ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'))
-    # recreate malicious C file from template and clean the temporary template
-    render_templates(path, True, **params)
-    remove_files(TEMPLATES_FOLDER, 'motes/malicious.c')
     if ext_lib and not exists(ext_lib):
         logger.error("External library does not exist !")
         logger.critical("Make aborded.")
         return False
+    logger.debug(" > Recompiling malicious mote...")
+    # remove former compiled malicious mote and prepare the template
+    motes = join(path, 'motes')
+    templates = get_path(path, 'templates', create=True)
+    get_path(templates, 'motes', create=True)
+    for f in listdir(motes):
+        if f.startswith('malicious.'):
+            remove_files((motes, f))
+    copy_files(TEMPLATES_FOLDER, templates,
+               ('Makefile', 'Makefile'),
+               ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'))
+    # recreate malicious C file from template and clean the temporary template
+    render_templates(path, True, **params)
+    # then clean the temporary folder with templates
+    remove_folder(templates)
+    # now recompile
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with lcd(path):
             # handle the malicious mote recompilation
+            copy_folder(CONTIKI_FOLDER, path, includes=get_contiki_includes(params["target"]))
             if ext_lib is not None:
-                # backup original RPL library and replace it with attack's library
-                get_path('.tmp')
-                move_folder((CONTIKI_FOLDER, 'core', 'net', 'rpl'), '.tmp')
-                copy_folder(ext_lib, (CONTIKI_FOLDER, 'core', 'net', 'rpl'))
+                copy_folder(ext_lib, (path, 'contiki', 'core', 'net', 'rpl'))
             logger.debug(" > Making 'malicious.{}'...".format(params["target"]))
-            stderr(local)("make motes/malicious TARGET={}".format(params["target"]), capture=True)
-            if ext_lib is not None:
-                # then, clean temporary files
-                remove_folder((CONTIKI_FOLDER, 'core', 'net', 'rpl'))
-                move_folder('.tmp/rpl', (CONTIKI_FOLDER, 'core', 'net'))
-                remove_folder('.tmp')
-            remove_files(path,
-                         'contiki-{}.a'.format(params["target"]),
-                         'contiki-{}.map'.format(params["target"]),
-                         'symbols.c',
-                         'symbols.h',
-                         'motes/malicious.c')
-            remove_folder((path, 'obj_{}'.format(params["target"])))
+            stderr(local)("make motes/malicious CONTIKI={}".format(join(path, 'contiki')), capture=True)
+            local('make clean')
+            remove_folder((path, 'contiki'))
 _remake = CommandMonitor(__remake)
 remake = command(
     autocomplete=lambda: list_experiments(),
@@ -218,8 +222,9 @@ def __run(name, **kwargs):
     Run an experiment.
 
     :param name: experiment name
+    :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
-    path = kwargs.pop('path')
+    path = kwargs['path']
     check_structure(path, remove=True)
     data, results = join(path, 'data'), join(path, 'results')
     with hide(*HIDDEN_ALL):
@@ -261,9 +266,25 @@ run = command(
 @command(autocomplete=lambda: list_campaigns(),
          examples=["my-simulation-campaign"],
          expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
+         not_exists=('exp_file', {'loglvl': 'error',
+                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}))
+def clean_all(exp_file):
+    """
+    Make a campaign of experiments.
+
+    :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
+                     the JSON file is searched in the experiments folder)
+    """
+    for name, params in get_experiments(exp_file).items():
+        clean(name, ask=False, silent=True)
+
+
+@command(autocomplete=lambda: list_campaigns(),
+         examples=["my-simulation-campaign"],
+         expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
          exists=('exp_file', {'on_boolean': 'ask', 'confirm': "Are you sure ? (yes|no) [default: no] "}),
          start_msg=("REMOVING EXPERIMENT CAMPAIGN AT '{}'", 'exp_file'))
-def drop(exp_file='experiments', ask=True):
+def drop(exp_file, ask=True, **kwargs):
     """
     Remove a campaign of experiments.
 
@@ -277,8 +298,9 @@ def drop(exp_file='experiments', ask=True):
          examples=["my-simulation-campaign"],
          expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
          not_exists=('exp_file', {'loglvl': 'error',
-                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}))
-def make_all(exp_file="experiments", **kwargs):
+                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}),
+         add_console_to_kwargs=True)
+def make_all(exp_file, **kwargs):
     """
     Make a campaign of experiments.
 
@@ -287,8 +309,8 @@ def make_all(exp_file="experiments", **kwargs):
     """
     global reuse_bin_path
     console = kwargs.get('console')
+    clean_all(exp_file)
     for name, params in sorted(get_experiments(exp_file).items(), key=lambda x: x[0]):
-        clean(name, ask=False, silent=True)
         make(name, **params) if console is None else console.do_make(name, **params)
 
 
@@ -298,7 +320,7 @@ def make_all(exp_file="experiments", **kwargs):
          exists=('exp_file', {'loglvl': 'warning', 'msg': (" > Experiment campaign '{}' already exists !", 'exp_file'),
                               'on_boolean': 'ask', 'confirm': "Overwrite ? (yes|no) [default: no] "}),
          start_msg=("CREATING NEW EXPERIMENT CAMPAIGN AT '{}'", 'exp_file'))
-def prepare(exp_file='experiments', ask=True):
+def prepare(exp_file, ask=True, **kwargs):
     """
     Create a campaign of experiments from a template.
 
@@ -312,23 +334,25 @@ def prepare(exp_file='experiments', ask=True):
          examples=["my-simulation-campaign"],
          expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
          not_exists=('exp_file', {'loglvl': 'error',
-                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}))
-def run_all(exp_file="experiments"):
+                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}),
+         add_console_to_kwargs=True)
+def run_all(exp_file, **kwargs):
     """
     Run a campaign of experiments.
 
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
     """
+    console = kwargs.get('console')
     for name in get_experiments(exp_file).keys():
-        run(name)
+        run(name) if console is None else console.do_run(name)
 
 
 # ************************************** INFORMATION COMMANDS *************************************
 @command(autocomplete=["campaigns", "experiments"],
          examples=["experiments", "campaigns"],
          reexec_on_emptyline=True)
-def list(item_type=None):
+def list(item_type):
     """
     List all available items of a specified type.
 
@@ -347,38 +371,36 @@ def list(item_type=None):
 
 
 # ***************************************** SETUP COMMANDS *****************************************
-@command(examples=["/opt/contiki", "~/contiki ~/Documents/experiments"])
-def config(contiki_folder='~/contiki', experiments_folder='~/Experiments'):
+@command(examples=["/opt/contiki", "~/contiki ~/Documents/experiments"],
+         start_msg="CREATING CONFIGURATION FILE AT '~/.rpl-attacks.conf'")
+def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silent=False):
     """
     Create a new configuration file at `~/.rpl-attacks.conf`.
 
     :param contiki_folder: Contiki folder
     :param experiments_folder: experiments folder
     """
-    logger.info("CREATING CONFIGURATION FILE AT '~/.rpl-attacks.conf'")
     with open(expanduser('~/.rpl-attacks.conf'), 'w') as f:
         f.write('[RPL Attacks Framework Configuration]\n')
         f.write('contiki_folder = {}\n'.format(contiki_folder))
         f.write('experiments_folder = {}\n'.format(experiments_folder))
 
 
-@command()
+@command(start_msg="TESTING THE FRAMEWORK")
 def test():
     """
     Run framework's tests.
     """
-    setup()
-    make("test-simulation")
-    with lcd(FRAMEWORK_FOLDER):
-        local("python -m unittest tests")
+    with settings(warn_only=True):
+        with lcd(FRAMEWORK_FOLDER):
+            local("python -m unittest tests")
 
 
-@command()
-def setup():
+@command(start_msg="SETTING UP OF THE FRAMEWORK")
+def setup(silent=False):
     """
     Setup the framework.
     """
-    logger.info("SETTING UP OF THE FRAMEWORK")
     recompile = False
     # install Cooja modifications
     if not check_cooja(COOJA_FOLDER):
@@ -417,7 +439,7 @@ def setup():
     if 'msp430-gcc (GCC) 4.7.0 20120322' not in msp430_version_output:
         txt = "In order to extend msp430x memory support, it is necessary to upgrade msp430-gcc.\n" \
               "Would you like to upgrade it now ? (yes|no) [default: no] "
-        answer = std_input(txt)
+        answer = std_input(txt, 'yellow')
         if answer == "yes":
             logger.debug(" > Upgrading msp430-gcc from version 4.6.3 to 4.7.0...")
             logger.warning("If you encounter problems with this upgrade, please refer to:\n"

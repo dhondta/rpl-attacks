@@ -7,10 +7,17 @@ from .logconfig import logger
 
 
 class DefaultCommand(object):
+    """
+    This is the default class for indicating that a command is sequentially executed
+    """
     is_multiprocessed = False
 
 
 class MultiprocessedCommand(object):
+    """
+    This class handles command multi-processing and is to be attached to a console through its constructor's
+     arguments.
+    """
     is_multiprocessed = True
 
     def __init__(self, console, command, name):
@@ -19,6 +26,7 @@ class MultiprocessedCommand(object):
         self.tasklist = console.tasklist
         self.command = command
         self.name = name
+        self.task = None
         self.tasklist[self] = {
             'name': name,
             'command': self.command.__name__,
@@ -50,4 +58,4 @@ class MultiprocessedCommand(object):
             self.__set_info('PENDING', expires=False)
             kwargs.pop('console', None)  # console instance must be removed as it is unpickable and will thus make
             #                               apply_async fail
-            self.pool.apply_async(self.command, args, kwargs, callback=self.callback)
+            self.task = self.pool.apply_async(self.command, args, kwargs, callback=self.callback)

@@ -3,11 +3,11 @@ import atexit
 import dill
 import os
 import signal
-from cmd2 import Cmd
+from cmd import Cmd
 from copy import copy
 from funcsigs import signature
 from getpass import getuser
-from multiprocessing import Pool, cpu_count
+from multiprocessing import cpu_count, Pool, TimeoutError
 from six.moves import zip_longest
 from socket import gethostname
 from sys import stdout
@@ -21,14 +21,53 @@ from .logconfig import logger, set_logging
 from .terminalsize import get_terminal_size
 
 
+def surround_ansi_escapes(prompt, start="\x01", end="\x02"):
+    """
+    See: https://bugs.python.org/issue17337
+    Other reference: http://stackoverflow.com/questions/9468435/look-how-to-fix-column-calculation-in
+                          -python-readline-if-use-color-prompt
+    This function allows to preprocess console's colored prompt in order to avoid incorrect prompt length
+     calculation by raw_input|input.
+    """
+    escaped = False
+    result = ""
+    for c in prompt:
+        if c == "\x1b" and not escaped:
+            result += start + c
+            escaped = True
+        elif c.isalpha() and escaped:
+            result += c + end
+            escaped = False
+        else:
+            result += c
+    return result
+
+
 class Console(Cmd, object):
     """ Simple command processor with standard commands. """
     file = None
     ruler = None
     badcmd_msg = " [!] {} command: {}"
+    max_history_entries = 10
 
     def __init__(self, *args, **kwargs):
         super(Console, self).__init__(*args, **kwargs)
+        self.__history = []
+
+    def cmdloop(self, intro=None):
+        try:
+            import readline
+            readline.set_completer_delims(' ')
+            super(Console, self).cmdloop(intro)
+        except (KeyboardInterrupt, EOFError):
+            self.cmdloop(' ')
+
+    def precmd(self, line):
+        if not line.startswith('history'):
+            if len(self.__history) >= self.max_history_entries:
+                del self.__history[0]
+            self.__history.append(line)
+        return line
 
     def default(self, line):
         print(self.badcmd_msg.format(["Unknown", "Invalid"][len(line.split()) > 1], line))
@@ -39,47 +78,64 @@ class Console(Cmd, object):
         """
         os.system("clear")
         cprint(BANNER, 'cyan', 'on_grey')
-        print(self.intro)
+        self.stdout.write(self.intro)
+
+    def do_EOF(self, line):
+        """
+    Exit the console by hitting Ctrl+D.
+        """
+        print('')
+        return True
+
+    def do_exit(self, line):
+        """
+    Exit the console.
+        """
+        return True
+
+    def do_history(self, line):
+        """
+    Print the history of commands.
+        """
+        print('Last {} commands'.format(len(self.__history)))
+        print(' > ' + '\n > '.join(self.__history))
 
 
 class FrameworkConsole(Console):
     """ Base command processor for the RPL Attacks Framework. """
     intro = "\nType help or ? to list commands.\nNB: DO NOT use spaces in arguments !\n"
-    prompt = '{}{}{}{}{}{} '.format(
-        colored(getuser(), 'magenta', attrs=['underline']),
+    prompt = surround_ansi_escapes('{}{}{}{}{}{} '.format(
+        colored(getuser(), 'magenta'),
         colored('@', 'cyan'),
         colored(gethostname(), 'blue'),
         colored(':', 'cyan'),
-        colored('rpl-attacks', 'red', attrs=['bold']),
+        colored('rpl-attacks', 'red'),
         colored('>>', 'cyan'),
-    )
-    abbrev = False
+    ))
 
-    def __init__(self, parallel, disabled=None):
+    def __init__(self, parallel):
+        self.continuation_prompt = self.prompt
         self.parallel = parallel
         width, height = get_terminal_size()
         if any(map((lambda s: s[0] < s[1]), zip((height, width), MIN_TERM_SIZE))):
             stdout.write("\x1b[8;{rows};{cols}t".format(rows=max(MIN_TERM_SIZE[0], height),
                                                         cols=max(MIN_TERM_SIZE[1], width)))
+        os.system('clear')
         if self.parallel:
             processes = cpu_count()
             self.__last_tasklist = None
             self.tasklist = {}
             self.pool = Pool(processes, lambda: signal.signal(signal.SIGINT, signal.SIG_IGN))
             atexit.register(self.graceful_exit)
-        self.reexec = ['status']
+        self.reexec = []
         self.__bind_commands()
         cprint(BANNER, 'cyan', 'on_grey')
-        for shortcut in disabled or []:
-            try:
-                delattr(Cmd, 'do_' + shortcut)
-            except AttributeError:
-                shortcut in self.shortcuts.pop(shortcut)
         super(FrameworkConsole, self).__init__()
 
     def __bind_commands(self):
-        if self.parallel:
-            self.do_status = self.__do_status
+        if not self.parallel:
+            for attr in ['complete_kill', 'do_kill', 'do_status']:
+                delattr(FrameworkConsole, attr)
         for name, func in get_commands():
             longname = 'do_{}'.format(name)
             # set the behavior of the console command (multi-processed or not)
@@ -106,7 +162,39 @@ class FrameworkConsole(Console):
             if hasattr(func, 'reexec_on_emptyline') and func.reexec_on_emptyline:
                 self.reexec.append(name)
 
-    def __do_status(self, line):
+    def clean_tasks(self):
+        """ Method for cleaning the list of tasks. """
+        for t in [x for x in self.tasklist.keys() if x.is_expired()]:
+            del self.tasklist[t]
+
+    def complete_kill(self, text, line, start_index, end_index):
+        return sorted([str(t) for t in self.tasklist.keys() if str(t).startswith(text)])
+
+    def complete_loglevel(self):
+        return ['debug', 'error', 'info', 'warning']
+
+    def do_kill(self, task):
+        """
+    Kill a task from the pool.
+        """
+        tasks = [str(t) for t in self.tasklist.keys()]
+        if task in tasks:
+            task_obj = [t for t in self.tasklist.keys() if str(t) == task][0]
+            try:
+                task_obj.task.get(1)
+            except TimeoutError:
+                self.tasklist[task_obj]['status'] = 'CANCELLED'
+                self.tasklist[task_obj]['result'] = 'None'
+                logger.warning('Task {} interrupted'.format(task_obj))
+
+    def do_loglevel(self, line):
+        """
+    Change the log level (info|warning|error|debug) [default: info].
+        """
+        if line != '' and set_logging(line):
+            print(' [I] Verbose level is now set to: {}'.format(line))
+
+    def do_status(self, line):
         """
     Display process pool status.
         """
@@ -114,7 +202,7 @@ class FrameworkConsole(Console):
         # this prevents from re-displaying the same status table once ENTER is pressed
         #  (marker 'restart' is handled in emptyline() hereafter
         if line == 'restart' and self.__last_tasklist is not None and \
-                hash(frozenset(self.tasklist)) == self.__last_tasklist:
+                        hash(frozenset(self.tasklist)) == self.__last_tasklist:
             return
         self.__last_tasklist = hash(frozenset(copy(self.tasklist)))
         if len(self.tasklist) == 0:
@@ -127,26 +215,15 @@ class FrameworkConsole(Console):
         table.justify_columns = {0: 'center', 1: 'center', 2: 'center'}
         print(table.table)
 
-    def clean_tasks(self):
-        """ Method for cleaning the list of tasks. """
-        for t in [x for x in self.tasklist.keys() if x.is_expired()]:
-            del self.tasklist[t]
-
-    def complete_loglevel(self):
-        return ['debug', 'error', 'info', 'warning']
-
-    def do_loglevel(self, line):
-        """
-    Change the log level (info|warning|error|debug) [default: info].
-        """
-        if line != '' and set_logging(line):
-            print(' [I] Verbose level is now set to: {}'.format(line))
-
     def emptyline(self):
         """ Re-execute last command if it's in the list of commands to be re-executed. """
-        if self.lastcmd == 'status':
+        try:
+            lastcmd = self.lastcmd.split()[0]
+        except IndexError:
+            return
+        if lastcmd == 'status':
             self.do_status('restart')
-        elif self.lastcmd and self.lastcmd.split()[0] in self.reexec:
+        elif lastcmd in self.reexec:
             return self.onecmd(self.lastcmd)
 
     def graceful_exit(self):
@@ -172,16 +249,3 @@ class FrameworkConsole(Console):
                 values = lazy_values or []
             return [v for v in values if v.startswith((text or "").strip())]
         return _template
-
-    # @staticmethod
-    # def start_process_template(f):
-    #     """ Template method for handling multi-processed commands. """
-    #     def _template(self, *args, **kwargs):
-    #         self.__clean_tasks()
-    #         if args == ('',):
-    #             return False
-    #         if not any([i['name'] == args[0] for i in self.tasklist.values()]):
-    #             f.behavior(self, f, args[0]).run(*args, **kwargs)
-    #         else:
-    #             logger.warning("A task {}[{}] is still pending on this experiment...".format(args[0], f.__name__))
-    #     return _template

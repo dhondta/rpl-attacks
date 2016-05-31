@@ -29,6 +29,31 @@ if not exists(EXPERIMENT_FOLDER):
 FRAMEWORK_FOLDER = join(dirname(__file__), pardir)
 TEMPLATES_FOLDER = join(FRAMEWORK_FOLDER, "templates")
 
+# Contiki template list of includes for specific mote target compilation (subfolders for 'dev', 'cpu', 'platform'
+#  are determined based on the specified target).
+# This is used for copying a minimal part of Contiki to an experiment folder for compiling custom malicious mote.
+CONTIKI_FILES = [
+    "core",
+    "dev/{}",
+    "platform/{}",
+    "cpu/{}",
+    "tools",
+    "Makefile.include",
+    "-tools/code-style",
+    "-tools/coffee-manager",
+    "-tools/collect-view",
+    "-tools/cooja",
+    "-tools/csc",
+    "-tools/cygwin",
+    "-tools/mspsim",
+    "-tools/powertrace",
+    "-tools/release-tools",
+    "-tools/wpcapslip",
+    "-tools/avr-makecoffeedata",
+    "-tools/avr-makefsdata",
+    "-tools/avr-make-symbols",
+]
+
 # simulation default parameters
 MIN_DIST_BETWEEN_MOTES = 20.0
 MAX_DIST_BETWEEN_MOTES = 50.0
@@ -108,24 +133,3 @@ MIN_TERM_SIZE = (40, len(BANNER.split('\n')[0]) + 10)
 
 # Multi-processing constants
 TASK_EXPIRATION = 60  # seconds
-CONTIKI_FILES = [
-    "core",
-    "dev/{}",
-    "platform/{}",
-    "cpu/{}",
-    "tools",
-    "Makefile.include",
-    "-tools/code-style",
-    "-tools/coffee-manager",
-    "-tools/collect-view",
-    "-tools/cooja",
-    "-tools/csc",
-    "-tools/cygwin",
-    "-tools/mspsim",
-    "-tools/powertrace",
-    "-tools/release-tools",
-    "-tools/wpcapslip",
-    "-tools/avr-makecoffeedata",
-    "-tools/avr-makefsdata",
-    "-tools/avr-make-symbols",
-]

@@ -25,15 +25,21 @@ def command(**params):
     :param examples: list of usage examples
     :param autocomplete: list of choices to be displayed when typing 2 x <TAB>
     :param behavior: attribute to be associated to the decorated function for handling a particular behavior
-    :param not_exist: specifies a tuple (argument_name, error_message[, ])
-    :param exist:
+    :param not_exists: specifies a tuple (argument_name, error_message[, ])
+    :param exists:
     :param start_msg: message to be displayed before calling 'f'
-    :param end_msg: message to be displayed after calling 'f'
+    :param reexec_on_emptyline: boolean indicating if the command is to be reexecuted when an empty line is
+                                 input in the console
+    :param add_console_to_kwargs: boolean indicating if the 'console' object is to be added to kwargs
+                                   (for usage inside command's code)
+    :param __base__: special parameter to be used if the command is to be multi-processed, it holds the
+                      "monitored" version of the command (that is, encapsulated inside a try-except)
     :return: the decorator function
     """
     def decorator(f):
         # set command attributes
         params.setdefault('behavior', DefaultCommand)
+        params.setdefault('add_console_to_kwargs', False)
         for key, val in params.items():
             setattr(f, key, val)
 
@@ -41,6 +47,8 @@ def command(**params):
         def wrapper(*args, **kwargs):
             # specific argument existence check through the 'not_exists' and 'exists' attributes
             def get_ask(sig, attrs):
+                if attrs['on_boolean'] in kwargs.keys():
+                    return kwargs[attrs['on_boolean']]
                 try:
                     param = sig.parameters[attrs['on_boolean']]
                     try:
@@ -69,17 +77,17 @@ def command(**params):
                     getattr(logger, lvl)(msg)
 
             console = args[0] if len(args) > 0 and isinstance(args[0], Cmd) else None
-            if console is not None:
+            if console is not None and f.add_console_to_kwargs:
                 kwargs['console'] = console
             # lexical analysis
             if len(args) > 1 and console is not None:
                 line = args[1]
                 kwargs_tmp = {k: v for k, v in kwargs.items()}
                 args, kwargs = lexer.analyze(line)
-                kwargs.update(kwargs_tmp)
                 if args is None and kwargs is None:
-                    print(args[0].badcmd_msg.format("Invalid", '{} {}'.format(f.__name__, line)))
+                    print(console.badcmd_msg.format("Invalid", '{} {}'.format(f.__name__, line)))
                     return
+                kwargs.update(kwargs_tmp)
             # bad signature check
             sig = signature(f)
             args = () if args == ('',) else args     # occurs in case of Cmd ; an empty 'line' can be passed if a
@@ -99,7 +107,11 @@ def command(**params):
             if hasattr(f, 'expand'):
                 arg, attrs = f.expand
                 arg_idx = list(sig.parameters.keys()).index(arg)
-                expanded = expanduser(join(attrs['into'], args[arg_idx]))
+                try:
+                    expanded = expanduser(join(attrs['into'], args[arg_idx]))
+                except IndexError:  # occurs when arg_idx out of range of args, meaning that the argument to be
+                    #                  expanded was not provided
+                    return
                 if attrs.get('ext') and not expanded.endswith("." + attrs['ext']):
                     expanded += "." + attrs['ext']
                 if attrs.get('new_arg') is None:
@@ -118,8 +130,9 @@ def command(**params):
                         if 'loglvl' in attrs.keys() and 'msg' in attrs.keys():
                             log_msg(attrs['loglvl'], attrs['msg'])
                         if attrs.get('loglvl') in ('error', 'critical') or \
-                                (attrs.get('loglvl') in ('warning', 'info') and get_ask(sig, attrs) and
-                                attrs.get('confirm') is not None and not std_input(attrs['confirm']) == 'yes'):
+                                ((attrs.get('loglvl') in ('warning', 'info') or fattr == 'exists') and
+                                 get_ask(sig, attrs) and attrs.get('confirm') is not None and
+                                 not std_input(attrs['confirm'], 'yellow') == 'yes'):
                             return
             # run the command and catch exception if any
             if f.behavior is MultiprocessedCommand and console is not None:
@@ -142,7 +155,7 @@ def command(**params):
 class CommandMonitor(object):
     """
     This ugly class decorator is aimed to make a function 'f' pickable (required for multiprocessing) while
-     using a decoration handling exceptions and returning a tuple ([status], [result/error message])
+     using a decoration handling exceptions and returning a tuple ([status], [result/error message]).
 
     :param f: the decorated function
     """

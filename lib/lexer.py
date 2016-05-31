@@ -4,6 +4,7 @@ from pygments.token import Error, Keyword, Name, Number, Operator, String, White
 
 
 class ValueLexer(RegexLexer):
+    """ A small lexer to analyze string, number, boolean and variable name. """
     tokens = {
         'root': [
             ('"', String, 'string'),
@@ -20,6 +21,8 @@ class ValueLexer(RegexLexer):
 
 
 class ArgumentsLexer(RegexLexer):
+    """ A lexer to analyze command arguments with the following structure:
+          [arg1, arg2, ..., argN][, kwarg1, kwarg2, ..., kwargM]  """
     tokens = {
         'root': [
             (r'\s+', Whitespace),

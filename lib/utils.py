@@ -7,6 +7,7 @@ from os import listdir, makedirs
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
 from random import choice, randint
 from re import findall
+from six import string_types
 
 from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
                        EXPERIMENT_FOLDER, TEMPLATES_FOLDER
@@ -110,6 +111,13 @@ def get_constants(blocks):
 
 
 def get_contiki_includes(target):
+    """
+    This function is aimed to compute the list of includes from the contiki folder based on a given list
+     (CONTIKI_FILES) and the current target by parsing its (potentially existing) Makefile's.
+
+    :param target: the mote's platform to be used for compilation
+    :return: the list of includes from Contiki for the specified target
+    """
     files = [f.format(target) if 'platform' in f else f for f in CONTIKI_FILES]
     includes = [x for x in set(files) if not x.startswith('-')]
     excludes = [x[1:] for x in list(set(files) - set(includes))]
@@ -143,16 +151,6 @@ def get_contiki_includes(target):
             if item not in excluded_files:
                 includes.append(join(folder, item))
     return includes
-
-
-def get_experiment_path(name):
-    """
-    This function is a simple shortcut for getting an experiment path.
-
-    :param name: name of the experiment (can also be an absolute path)
-    :return: path string
-    """
-    return get_path(EXPERIMENT_FOLDER, name)
 
 
 def get_experiments(exp_file):
@@ -198,7 +196,6 @@ def get_parameter(dictionary, section, key, condition, reason=None):
         return buffer
     else:
         if not condition(param):
-            print(param)
             logger.warning("Parameter [{} -> {}] {} (set to default: {})".format(section, key, reason, DEFAULTS[key]))
             param = DEFAULTS[key]
         return param
@@ -346,11 +343,11 @@ def validated_parameters(dictionary):
     params = {}
     # simulation parameters
     params["title"] = get_parameter(dictionary, "simulation", "title",
-        lambda x: isinstance(x, str), "is not a string")
+        lambda x: isinstance(x, string_types), "is not a string")
     params["goal"] = get_parameter(dictionary, "simulation", "goal",
-        lambda x: isinstance(x, str), "is not a string")
+        lambda x: isinstance(x, string_types), "is not a string")
     params["notes"] = get_parameter(dictionary, "simulation", "notes",
-        lambda x: isinstance(x, str), "is not a string")
+        lambda x: isinstance(x, string_types), "is not a string")
     params["duration"] = get_parameter(dictionary, "simulation", "duration",
         lambda x: isinstance(x, int) and x > 0, "is not an integer greater than 0")
     params["n"] = get_parameter(dictionary, "simulation", "number-motes",

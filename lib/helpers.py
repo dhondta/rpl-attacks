@@ -3,6 +3,7 @@ import ast
 import sh
 from os import makedirs
 from os.path import exists, expanduser, join, split
+from six import string_types
 from termcolor import colored
 
 from .logconfig import logger
@@ -26,7 +27,7 @@ def __expand_folders(*folders):
 
 
 # ********************* SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y *******************
-def std_input(txt="Are you sure ? (yes|no) [default: no] ", color='yellow'):
+def std_input(txt="Are you sure ? (yes|no) [default: no] ", color=None):
     """
     This helper function is aimed to simplify user input regarding raw_input() (Python 2.X) and input()
      (Python 3.Y).
@@ -36,9 +37,13 @@ def std_input(txt="Are you sure ? (yes|no) [default: no] ", color='yellow'):
     """
     txt = txt if color is None else colored(txt, color)
     try:
-        return raw_input(txt)
-    except NameError:
-        return input(txt)
+        try:
+            return raw_input(txt)
+        except NameError:
+            return input(txt)
+    except KeyboardInterrupt:
+        print('')
+        return ''
 
 
 # **************************************** FILE-RELATED HELPERS ****************************************
@@ -54,7 +59,7 @@ def copy_files(src_path, dst_path, *files):
     for file in files:
         if isinstance(file, tuple):
             src, dst = file
-        elif isinstance(file, (str, bytes)):
+        elif isinstance(file, string_types):
             src, dst = 2 * [file]
         else:
             logger.warning("File {} was not copied from {} to {}".format(file, src_path, dst_path))
@@ -99,7 +104,7 @@ def move_files(src_path, dst_path, *files):
     for file in files:
         if isinstance(file, tuple):
             src, dst = file
-        elif isinstance(file, (str, bytes)):
+        elif isinstance(file, string_types):
             src, dst = 2 * [file]
         else:
             logger.warning("File {} was not moved from {} to {}".format(file, src_path, dst_path))
@@ -160,6 +165,19 @@ def remove_folder(path):
 
 # *********************************** SIMULATION CONFIG HELPERS *************************************
 def read_config(path, sep=' = '):
+    """
+    This helper function reads a simple configuration file with the following format:
+
+     max_range = 50.0
+     repeat    = 1
+     blocks    = []
+     goal      = ""
+     ...
+
+    :param path: path to the configuration file
+    :param sep: separator between the key and the value
+    :return: dictionary with the whole configuration
+    """
     config = {}
     try:
         with open(join(path, '.simulation.conf')) as f:
@@ -179,7 +197,14 @@ def read_config(path, sep=' = '):
 
 
 def write_config(path, config, sep=' = '):
+    """
+    This helper function saves a simple configuration file.
+
+    :param path: path to the configuration file
+    :param config: dictionary with the whole configuration
+    :param sep: separator between the key and the value
+    """
     width = max([len(k) for k in config.keys()])
     with open(join(path, '.simulation.conf'), 'w') as f:
         for k, v in config.items():
-            f.write('{}{}{}\n'.format(k.ljust(width), sep, v))
+            f.write('{}{}{}\n'.format(k.ljust(width), sep, ['{}', '"{}"'][isinstance(v, string_types)].format(v)))
