@@ -1,13 +1,12 @@
 cairocffi
 cffi
-cmd2
 dill
 fabric3
 funcsigs
 jinja2
-makesense
 matplotlib
 networkx
 pandas
+readline
 sh
 scipy
