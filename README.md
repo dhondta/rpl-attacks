@@ -31,10 +31,10 @@ Installation
  sudo pip3 install -r requirements.txt
  ```
 
-4. Setup Cooja
+4. Setup dependencies and test the framework
 
  ```
- ../rpl-attacks$ fab setup
+ ../rpl-attacks$ fab test
  ```
 
 
@@ -76,8 +76,40 @@ experiments_folder = ~/simulations
 ```
 
 
-Quick Start
------------
+Quick Start (using the integrated console)
+------------------------------------------
+
+1. Open the console (you should see something like in the following screenshot)
+
+ ```
+ ../rpl-attacks$ fab console
+ ```
+
+ ![RPL Attacks Framework console](doc/rpl-attacks.png)
+
+2. Create a campaign of simulations
+
+ ```
+ user@instant-contiki:rpl-attacks>> prepare sample-attacks
+ ```
+
+3. Go to your experiments folder (default: `~/Experiments`) and edit your new `sample-attacks.json` to suit your needs
+
+4. Make the experiments
+
+ ```
+ user@instant-contiki:rpl-attacks>> make_all sample-attacks
+ ```
+
+5. Run the experiments
+
+ ```
+ user@instant-contiki:rpl-attacks>> run_all sample-attacks
+ ```
+
+
+Quick Start (using `fabric`)
+----------------------------
 
 1. Create a simulation campaign file from the template
 
@@ -100,11 +132,10 @@ Quick Start
  ```
 
 
-
 Commands
 --------
 
-Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-flood``).
+Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-flood``) or in the framework's console (e.g. ``launch hello-flood``).
 
 - **`clean`**`:name`
 
@@ -123,6 +154,16 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 > This will open Cooja and load simulation named 'name' in its version with or without the malicious mote.
 >
 >  `with-malicious-mote`: flag for starting the simulation with/without the malicious mote [default: false]
+
+- **`drop`**`:simulation-campaign-json-file`
+
+> This will remove the campaign file named 'simulation-campaign-json-file'.
+
+- **`list`**`:type-of-item`
+
+> This will list all existing items of the specified type from the experiment folder.
+>
+>  `type-of-item`: `experiments` or `campaigns`
 
 - **`make`**`:name[, n, mtype, max_range, blocks, ext_lib, duration, title, goal, notes, target]`
 
@@ -150,6 +191,10 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 > This will generate a campaign of simulations from a JSON file formatted and execute the chain `clean`|`new`|`make` for each simulation. See ``./templates/experiments.json`` for simulation campaign JSON format.
 
+- **`prepare`**`:simulation-campaign-json-file`
+
+> This will generate a campaign JSON file from the template located at `./templates/experiments.json`.
+
 - **`run`**`:name`
 
 > This will execute the the given simulation, parse log files and generate the results.
@@ -160,7 +205,11 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 - **`setup`**
 
-> This will setup Contiki and Cooja for RPL Attacks.
+> This will setup Contiki, Cooja nad upgrade msp430-gcc for RPL Attacks.
+
+- **`test`**
+
+> This will test the framework.
 
 
 Simulation campaign
