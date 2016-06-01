@@ -223,27 +223,10 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 Simulation campaign
 -------------------
 
-Example JSON :
+Example JSON for a campaign with a BASE simulation as a template for the other simulations (with the same topology) :
 
-```
-{
-  "sinkhole": {
-    "simulation": {
-      "title": "Sinkhole Attack",
-      "goal": "Show that the malicious node is creating another\n DODAG, preventing some motes from joining legitimate\n root's DODAG",
-      "notes": "The malicious mote will use the same prefix as the\n root and prevent sensors from joining the legitimate\n DODAG",
-      "number_motes": 10,
-      "target": "z1",
-      "duration": 120,
-      "debug": true
-    },
-    "malicious": {
-      "type": "sensor",
-      "constants": {
-        "RPL_CONF_MIN_HOPRANKINC": 128
-      }
-    }
-  }
-}
-```
+ ![RPL Attacks Framework console](doc/json-base-simulations.png)
 
+Example JSON for a campaign of heterogeneous simulations (with randomized topologies) :
+
+ ![RPL Attacks Framework console](doc/json-randomized-simulations.png)
