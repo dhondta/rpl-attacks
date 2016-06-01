@@ -4,6 +4,7 @@ dill
 fabric3
 funcsigs
 jinja2
+jsmin
 matplotlib
 networkx
 pandas

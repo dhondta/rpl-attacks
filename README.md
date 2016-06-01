@@ -1,7 +1,9 @@
 RPL Attacks Framework
 =====================
 
-This project is aimed to provide a simple and convenient way to generate simulations and deploy malicious motes for a Wireless Sensor Network (WSN) that uses Routing Protocol for Low-power and lossy devices (RPL) as its network layer. With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants or using an own external RPL library.
+This project is aimed to provide a simple and convenient way to generate simulations and deploy malicious motes for a Wireless Sensor Network (WSN) that uses Routing Protocol for Low-power and lossy devices (RPL) as its network layer.
+
+With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants or using an own external RPL library. Moreover, campaign can be generated either based on a same or a randomized topology for each simulation.
 
 
 Installation
@@ -107,6 +109,8 @@ Quick Start (using the integrated console)
  user@instant-contiki:rpl-attacks>> run_all sample-attacks
  ```
 
+**Hint** : You can type ``status`` during ``make_all`` and ``run_all`` processing for getting the status of pending tasks.
+
 
 Quick Start (using `fabric`)
 ----------------------------
@@ -206,6 +210,10 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 - **`setup`**
 
 > This will setup Contiki, Cooja nad upgrade msp430-gcc for RPL Attacks.
+
+- **`status`**
+
+> This will the status of current multi-processed tasks.
 
 - **`test`**
 
