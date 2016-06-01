@@ -6,6 +6,14 @@ This project is aimed to provide a simple and convenient way to generate simulat
 With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants or using an own external RPL library. Moreover, campaign can be generated either based on a same or a randomized topology for each simulation.
 
 
+System Requirements
+-------------------
+
+This framework was tested on an InstantContiki appliance (that is, an Ubuntu 14.04).
+
+It was tested with Python 2 and 3.
+
+
 Installation
 ------------
 
