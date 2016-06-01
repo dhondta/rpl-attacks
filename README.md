@@ -95,6 +95,18 @@ Quick Start (using the integrated console)
  ../rpl-attacks$ fab console
  ```
 
+ or
+
+ ```
+ ../rpl-attacks$ python main.py
+ ```
+
+ or
+
+ ```
+ ../rpl-attacks$ python3 main.py
+ ```
+
  ![RPL Attacks Framework console](doc/rpl-attacks.png)
 
 2. Create a campaign of simulations
