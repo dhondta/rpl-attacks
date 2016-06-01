@@ -163,6 +163,25 @@ def remove_folder(path):
         pass
 
 
+def replace_in_file(path, replacement):
+    """
+    This helper function performs a line replacement in the file located at 'path'.
+
+    :param path: path to the file to be altered
+    :param replacement: list of two strings formatted as [old_line_pattern, new_line_replacement]
+    """
+    tmp = path + '.tmp'
+    with open(tmp, 'w') as nf:
+        with open(path) as of:
+            for line in of.readlines():
+                if replacement[0] in line:
+                    nf.write(line.replace(replacement[0], replacement[1]))
+                else:
+                    nf.write(line)
+    sh.rm(path)
+    sh.mv(tmp, path)
+
+
 # *********************************** SIMULATION CONFIG HELPERS *************************************
 def read_config(path, sep=' = '):
     """
@@ -182,6 +201,8 @@ def read_config(path, sep=' = '):
     try:
         with open(join(path, '.simulation.conf')) as f:
             for line in f.readlines():
+                if line.strip().startswith('#'):
+                    continue
                 try:
                     k, v = [x.strip() for x in line.split(sep)]
                 except ValueError:
@@ -206,5 +227,5 @@ def write_config(path, config, sep=' = '):
     """
     width = max([len(k) for k in config.keys()])
     with open(join(path, '.simulation.conf'), 'w') as f:
-        for k, v in config.items():
+        for k, v in sorted(config.items(), key=lambda x: x[0]):
             f.write('{}{}{}\n'.format(k.ljust(width), sep, ['{}', '"{}"'][isinstance(v, string_types)].format(v)))

@@ -1,18 +1,21 @@
+/*
+Available Building Blocks :
+{{ available_building_blocks }}
+*/
+
 {
   "test": {
     "simulation": {
       "title": "Test simulation",
       "goal": "Create a new simulation",
       "notes": "",
-      "number_motes": 5,
+      "number_motes": 10,
       "target": "z1",
-      "duration": 60
+      "duration": 300
     },
     "malicious": {
       "type": "sensor",
       "building-blocks": [
-        "hello-flood",
-        "sinkhole"
       ]
     }
   }

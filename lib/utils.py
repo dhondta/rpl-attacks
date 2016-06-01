@@ -1,9 +1,10 @@
 # -*- coding: utf8 -*-
 from copy import deepcopy
 from jinja2 import Environment, FileSystemLoader
-from json import load
+from jsmin import jsmin
+from json import loads
 from math import sqrt
-from os import listdir, makedirs
+from os import listdir, makedirs, rename
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
 from random import choice, randint
 from re import findall
@@ -11,7 +12,7 @@ from six import string_types
 
 from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
                        EXPERIMENT_FOLDER, TEMPLATES_FOLDER
-from .helpers import remove_files
+from .helpers import remove_files, replace_in_file
 from .logconfig import logger
 
 
@@ -55,17 +56,9 @@ def generate_motes(n=DEFAULTS["number-motes"], max_from_root=DEFAULTS["maximum-r
     :return: the list of motes (formatted as dictionaries like hereafter)
     """
     motes = [{"id": 0, "type": "root", "x": 0, "y": 0, "z": 0}]
-    malicious = None
     for i in range(n):
-        # this is aimed to randomly add the malicious mote not far from the root
-        if malicious is None and randint(1, n // (i + 1)) == 1:
-            malicious = _generate_mote(motes, n + 1, "malicious", max_from_root)
-            motes.append(malicious)
-        # now generate a position for the current mote
         motes.append(_generate_mote(motes, i + 1, "sensor"))
-    malicious = _generate_mote(motes, n + 1, "malicious", max_from_root) \
-        if not malicious else motes.pop(motes.index(malicious))
-    motes.append(malicious)
+    motes.append(_generate_mote(motes, n + 1, "malicious", max_from_root))
     return motes
 
 
@@ -89,25 +82,35 @@ def get_building_blocks():
     :return: List of strings representing the available building blocks
     """
     with open(join(TEMPLATES_FOLDER, 'building-blocks.json')) as f:
-        blocks = load(f)
+        blocks = loads(jsmin(f.read()))
     return blocks
 
 
-def get_constants(blocks):
+def get_constants_and_replacements(blocks):
     """
-    This function retrieves the constants to the building blocks provided in input.
+    This function retrieves the constants and replacements corresponding to the building blocks provided in input.
 
     :param blocks: input building blocks
-    :return: corresponding constants
+    :return: corresponding constants and replacements to be made in ContikiRPL files
     """
-    available_blocks, constants = get_building_blocks(), {}
+    available_blocks = get_building_blocks()
+    constants, replacements = {}, {}
     for block in blocks:
-        for constant, value in available_blocks[block].items():
-            if constant in constants.keys():
-                logger.warning(" > Building-block '{}': '{}' is already set to {}".format(block, constant, value))
+        for key, value in available_blocks[block].items():
+            # e.g. {"RPL_CONF_MIN_HOPRANKINC": 128} will be collected in constants
+            if key.upper() == key and not (key.endswith('.c') or key.endswith('.h')):
+                if key in constants.keys():
+                    logger.warning(" > Building-block '{}': '{}' is already set to {}".format(block, key, value))
+                else:
+                    constants[key] = value
+            # else, it is a replacement in a file, e.g. {"rpl-icmp6.c": ["dag->version", "dag->version++"]}
             else:
-                constants[constant] = value
-    return constants
+                if key in replacements.keys() and value[0] in [srcl for srcl, dstl in replacements.values()]:
+                    logger.warning(" > Building-block '{}': line '{}' is already replaced in {}"
+                                   .format(block, value[0], key))
+                else:
+                    replacements[key] = value
+    return constants, replacements
 
 
 def get_contiki_includes(target):
@@ -170,7 +173,7 @@ def get_experiments(exp_file):
         logger.warning("Make sure you've generated a JSON simulation campaign file by using 'prepare' fabric command.")
         return
     with open(exp_file) as f:
-        experiments = load(f)
+        experiments = loads(jsmin(f.read()))
     return experiments
 
 
@@ -239,6 +242,17 @@ def list_experiments():
 
 
 # ************************************** TEMPLATE AND PARAMETER FUNCTIONS **************************************
+def apply_replacements(contiki_rpl, replacements):
+    """
+    This function replaces lines in specified ContikiRPL files. Each replacement is formatted as follows:
+        {"ContikiRPL_filename": ["source_line", "destination_line"]}
+
+    :param replacements: dictionary of replacement entries
+    """
+    for filename, replacement in replacements.items():
+        replace_in_file(join(contiki_rpl, filename), replacement)
+
+
 def check_structure(path, files=None, remove=False):
     """
     This function checks if the file structure given by the dictionary files exists at the input path.
@@ -271,10 +285,23 @@ def is_valid_campaign(path):
     try:
         # TODO: check JSON file structure
         with open(path) as f:
-            load(f)
+            loads(jsmin(f.read()))
         return True
     except ValueError:
         return False
+
+
+def render_campaign(exp_file):
+    """
+    This function is aimed to render a campaign JSON file with the list of available building blocks for
+     helping the user to tune its experiments.
+
+    :param exp_file: path to the experiment file to be created
+    """
+    path = dirname(exp_file)
+    write_template(path, Environment(loader=FileSystemLoader(TEMPLATES_FOLDER)), 'experiments.json',
+                   available_building_blocks='\n'.join([' - {}'.format(b) for b in get_building_blocks()]))
+    rename(join(path, 'experiments.json'), exp_file)
 
 
 def render_templates(path, only_malicious=False, **params):
@@ -284,14 +311,16 @@ def render_templates(path, only_malicious=False, **params):
     :param path: experiment folder path
     :param only_malicious: flag to indicate if all the templates have to be deployed or only malicious's one
     :param params: dictionary with all the parameters for the experiment
+    :return: eventual replacements to be made in ContikiRPL files
     """
     templates = deepcopy(TEMPLATES)
     env = Environment(loader=FileSystemLoader(join(path, 'templates')))
     # generate the list of motes (first one is the root, last one is the malicious mote)
-    motes = generate_motes(params["n"])
+    motes = params['motes'] or generate_motes(params["n"], params['max_range'])
     # fill in the different templates with input parameters
+    constants, replacements = get_constants_and_replacements(params["blocks"])
     templates["motes/malicious.c"]["constants"] = "\n".join(["#define {} {}".format(*c) \
-        for c in get_constants(params["blocks"]).items()])
+        for c in constants.items()])
     if only_malicious:
         template_malicious = "motes/malicious.c"
         write_template(path, env, template_malicious, **templates[template_malicious])
@@ -315,6 +344,7 @@ def render_templates(path, only_malicious=False, **params):
     # render the list of templates
     for name, kwargs in templates.items():
         write_template(path, env, name, **kwargs)
+    return replacements
 
 
 def write_template(path, env, name, **kwargs):
@@ -322,8 +352,8 @@ def write_template(path, env, name, **kwargs):
     This function fills in a template and copy it to its destination.
 
     :param path: folder where the template is to be copied
-    :param templates_env: template environment
-    :param template_name: template's key in the templates dictionary
+    :param env: template environment
+    :param name: template's key in the templates dictionary
     :param kwargs: parameters associated to this template
     """
     logger.debug(" > Setting template file: {}".format(name))
@@ -340,7 +370,7 @@ def validated_parameters(dictionary):
     :param dictionary: input parameters
     :return: dictionary of validated parameters
     """
-    params = {}
+    params = dict(motes=dictionary.get('motes'))
     # simulation parameters
     params["title"] = get_parameter(dictionary, "simulation", "title",
         lambda x: isinstance(x, string_types), "is not a string")
@@ -377,7 +407,7 @@ def validated_parameters(dictionary):
     params["area_side"] = get_parameter(dictionary, "simulation", "area-square-side",
         lambda x: isinstance(x, (int, float)) and x >= sqrt(2.0) * params["dmin"],
         "is not an integer or a float greater or equal to sqrt(2)*{:.0f}".format(params["dmin"]))
-    params["max_range"] = get_parameter(dictionary, "malicious", "maximum-range-from-root",
+    params["max_range"] = get_parameter(dictionary, "simulation", "maximum-range-from-root",
         lambda x: isinstance(x, (int, float)) and params["dmin"] <= x <= params["area_side"],
         "is not an integer or a float between {:.0f} and {:.0f}".format(params["dmin"], params["area_side"]))
     return params

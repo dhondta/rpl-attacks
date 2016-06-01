@@ -14,8 +14,8 @@ from .helpers import copy_files, copy_folder, move_files, remove_files, remove_f
 from .install import check_cooja, modify_cooja, register_new_path_in_profile, \
                      update_cooja_build, update_cooja_user_properties
 from .logconfig import logger, HIDDEN_ALL
-from .utils import check_structure, get_contiki_includes, get_experiments, get_path, list_campaigns, \
-                   list_experiments, render_templates, validated_parameters
+from .utils import apply_replacements, check_structure, generate_motes, get_contiki_includes, get_experiments, \
+                   get_path, list_campaigns, list_experiments, render_campaign, render_templates, validated_parameters
 
 reuse_bin_path = None
 
@@ -101,12 +101,11 @@ def __make(name, ask=True, **kwargs):
         logger.critical("Make aborded.")
         return False
     logger.debug(" > Creating simulation...")
-    # create experiment's directories and config file
+    # create experiment's directories
     get_path(path, create=True)
     get_path(path, 'motes', create=True)
     get_path(path, 'data', create=True)
     get_path(path, 'results', create=True)
-    write_config(path, params)
     # select the right malicious mote template and duplicate the simulation file
     templates = get_path(path, 'templates', create=True)
     get_path(templates, 'motes', create=True)
@@ -119,9 +118,12 @@ def __make(name, ask=True, **kwargs):
                ('simulation.csc', 'simulation_with_malicious.csc'),
                ('script.js', 'script.js'))
     # create experiment's files from templates
-    render_templates(path, **params)
+    replacements = render_templates(path, **params)
     # then clean the temporary folder with templates
     remove_folder(templates)
+    # now, write the config file without the list of motes
+    del params['motes']
+    write_config(path, params)
     # now compile
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with lcd(path):
@@ -144,8 +146,10 @@ def __make(name, ask=True, **kwargs):
                 remove_files(path, 'motes/root.c', 'motes/sensor.c')
             # now, handle the malicious mote compilation
             copy_folder(CONTIKI_FOLDER, path, includes=get_contiki_includes(params["target"]))
+            contiki_rpl = join(path, 'contiki', 'core', 'net', 'rpl')
             if ext_lib is not None:
-                copy_folder(ext_lib, (path, 'contiki', 'core', 'net', 'rpl'))
+                copy_folder(ext_lib, contiki_rpl)
+            apply_replacements(contiki_rpl, replacements)
             logger.debug(" > Making 'malicious.{}'...".format(params["target"]))
             stderr(local)("make motes/malicious CONTIKI={}".format(join(path, 'contiki')), capture=True)
             local('make clean')
@@ -191,7 +195,7 @@ def __remake(name, **kwargs):
                ('Makefile', 'Makefile'),
                ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'))
     # recreate malicious C file from template and clean the temporary template
-    render_templates(path, True, **params)
+    replacements = render_templates(path, True, **params)
     # then clean the temporary folder with templates
     remove_folder(templates)
     # now recompile
@@ -199,8 +203,10 @@ def __remake(name, **kwargs):
         with lcd(path):
             # handle the malicious mote recompilation
             copy_folder(CONTIKI_FOLDER, path, includes=get_contiki_includes(params["target"]))
+            contiki_rpl = join(path, 'contiki', 'core', 'net', 'rpl')
             if ext_lib is not None:
-                copy_folder(ext_lib, (path, 'contiki', 'core', 'net', 'rpl'))
+                copy_folder(ext_lib, contiki_rpl)
+            apply_replacements(contiki_rpl, replacements)
             logger.debug(" > Making 'malicious.{}'...".format(params["target"]))
             stderr(local)("make motes/malicious CONTIKI={}".format(join(path, 'contiki')), capture=True)
             local('make clean')
@@ -310,7 +316,17 @@ def make_all(exp_file, **kwargs):
     global reuse_bin_path
     console = kwargs.get('console')
     clean_all(exp_file)
-    for name, params in sorted(get_experiments(exp_file).items(), key=lambda x: x[0]):
+    experiments = get_experiments(exp_file)
+    sim_params, motes = None, None
+    # if a simulation named 'BASE' is present, use it as a template simulation for all the other simulations
+    if 'BASE' in experiments.keys():
+        sim_params = validated_parameters(experiments['BASE'])
+        motes = generate_motes(sim_params["n"], sim_params['max_range'])
+        del experiments['BASE']
+    for name, params in sorted(experiments.items(), key=lambda x: x[0]):
+        if sim_params is not None:
+            params.update(sim_params)
+            params['motes'] = motes
         make(name, **params) if console is None else console.do_make(name, **params)
 
 
@@ -327,7 +343,7 @@ def prepare(exp_file, ask=True, **kwargs):
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
     """
-    copy_files(TEMPLATES_FOLDER, dirname(exp_file), ('experiments.json', exp_file))
+    render_campaign(exp_file)
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -345,7 +361,8 @@ def run_all(exp_file, **kwargs):
     """
     console = kwargs.get('console')
     for name in get_experiments(exp_file).keys():
-        run(name) if console is None else console.do_run(name)
+        if name != 'BASE':
+            run(name) if console is None else console.do_run(name)
 
 
 # ************************************** INFORMATION COMMANDS *************************************

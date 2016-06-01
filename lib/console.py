@@ -63,7 +63,7 @@ class Console(Cmd, object):
             self.cmdloop(' ')
 
     def precmd(self, line):
-        if not line.startswith('history'):
+        if len(self.__history) == 0 or (not line.startswith('history') and line != self.__history[-1] and line != ''):
             if len(self.__history) >= self.max_history_entries:
                 del self.__history[0]
             self.__history.append(line)
