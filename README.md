@@ -9,9 +9,9 @@ With this framework, it is possible to easily define campaign of simulations eit
 System Requirements
 -------------------
 
-This framework was tested on an InstantContiki appliance (that is, an Ubuntu 14.04).
+This framework was tested on an **InstantContiki** appliance (that is, an Ubuntu 14.04).
 
-It was tested with Python 2 and 3.
+It was tested with **Python 2 and 3**.
 
 
 Installation
@@ -48,8 +48,8 @@ Installation
  ```
 
 
-Configuration
--------------
+Non-Standard Configuration
+--------------------------
 
 **This section only applies if you want to tune Contiki's source folder and/or your experiments folder.**
 
@@ -105,13 +105,13 @@ Quick Start (using the integrated console)
 
 3. Go to your experiments folder (default: `~/Experiments`) and edit your new `sample-attacks.json` to suit your needs
 
-4. Make the experiments
+4. Make the simulations
 
  ```
  user@instant-contiki:rpl-attacks>> make_all sample-attacks
  ```
 
-5. Run the experiments
+5. Run the simulations (multi-processed)
 
  ```
  user@instant-contiki:rpl-attacks>> run_all sample-attacks
@@ -141,6 +141,12 @@ Quick Start (using `fabric`)
 
  ```
  ../rpl-attacks$ fab make_all:test-campaign
+ ```
+
+4. Run the simulations (not multi-processed)
+
+ ```
+ ../rpl-attacks$ fab run_all:test-campaign
  ```
 
 
