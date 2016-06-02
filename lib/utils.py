@@ -13,7 +13,6 @@ from numpy import average, cos, pi, sign, sin, sqrt
 from numpy.random import randint
 from six import string_types
 
-from tmp.netgen import Network, NetworkGenerator
 from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
                        EXPERIMENT_FOLDER, TEMPLATES_FOLDER, WSN_DENSITY_FACTOR
 from .helpers import remove_files, replace_in_file
@@ -29,9 +28,9 @@ def generate_motes(**kwargs):
     """
     nodes = [{"id": 0, "type": "root", "x": 0, "y": 0, "z": 0}]
     n = kwargs.pop('n', DEFAULTS["number-motes"])
-    min_range = kwargs.pop()
-    max_range = kwargs.pop('area_side', DEFAULTS["area-square-side"])
-    tx_range = kwargs.pop('tx_range', DEFAULTS["communication_range"])
+    min_range = kwargs.pop('min_range', DEFAULTS["minimum-distance-between-motes"])
+    max_range = kwargs.pop('max_range', DEFAULTS["area-square-side"])
+    tx_range = kwargs.pop('tx_range', DEFAULTS["transmission-range"])
     # determine 'i', the number of steps for the algorithm
     # at step i, the newtork must be filled with at most sum(f * 2 ** i)
     #   e.g. if f = 3, with 10 nodes, root's proximity will hold 6 nodes then the 4 ones remaining in the next ring
@@ -78,44 +77,6 @@ def generate_motes(**kwargs):
 
 
 # *********************************************** GET FUNCTIONS ************************************************
-def generate_motes(**kwargs):
-    """
-    This function generates a WSN with 1 root, n legitimate motes and 1 malicious mote
-
-    :return: the list of motes (formatted as dictionaries like hereafter)
-    """
-    n = kwargs.pop('n', DEFAULTS["number-motes"])
-    max_from_root = kwargs.pop('max_from_root', DEFAULTS["maximum-range-from-root"])
-    area_side = kwargs.pop('area_side', DEFAULTS["area-square-side"])
-    comm_range = kwargs.pop('comm_range', DEFAULTS["communication_range"])
-    # create the network with only the root
-    net = Network((area_side, ) * 2)
-    net.add_node(pos=(area_side // 2,)*2, comm_range=comm_range)
-    # now, create the generator and generate the sensors
-    gen = NetworkGenerator(n_count=n+1, connected=True, comm_range=comm_range, logger=logger,
-                           method='homogeneous_network')  #neighborhood_network
-    for i in range(n):
-        net = gen.generate(net)
-    net.savefig()
-    exit(0)
-    # then, add the malicious mote
-    net.add_node(comm_range=comm_range)
-    motes = []
-    for node, pos in sorted(net.pos.items(), key=lambda x: x[0].id):
-        motes.append({"id": node.id, "x": pos[0], "y": pos[1], "z": 0,
-                      "type": "root" if node.id == 0 else ("malicious" if node.id == len(net.pos) - 1 else "sensor")})
-    # motes = list({"id": 0, "type": "root", "x": 0, "y": 0, "z": 0})
-    # for i in range(n):
-    #     motes.append(_generate_mote(motes, i + 1, "sensor"))
-    # motes.append(_generate_mote(motes, n + 1, "malicious", max_from_root))
-    # net = gen.generate()
-    # TODO:
-    #  - reframe network on environment
-    #  - center network on (0, 0)
-    #  - retrieve motes
-    return motes
-
-
 def get_available_platforms():
     """
     This function retrieves the list of available platforms from the Contiki directory.
@@ -409,6 +370,7 @@ def render_templates(path, only_malicious=False, **params):
     templates["simulation.csc"]["target_capitalized"] = params["target"].capitalize()
     templates["simulation.csc"]["malicious_target"] = params["malicious_target"]
     templates["simulation.csc"]["malicious_target_capitalized"] = params["malicious_target"].capitalize()
+    templates["simulation.csc"]["motes"] = motes
     for mote_type in templates["simulation.csc"]["mote_types"]:
         mote_type["target"] = params["target"] if mote_type["name"] != "malicious" else params["malicious_target"]
     # render the templates for the simulation with the malicious mote
@@ -476,18 +438,18 @@ def validated_parameters(dictionary, silent=False):
     params["ext_lib"] = get_parameter(dictionary, "malicious", "external-library",
         lambda x: x is None or exists(x), "does not exist")
     # area dimensions and limits
+    params["min_range"] = get_parameter(dictionary, "simulation", "minimum-distance-between-motes",
+        lambda x: isinstance(x, (int, float)) and x > 0, "is not an integer greater than 0")
     params["tx_range"] = get_parameter(dictionary, "simulation", "transmission-range",
-        lambda x: isinstance(x, (int, float)) and x > params["dmin"],
-        "is not an integer greater than {}".format(params["dmin"]))
+        lambda x: isinstance(x, (int, float)) and x > params["min_range"],
+        "is not an integer greater than {}".format(params["min_range"]))
     params["int_range"] = get_parameter(dictionary, "simulation", "interference-range",
         lambda x: isinstance(x, (int, float)) and x >= params["tx_range"],
         "is not an integer greater than or equal to {}".format(params["tx_range"]), default=2*params["tx_range"])
     params["area_side"] = get_parameter(dictionary, "simulation", "area-square-side",
-        lambda x: isinstance(x, (int, float)) and x >= sqrt(2.0) * params["dmin"],
-        "is not an integer or a float greater or equal to sqrt(2)*{:.0f}".format(params["dmin"]))
-    params["min_range"] = get_parameter(dictionary, "simulation", "minimum-distance-between-motes",
-        lambda x: isinstance(x, (int, float)) and x > 0, "is not an integer greater than 0")
-    params["max_range"] = get_parameter(dictionary, "simulation", "maximum-range-from-root",
-        lambda x: isinstance(x, (int, float)) and params["dmin"] <= x <= params["area-side"],
-        "is not an integer or a float between {:.0f} and {:.0f}".format(params["dmin"], params["area_side"]))
+        lambda x: isinstance(x, (int, float)) and x >= sqrt(2.0) * params["min_range"],
+        "is not an integer or a float greater or equal to sqrt(2)*{:.0f}".format(params["min_range"]))
+    params["max_range"] = get_parameter(dictionary, "simulation", "area-square-side",
+        lambda x: isinstance(x, (int, float)) and x >= params["min_range"],
+        "is not an integer or a float greater or equal to {:.0f}".format(params["min_range"]))
     return params

@@ -49,6 +49,7 @@ class Console(Cmd, object):
     ruler = None
     badcmd_msg = " [!] {} command: {}"
     max_history_entries = 10
+    welcome = "\nType help or ? to list commands.\nNB: DO NOT use spaces in arguments !\n"
 
     def __init__(self, *args, **kwargs):
         super(Console, self).__init__(*args, **kwargs)
@@ -78,7 +79,7 @@ class Console(Cmd, object):
         """
         os.system("clear")
         cprint(BANNER, 'cyan', 'on_grey')
-        self.stdout.write(self.intro)
+        print(self.welcome)
 
     def do_EOF(self, line):
         """
@@ -103,7 +104,6 @@ class Console(Cmd, object):
 
 class FrameworkConsole(Console):
     """ Base command processor for the RPL Attacks Framework. """
-    intro = "\nType help or ? to list commands.\nNB: DO NOT use spaces in arguments !\n"
     prompt = surround_ansi_escapes('{}{}{}{}{}{} '.format(
         colored(getuser(), 'magenta'),
         colored('@', 'cyan'),
@@ -120,7 +120,6 @@ class FrameworkConsole(Console):
         if any(map((lambda s: s[0] < s[1]), zip((height, width), MIN_TERM_SIZE))):
             stdout.write("\x1b[8;{rows};{cols}t".format(rows=max(MIN_TERM_SIZE[0], height),
                                                         cols=max(MIN_TERM_SIZE[1], width)))
-        os.system('clear')
         if self.parallel:
             processes = cpu_count()
             self.__last_tasklist = None
@@ -129,8 +128,8 @@ class FrameworkConsole(Console):
             atexit.register(self.graceful_exit)
         self.reexec = []
         self.__bind_commands()
-        cprint(BANNER, 'cyan', 'on_grey')
         super(FrameworkConsole, self).__init__()
+        self.do_clear('')
 
     def __bind_commands(self):
         if not self.parallel:
