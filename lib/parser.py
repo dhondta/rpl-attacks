@@ -1,77 +1,107 @@
 # -*- coding: utf8 -*-
+import networkx
 from csv import DictWriter
-from os.path import join as pj
-import os
-import re
-import subprocess
+from json import load
+from matplotlib import pyplot
+from os.path import join
+from re import finditer, match, MULTILINE
+from subprocess import Popen, PIPE
+
+from .utils import get_available_platforms
 
 
-def powertracker2csv(folder, shift=0):
-    output_folder = pj(folder, "results")
-    with open(pj(folder, "powertracker.log")) as f:
-        powertracker_logs = f.read()
-        monitored_iterable = re.finditer(
-            r"^(Sky|Wismote|Z1)_(?P<mote_id>\d+) MONITORED (?P<monitored_time>\d+)",
-            powertracker_logs, re.MULTILINE)
-        on_iterable = re.finditer(
-            r"^(Sky|Wismote|Z1)_(?P<mote_id>\d+) ON (?P<on_time>\d+)",
-            powertracker_logs, re.MULTILINE)
-        tx_iterable = re.finditer(
-            r"^(Sky|Wismote|Z1)_(?P<mote_id>\d+) TX (?P<tx_time>\d+)",
-            powertracker_logs, re.MULTILINE)
-        rx_iterable = re.finditer(
-            r"^(Sky|Wismote|Z1)_(?P<mote_id>\d+) RX (?P<rx_time>\d+)",
-            powertracker_logs, re.MULTILINE)
-        int_iterable = re.finditer(
-            r"^(Sky|Wismote|Z1)_(?P<mote_id>\d+) INT (?P<int_time>\d+)",
-            powertracker_logs, re.MULTILINE)
-        all_iterable = zip(monitored_iterable, on_iterable, tx_iterable, rx_iterable, int_iterable)
-        fields = ["mote_id", "monitored_time", "tx_time", "rx_time", "on_time", "int_time"]
-
-
-        with open(pj(output_folder, "powertracker.csv"), "w") as csv_output:
-            writer = DictWriter(csv_output, delimiter=',', fieldnames=fields)
-            writer.writeheader()
-
-            for matches in all_iterable:
-                row = {}
-                for match in matches:
-                    all(m.groupdict()["mote_id"] == matches[0].groupdict()["mote_id"]
-                        for m in matches)
-                    row.update((k, int(v))
-                               for k, v in match.groupdict().items())
-                # Passing the result from us to s
-                row["monitored_time"] = float(
-                    row["monitored_time"]) / (10 ** 6)
-                row["tx_time"] = float(row["tx_time"]) / (10 ** 6)
-                row["rx_time"] = float(row["rx_time"]) / (10 ** 6)
-                row["on_time"] = float(row["on_time"]) / (10 ** 6)
-                row["int_time"] = float(row["int_time"]) / (10 ** 6)
-                if row["monitored_time"] > shift:
-                    writer.writerow(row)
-
-
-def pcap2csv(folder):
+def convert_pcap_to_csv(path):
     """
-    Execute a simple filter on PCAP and count
-    """
-    print("start pcap2csv")
-    with open(pj(folder, "results", "pcap.csv"), "wb") as output_file:
-        command = ["tshark",
-                   "-T", "fields",
-                   "-E", "header=y",
-                   "-E", "separator=,",
-                   "-e", "frame.time_relative",
-                   "-e", "frame.len",
-                   "-e", "wpan.src64",
-                   "-e", "wpan.dst64",
-                   "-e", "icmpv6.type",
-                   "-e", "ipv6.src",
-                   "-e", "ipv6.dst",
-                   "-e", "icmpv6.code",
-                   "-e", "data.data",
-                   "-r", pj(folder, "output.pcap")]
-        process = subprocess.Popen(command, stdout=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        output_file.write(stdout)
+    This function creates a CSV file (to ./results) from a PCAP file (from ./data).
+    This is inspired from https://github.com/sieben/makesense/blob/master/makesense/parser.py.
 
+    :param path: path to the experiment
+    """
+    data, results = join(path, 'data'), join(path, 'results')
+    with open(join(results, 'pcap.csv'), 'wb') as f:
+        p = Popen(['tshark',
+                   '-T', 'fields',
+                   '-E', 'header=y',
+                   '-E', 'separator=,',
+                   '-e', 'frame.time',
+                   '-e', 'frame.len',
+                   '-e', 'wpan.src64',
+                   '-e', 'wpan.dst64',
+                   '-e', 'icmpv6.type',
+                   '-e', 'ipv6.src',
+                   '-e', 'ipv6.dst',
+                   '-e', 'icmpv6.code',
+                   '-e', 'data.data',
+                   '-r', join(data, 'output.pcap')], stdout=PIPE)
+        out, _ = p.communicate()
+        f.write(out)
+
+
+PT_ITEMS = ['monitored', 'on', 'tx', 'rx', 'int']
+PT_REGEX = r'^({})_(?P<mote_id>\d+) {} (?P<{}>\d+)'
+
+
+def convert_powertracker_log_to_csv(path):
+    """
+    This function creates a CSV file (to ./results) from a PowerTracker log file (from ./data).
+    This is inspired from https://github.com/sieben/makesense/blob/master/makesense/parser.py.
+
+    :param path: path to the experiment
+    """
+    platforms = [p.capitalize() for p in get_available_platforms()]
+    data, results = join(path, 'data'), join(path, 'results')
+    with open(join(data, 'powertracker.log')) as f:
+        log = f.read()
+    iterables, fields = [], ['mote_id']
+    for it in PT_ITEMS:
+        time_field = '{}_time'.format(it)
+        iterables.append(finditer(PT_REGEX.format('|'.join(platforms), it.upper(), time_field), log, MULTILINE))
+        fields.append(time_field)
+    with open(join(results, 'powertracker.csv'), 'w') as f:
+        writer = DictWriter(f, delimiter=',', fieldnames=fields)
+        writer.writeheader()
+        for matches in zip(*iterables):
+            row = {}
+            for match in matches:
+                #all(m.groupdict()['mote_id'] == matches[0].groupdict()['mote_id'] for m in matches)
+                row.update((k, int(v)) for k, v in match.groupdict().items())
+            for it in PT_ITEMS:
+                time_field = '{}_time'.format(it)
+                row[time_field] = float(row[time_field] / 10 ** 6)
+            writer.writerow(row)
+
+
+RELATIONSHIP_REGEX = r'^\d+\s+ID\:(?P<src_id>\d+)\s+#L\s+(?P<dst_id>\d+)\s+(?P<flag>\d+)$'
+
+
+def draw_dodag(path):
+    """
+    This function draws the DODAG (to ./results) from the list of motes (from ./data/motes.json) and the list of
+     edges (from ./data/relationships.log).
+
+    :param path: path to the experiment
+    """
+    data, results = join(path, 'data'), join(path, 'results')
+    dodag = networkx.DiGraph()
+    with open(join(data, 'motes.json')) as f:
+        motes = load(f)
+    motes = {int(k): v for k, v in motes.items()}
+    dodag.add_nodes_from([int(x) for x in motes.keys()])
+    colors = []
+    for n, p in motes.items():
+        dodag.node[n]['pos'] = p
+        colors.append('green' if n == 0 else ('yellow' if 0 < n < len(motes) - 1 else 'red'))
+    with open(join(data, 'relationships.log')) as f:
+        for line in f.readlines():
+            try:
+                d = match(RELATIONSHIP_REGEX, line).groupdict()
+                if int(d['flag']) == 0:
+                    continue
+                src, dst = int(d['src_id']), int(d['dst_id'])
+            except AttributeError:
+                continue
+            for child in dodag.successors(src):
+                dodag.remove_edge(src, child)
+            dodag.add_edge(src, dst)
+    networkx.draw(dodag, motes, node_color=colors)
+    pyplot.show()
