@@ -7,7 +7,9 @@ jinja2
 jsmin
 matplotlib
 networkx
+numpy
 pandas
+pypng
 readline
 sh
 scipy

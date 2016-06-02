@@ -1,64 +1,118 @@
 # -*- coding: utf8 -*-
 from copy import deepcopy
-from jinja2 import Environment, FileSystemLoader
-from jsmin import jsmin
-from json import loads
+from json import dump, loads
 from math import sqrt
 from os import listdir, makedirs, rename
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
-from random import choice, randint
+from random import randint
 from re import findall
+
+from jinja2 import Environment, FileSystemLoader
+from jsmin import jsmin
+from numpy import average, cos, pi, sign, sin, sqrt
+from numpy.random import randint
 from six import string_types
 
+from tmp.netgen import Network, NetworkGenerator
 from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
-                       EXPERIMENT_FOLDER, TEMPLATES_FOLDER
+                       EXPERIMENT_FOLDER, TEMPLATES_FOLDER, WSN_DENSITY_FACTOR
 from .helpers import remove_files, replace_in_file
 from .logconfig import logger
 
 
-# **************************************** PROTECTED FUNCTIONS ****************************************
-def _generate_mote(motes, mote_id, mote_type,
-                   max_x=DEFAULTS["area-square-side"]//2,
-                   dmin=DEFAULTS["minimum-distance-between-motes"],
-                   dmax=DEFAULTS["maximum-distance-between-motes"] * 0.9,
-                   max_from_root=None):
-    """
-    This function generates a dictionary for a mote with its random position taking some criteria into account:
-     - the new mote must be at a distance of at least 'dmin' from every other existing motes
-     - the new mote must be at a distance of at most 'dmax' from every other existing motes (not to be isolated)
-
-    :param motes: list of existing motes
-    :param mote_id: new mote's ID
-    :param mote_type: new mote's type
-    :param max_xy: maximum (x, y) values ; defines a square of size 2*x
-    :param dmin: minimum distance between all motes
-    :param dmax: maximum distance between all motes
-    :return:
-    """
-    while True:
-        d = float("Inf")
-        x = randint(-max_x, max_x)
-        r = randint(abs(x), max_x)
-        y = choice([-1, 1]) * sqrt(r ** 2 - x ** 2)
-        for n in motes:
-            d = min(d, sqrt((x - n['x'])**2 + (y - n['y'])**2))
-        if (dmin < d < dmax and max_from_root is not None and d <= max_from_root) or \
-                (dmin < d < dmax and max_from_root is None):
-            return {"id": mote_id, "type": mote_type, "x": float(x), "y": float(y), "z": 0}
-
-
-# *********************************************** GET FUNCTIONS ************************************************
-def generate_motes(n=DEFAULTS["number-motes"], max_from_root=DEFAULTS["maximum-range-from-root"]):
+# ************************************** NETWORK GENERATION FUNCTION ****************************************
+def generate_motes(**kwargs):
     """
     This function generates a WSN with 1 root, n legitimate motes and 1 malicious mote
 
-    :param n: the number of legitimate motes to be generated
     :return: the list of motes (formatted as dictionaries like hereafter)
     """
-    motes = [{"id": 0, "type": "root", "x": 0, "y": 0, "z": 0}]
+    nodes = [{"id": 0, "type": "root", "x": 0, "y": 0, "z": 0}]
+    n = kwargs.pop('n', DEFAULTS["number-motes"])
+    min_range = kwargs.pop()
+    max_range = kwargs.pop('area_side', DEFAULTS["area-square-side"])
+    tx_range = kwargs.pop('tx_range', DEFAULTS["communication_range"])
+    # determine 'i', the number of steps for the algorithm
+    # at step i, the newtork must be filled with at most sum(f * 2 ** i)
+    #   e.g. if f = 3, with 10 nodes, root's proximity will hold 6 nodes then the 4 ones remaining in the next ring
+    i, s, nid = 1, 0, 1
+    while s <= n:
+        s += WSN_DENSITY_FACTOR * 2 ** i
+        i += 1
+    # now, generate the nodes
+    # first, the range increment is defined ; it will provide the interval of ranges for the quadrants
+    range_inc = min(tx_range, max_range / (i - 1))
+    for ns in range(1, i):
+        n_step = WSN_DENSITY_FACTOR * 2 ** ns
+        # determine the angle increment for the quadrants
+        angle_inc = 360 // min(n_step, n - nid)
+        # then, divide the ring in quadrants and generate 1 node per quadrant with a 10% margin either
+        #  for the angle or for the range
+        range_min, range_max = int((ns - 0.8) * range_inc), int((ns - 0.2) * range_inc)
+        for j in range(0, n_step):
+            angle_min, angle_max = int((j + 0.2) * angle_inc), int((j + 0.8) * angle_inc)
+            d, k = 0, 0
+            while d < min_range and k < 1000:
+                node_angle = randint(angle_min, angle_max) * pi / 180
+                node_range = randint(max(range_min, min_range), min(range_max, max_range))
+                # compute the coordinates and append the new node to the list
+                x, y = node_range * cos(node_angle), node_range * sin(node_angle)
+                for node in nodes:
+                    d = min(d, sqrt((x - node['x'])**2 + (y - node['y'])**2))
+                k += 1
+            nodes.append({'id': nid, 'type': 'sensor', 'x': x, 'y': y, 'z': 0})
+            if nid == n:
+                break
+            nid += 1
+        range_inc *= 0.7
+    # finally, add the malicious mote in the middle of the network
+    x, y = 0, 0
+    for i in range(0, 1):
+        # get the average of the squared x and y deltas
+        avg_x = average([sign(n['x'] - x) * (n['x'] - x) ** 2 for n in nodes])
+        x = sign(avg_x) * sqrt(abs(avg_x))
+        avg_y = average([sign(n['y'] - y) * (n['y'] - y) ** 2 for n in nodes])
+        y = sign(avg_y) * sqrt(abs(avg_y))
+    nodes.append({'id': len(nodes), 'type': 'malicious', 'x': x, 'y': y, 'z': 0})
+    return nodes
+
+
+# *********************************************** GET FUNCTIONS ************************************************
+def generate_motes(**kwargs):
+    """
+    This function generates a WSN with 1 root, n legitimate motes and 1 malicious mote
+
+    :return: the list of motes (formatted as dictionaries like hereafter)
+    """
+    n = kwargs.pop('n', DEFAULTS["number-motes"])
+    max_from_root = kwargs.pop('max_from_root', DEFAULTS["maximum-range-from-root"])
+    area_side = kwargs.pop('area_side', DEFAULTS["area-square-side"])
+    comm_range = kwargs.pop('comm_range', DEFAULTS["communication_range"])
+    # create the network with only the root
+    net = Network((area_side, ) * 2)
+    net.add_node(pos=(area_side // 2,)*2, comm_range=comm_range)
+    # now, create the generator and generate the sensors
+    gen = NetworkGenerator(n_count=n+1, connected=True, comm_range=comm_range, logger=logger,
+                           method='homogeneous_network')  #neighborhood_network
     for i in range(n):
-        motes.append(_generate_mote(motes, i + 1, "sensor"))
-    motes.append(_generate_mote(motes, n + 1, "malicious", max_from_root))
+        net = gen.generate(net)
+    net.savefig()
+    exit(0)
+    # then, add the malicious mote
+    net.add_node(comm_range=comm_range)
+    motes = []
+    for node, pos in sorted(net.pos.items(), key=lambda x: x[0].id):
+        motes.append({"id": node.id, "x": pos[0], "y": pos[1], "z": 0,
+                      "type": "root" if node.id == 0 else ("malicious" if node.id == len(net.pos) - 1 else "sensor")})
+    # motes = list({"id": 0, "type": "root", "x": 0, "y": 0, "z": 0})
+    # for i in range(n):
+    #     motes.append(_generate_mote(motes, i + 1, "sensor"))
+    # motes.append(_generate_mote(motes, n + 1, "malicious", max_from_root))
+    # net = gen.generate()
+    # TODO:
+    #  - reframe network on environment
+    #  - center network on (0, 0)
+    #  - retrieve motes
     return motes
 
 
@@ -177,7 +231,7 @@ def get_experiments(exp_file):
     return experiments
 
 
-def get_parameter(dictionary, section, key, condition, reason=None):
+def get_parameter(dictionary, section, key, condition, reason=None, default=None):
     """
     This function checks and returns a validated value for the given parameter.
 
@@ -186,20 +240,28 @@ def get_parameter(dictionary, section, key, condition, reason=None):
     :param key: key of the related parameter
     :param condition: validation condition
     :param reason: message to be displayed in case of test failure
+    :param default: default value to be used in last resort
     :return: validated parameter
     """
+    silent = dictionary.pop('silent', False)
     param = (dictionary.get(section) or {}).get(key) or DEFAULTS.get(key)
+    if param is None and default is not None:
+        param = default
     if isinstance(condition, list) and isinstance(param, list):
         buffer = []
         for p in param:
             if not condition[0](p):
-                logger.warning("Parameter [{} -> {}] '{}' does not exist (removed)".format(section, key, p))
+                if not silent:
+                    logger.warning("Parameter [{} -> {}] '{}' does not exist (removed)"
+                                   .format(section, key, p))
             else:
                 buffer.append(p)
         return buffer
     else:
         if not condition(param):
-            logger.warning("Parameter [{} -> {}] {} (set to default: {})".format(section, key, reason, DEFAULTS[key]))
+            if not silent:
+                logger.warning("Parameter [{} -> {}] {} (set to default: {})"
+                               .format(section, key, reason, DEFAULTS[key]))
             param = DEFAULTS[key]
         return param
 
@@ -315,8 +377,6 @@ def render_templates(path, only_malicious=False, **params):
     """
     templates = deepcopy(TEMPLATES)
     env = Environment(loader=FileSystemLoader(join(path, 'templates')))
-    # generate the list of motes (first one is the root, last one is the malicious mote)
-    motes = params['motes'] or generate_motes(params["n"], params['max_range'])
     # fill in the different templates with input parameters
     constants, replacements = get_constants_and_replacements(params["blocks"])
     templates["motes/malicious.c"]["constants"] = "\n".join(["#define {} {}".format(*c) \
@@ -325,25 +385,46 @@ def render_templates(path, only_malicious=False, **params):
         template_malicious = "motes/malicious.c"
         write_template(path, env, template_malicious, **templates[template_malicious])
         return
-    templates["Makefile"]["target"] = params["target"]
+    # generate the list of motes (first one is the root, last one is the malicious mote)
+    motes = params['motes'] or generate_motes(**params)
+    # fill in and render malicious mote template directly in the simulation with malicious mote
+    write_template(join(path, 'with-malicious'), env, "motes/malicious.c", **templates.pop("motes/malicious.c"))
+    # fill in and render templates shared by both simulations
+    shared_templates = dict()
+    shared_templates["Makefile"] = templates.pop("Makefile")
+    shared_templates["Makefile"]["target"] = params["target"]
+    shared_templates["motes/root.c"] = templates.pop("motes/root.c")
+    shared_templates["motes/sensor.c"] = templates.pop("motes/sensor.c")
+    for name, kwargs in shared_templates.items():
+        write_template(path, env, name, **kwargs)
+    # fill in simulation file templates
     templates["script.js"]["timeout"] = 1000 * params["duration"]
     templates["script.js"]["sampling_period"] = templates["script.js"]["timeout"] // 100
-    simulation_template = templates.pop("simulation.csc")
-    simulation_template["title"] = params["title"]
-    simulation_template["goal"] = params["goal"]
-    simulation_template["notes"] = params["notes"]
-    simulation_template["interference_range"] = params["int_range"]
-    simulation_template["transmitting_range"] = params["tx_range"]
-    simulation_template["target"] = params["target"]
-    simulation_template["target_capitalized"] = params["target"].capitalize()
-    templates["simulation_with_malicious.csc"] = deepcopy(simulation_template)
-    templates["simulation_with_malicious.csc"]["motes"] = motes
-    templates["simulation_without_malicious.csc"] = deepcopy(simulation_template)
-    templates["simulation_without_malicious.csc"]["motes"] = motes[:-1]
-    del templates["simulation_without_malicious.csc"]["mote_types"][-1]  # remove malicious mote
-    # render the list of templates
+    templates["simulation.csc"]["title"] = params["title"] + ' (with the malicious mote)'
+    templates["simulation.csc"]["goal"] = params["goal"]
+    templates["simulation.csc"]["notes"] = params["notes"]
+    templates["simulation.csc"]["interference_range"] = params["int_range"]
+    templates["simulation.csc"]["transmitting_range"] = params["tx_range"]
+    templates["simulation.csc"]["target"] = params["target"]
+    templates["simulation.csc"]["target_capitalized"] = params["target"].capitalize()
+    templates["simulation.csc"]["malicious_target"] = params["malicious_target"]
+    templates["simulation.csc"]["malicious_target_capitalized"] = params["malicious_target"].capitalize()
+    for mote_type in templates["simulation.csc"]["mote_types"]:
+        mote_type["target"] = params["target"] if mote_type["name"] != "malicious" else params["malicious_target"]
+    # render the templates for the simulation with the malicious mote
     for name, kwargs in templates.items():
-        write_template(path, env, name, **kwargs)
+        write_template(join(path, 'with-malicious'), env, name, **kwargs)
+    with open(join(path, 'with-malicious', 'data', 'motes.json'), 'w') as f:
+        dump({m['id']: (m['x'], m['y']) for m in motes}, f, sort_keys=True, indent=4)
+    # now, adapt the title, remove the malicious mote from the list and from the mote types
+    templates["simulation.csc"]["title"] = params["title"] + ' (without the malicious mote)'
+    templates["simulation.csc"]["motes"] = motes[:-1]
+    del templates["simulation.csc"]["mote_types"][-1]
+    # render the templates for the simulation with the malicious mote
+    for name, kwargs in templates.items():
+        write_template(join(path, 'without-malicious'), env, name, **kwargs)
+    with open(join(path, 'without-malicious', 'data', 'motes.json'), 'w') as f:
+        dump({m['id']: (m['x'], m['y']) for m in motes[:-1]}, f, sort_keys=True, indent=4)
     return replacements
 
 
@@ -362,7 +443,7 @@ def write_template(path, env, name, **kwargs):
         f.write(template)
 
 
-def validated_parameters(dictionary):
+def validated_parameters(dictionary, silent=False):
     """
     This function validates all parameters coming from a JSON dictionary parsed from the simulation
      campagin file.
@@ -386,6 +467,8 @@ def validated_parameters(dictionary):
         lambda x: isinstance(x, int) and x > 0, "is not an integer greater than 0")
     params["target"] = get_parameter(dictionary, "simulation", "target",
         lambda x: x in get_available_platforms(), "is not a valid platform")
+    params["malicious_target"] = get_parameter(dictionary, "malicious", "target",
+        lambda x: x in get_available_platforms(), "is not a valid platform", default=params["target"])
     params["mtype"] = get_parameter(dictionary, "malicious", "type",
         lambda x: x in ["root", "sensor"], "is not 'root' or 'sensor'")
     params["blocks"] = get_parameter(dictionary, "malicious", "building-blocks",
@@ -393,21 +476,18 @@ def validated_parameters(dictionary):
     params["ext_lib"] = get_parameter(dictionary, "malicious", "external-library",
         lambda x: x is None or exists(x), "does not exist")
     # area dimensions and limits
-    params["dmin"] = get_parameter(dictionary, "simulation", "minimum-distance-between-motes",
-        lambda x: isinstance(x, (int, float)) and x > 0, "is not an integer greater than 0")
-    params["tx_range"] = get_parameter(dictionary, "simulation", "transmitting_range",
+    params["tx_range"] = get_parameter(dictionary, "simulation", "transmission-range",
         lambda x: isinstance(x, (int, float)) and x > params["dmin"],
         "is not an integer greater than {}".format(params["dmin"]))
-    params["int_range"] = get_parameter(dictionary, "simulation", "interference_range",
+    params["int_range"] = get_parameter(dictionary, "simulation", "interference-range",
         lambda x: isinstance(x, (int, float)) and x >= params["tx_range"],
-        "is not an integer greater than or equal to {}".format(params["tx_range"]))
-    params["dmax"] = get_parameter(dictionary, "simulation", "maximum-distance-between-motes",
-        lambda x: isinstance(x, (int, float)) and params["dmin"] < x <= params["tx_range"],
-        "is not an integer between {:.0f} and {:.0f}".format(params["dmin"], params["tx_range"]))
+        "is not an integer greater than or equal to {}".format(params["tx_range"]), default=2*params["tx_range"])
     params["area_side"] = get_parameter(dictionary, "simulation", "area-square-side",
         lambda x: isinstance(x, (int, float)) and x >= sqrt(2.0) * params["dmin"],
         "is not an integer or a float greater or equal to sqrt(2)*{:.0f}".format(params["dmin"]))
+    params["min_range"] = get_parameter(dictionary, "simulation", "minimum-distance-between-motes",
+        lambda x: isinstance(x, (int, float)) and x > 0, "is not an integer greater than 0")
     params["max_range"] = get_parameter(dictionary, "simulation", "maximum-range-from-root",
-        lambda x: isinstance(x, (int, float)) and params["dmin"] <= x <= params["area_side"],
+        lambda x: isinstance(x, (int, float)) and params["dmin"] <= x <= params["area-side"],
         "is not an integer or a float between {:.0f} and {:.0f}".format(params["dmin"], params["area_side"]))
     return params

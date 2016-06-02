@@ -2,7 +2,7 @@
 from fabric.api import hide, lcd, local, settings, sudo
 from inspect import getmembers, isfunction
 from os import listdir
-from os.path import dirname, exists, expanduser, join, splitext
+from os.path import exists, expanduser, join, splitext
 from sys import modules
 from terminaltables import SingleTable
 
@@ -14,6 +14,7 @@ from .helpers import copy_files, copy_folder, move_files, remove_files, remove_f
 from .install import check_cooja, modify_cooja, register_new_path_in_profile, \
                      update_cooja_build, update_cooja_user_properties
 from .logconfig import logger, HIDDEN_ALL
+from .parser import convert_pcap_to_csv, convert_powertracker_log_to_csv, draw_dodag
 from .utils import apply_replacements, check_structure, generate_motes, get_contiki_includes, get_experiments, \
                    get_path, list_campaigns, list_experiments, render_campaign, render_templates, validated_parameters
 
@@ -102,21 +103,17 @@ def __make(name, ask=True, **kwargs):
         return False
     logger.debug(" > Creating simulation...")
     # create experiment's directories
-    get_path(path, create=True)
     get_path(path, 'motes', create=True)
-    get_path(path, 'data', create=True)
-    get_path(path, 'results', create=True)
-    # select the right malicious mote template and duplicate the simulation file
+    for sim in ['without-malicious', 'with-malicious']:
+        get_path(join(path, sim), 'data', create=True)
+        get_path(join(path, sim), 'motes', create=True)
+        get_path(join(path, sim), 'results', create=True)
     templates = get_path(path, 'templates', create=True)
     get_path(templates, 'motes', create=True)
-    copy_files(TEMPLATES_FOLDER, templates,
-               ('motes/root.c', 'motes/root.c'),
-               ('motes/sensor.c', 'motes/sensor.c'),
+    # select the right malicious mote template and duplicate the simulation file
+    copy_files(TEMPLATES_FOLDER, templates, 'motes/root.c', 'motes/sensor.c',
                ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'),
-               ('Makefile', 'Makefile'),
-               ('simulation.csc', 'simulation_without_malicious.csc'),
-               ('simulation.csc', 'simulation_with_malicious.csc'),
-               ('script.js', 'script.js'))
+               'Makefile', 'simulation.csc', 'script.js')
     # create experiment's files from templates
     replacements = render_templates(path, **params)
     # then clean the temporary folder with templates
@@ -129,6 +126,10 @@ def __make(name, ask=True, **kwargs):
         with lcd(path):
             # for every simulation, root and sensor compilation is the same ;
             #  then, if these were not previously compiled, proceed
+            without_malicious = join(path, 'without-malicious')
+            with_malicious = join(path, 'with-malicious')
+            croot = "motes/root.{}".format(params["target"])
+            csensor = "motes/sensor.{}".format(params["target"])
             if reuse_bin_path is None or reuse_bin_path == path:
                 logger.debug(" > Making 'root.{}'...".format(params["target"]))
                 stderr(local)("make motes/root", capture=True)
@@ -137,23 +138,26 @@ def __make(name, ask=True, **kwargs):
                 # after compiling, clean artifacts
                 local('make clean')
                 remove_files(path, 'motes/root.c', 'motes/sensor.c')
+                copy_files(path, without_malicious, croot, csensor)
+                move_files(path, with_malicious, croot, csensor)
                 # save this path (can be reused while creating other simulations)
-                reuse_bin_path = path
+                reuse_bin_path = without_malicious
             # otherwise, reuse them by copying the compiled files to the current experiment folder
             else:
-                copy_files(reuse_bin_path, path, "motes/root.{}".format(params["target"]),
-                           "motes/sensor.{}".format(params["target"]))
-                remove_files(path, 'motes/root.c', 'motes/sensor.c')
+                copy_files(reuse_bin_path, without_malicious, croot, csensor)
+                copy_files(reuse_bin_path, with_malicious, croot, csensor)
+            remove_folder((path, 'motes'))
             # now, handle the malicious mote compilation
-            copy_folder(CONTIKI_FOLDER, path, includes=get_contiki_includes(params["target"]))
-            contiki_rpl = join(path, 'contiki', 'core', 'net', 'rpl')
+            copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["target"]))
+            contiki_rpl = join(with_malicious, 'core', 'net', 'rpl')
             if ext_lib is not None:
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)
             logger.debug(" > Making 'malicious.{}'...".format(params["target"]))
-            stderr(local)("make motes/malicious CONTIKI={}".format(join(path, 'contiki')), capture=True)
+            stderr(local)("make with-malicious/motes/malicious CONTIKI={} TARGET={}"
+                          .format(join(with_malicious, 'contiki'), params["malicious_target"]), capture=True)
             local('make clean')
-            remove_folder((path, 'contiki'))
+            remove_folder((with_malicious, 'contiki'))
 _make = CommandMonitor(__make)
 make = command(
     autocomplete=lambda: list_experiments(),
@@ -320,14 +324,18 @@ def make_all(exp_file, **kwargs):
     sim_params, motes = None, None
     # if a simulation named 'BASE' is present, use it as a template simulation for all the other simulations
     if 'BASE' in experiments.keys():
+        experiments['BASE']['silent'] = True
         sim_params = validated_parameters(experiments['BASE'])
-        motes = generate_motes(sim_params["n"], sim_params['max_range'])
+        motes = generate_motes(**sim_params)
         del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
+        exp_params = {}
         if sim_params is not None:
-            params.update(sim_params)
+            exp_params.update(sim_params)
+        exp_params.update(params)
+        if sim_params is not None:
             params['motes'] = motes
-        make(name, **params) if console is None else console.do_make(name, **params)
+        make(name, **exp_params) if console is None else console.do_make(name, **exp_params)
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -475,10 +483,13 @@ def setup(silent=False):
 
 
 # **************************************** MAGIC COMMAND ****************************************
-@command()
-def rip_my_slip():
+@command(autocomplete=lambda: list_experiments(),
+         expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}))
+def rip_my_slip(name, **kwargs):
     """
     Run a demonstration.
     """
     # TODO: prepare 'rpl-attacks' campaign, make all its experiments then run them
-    print("yeah, man !")
+    convert_pcap_to_csv(kwargs['path'])
+    convert_powertracker_log_to_csv(kwargs['path'])
+    draw_dodag(kwargs['path'])

@@ -16,13 +16,13 @@ CFLAGS += -ffunction-sections
 LDFLAGS += -Wl,--gc-sections,--undefined=_reset_vector__,--undefined=InterruptVectors,--undefined=_copy_data_init__,--undefined=_clear_bss_init__,--undefined=_end_of_init__
 
 run-without-malicious:
-	java -mx512m -jar $(CONTIKI)/tools/cooja/dist/cooja.jar -hidden=simulation_without_malicious.csc -contiki=$(CONTIKI)
+	java -mx512m -jar $(CONTIKI)/tools/cooja/dist/cooja.jar -hidden=without-malicious/simulation.csc -contiki=$(CONTIKI)
 
 run-with-malicious:
-	java -mx512m -jar $(CONTIKI)/tools/cooja/dist/cooja.jar -hidden=simulation_with_malicious.csc -contiki=$(CONTIKI)
+	java -mx512m -jar $(CONTIKI)/tools/cooja/dist/cooja.jar -hidden=with-malicious/simulation.csc -contiki=$(CONTIKI)
 
 cooja-without-malicious:
-	make TARGET=cooja simulation_without_malicious.csc
+	make TARGET=cooja without-malicious/simulation.csc
 
 cooja-with-malicious:
-	make TARGET=cooja simulation_with_malicious.csc
+	make TARGET=cooja with-malicious/simulation.csc

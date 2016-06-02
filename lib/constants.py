@@ -55,6 +55,7 @@ CONTIKI_FILES = [
 ]
 
 # simulation default parameters
+WSN_DENSITY_FACTOR = 3
 MIN_DIST_BETWEEN_MOTES = 20.0
 MAX_DIST_BETWEEN_MOTES = 50.0
 DEFAULTS = {
@@ -63,16 +64,16 @@ DEFAULTS = {
     "duration": 300,
     "external-library": None,
     "goal": "",
-    "interference_range": 2 * MAX_DIST_BETWEEN_MOTES,
+    "transmission_range": MAX_DIST_BETWEEN_MOTES,
+    "interference_range": None,  # set to 2 * transmission_range at parameter validation
     "maximum-distance-between-motes": MAX_DIST_BETWEEN_MOTES,
-    "maximum-range-from-root": MAX_DIST_BETWEEN_MOTES,
     "minimum-distance-between-motes": MIN_DIST_BETWEEN_MOTES,
     "notes": "",
     "number-motes": 10,
     "repeat": 1,
     "target": "z1",
+    "malicious-target": None,
     "title": "Default title",
-    "transmitting_range": MAX_DIST_BETWEEN_MOTES,
     "type": "sensor",
 }
 
@@ -97,17 +98,24 @@ TEMPLATES = OrderedDict([
 
 EXPERIMENT_STRUCTURE = {
     "Makefile": False,
-    "simulation_with_malicious.csc": False,
-    "simulation_without_malicious.csc": False,
-    "script.js": False,
     ".simulation.conf": False,
-    "data": {},
     "motes": {
         "root.*": False,
         "sensor.*": False,
         "malicious.*": False,
     },
-    "results": {},
+    "without-malicious": {
+        "simulation.csc": False,
+        "script.js": False,
+        "data": {"motes.json": False},
+        "results": {},
+    },
+    "with-malicious": {
+        "simulation.csc": False,
+        "script.js": False,
+        "data": {"motes.json": False},
+        "results": {},
+    },
 }
 
 BANNER = """   ___  ___  __     ___  __  __           __          ____                                   __

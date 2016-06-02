@@ -18,7 +18,7 @@ from types import MethodType
 from .commands import get_commands
 from .constants import BANNER, COMMAND_DOCSTRING, MIN_TERM_SIZE
 from .logconfig import logger, set_logging
-from .terminalsize import get_terminal_size
+from .termsize import get_terminal_size
 
 
 def surround_ansi_escapes(prompt, start="\x01", end="\x02"):
