@@ -66,8 +66,7 @@ DEFAULTS = {
     "goal": "",
     "transmission-range": MAX_DIST_BETWEEN_MOTES,
     "interference-range": None,  # set to 2 * transmission_range at parameter validation
-    "maximum-distance-between-motes": MAX_DIST_BETWEEN_MOTES,
-    "minimum-distance-between-motes": MIN_DIST_BETWEEN_MOTES,
+    "minimum-distance-from-root": MIN_DIST_BETWEEN_MOTES,
     "notes": "",
     "number-motes": 10,
     "repeat": 1,

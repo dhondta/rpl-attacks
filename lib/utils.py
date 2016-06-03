@@ -1,16 +1,14 @@
 # -*- coding: utf8 -*-
 from copy import deepcopy
+from jinja2 import Environment, FileSystemLoader
+from jsmin import jsmin
 from json import dump, loads
 from math import sqrt
+from numpy import average, cos, pi, sign, sin, sqrt
 from os import listdir, makedirs, rename
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
 from random import randint
 from re import findall
-
-from jinja2 import Environment, FileSystemLoader
-from jsmin import jsmin
-from numpy import average, cos, pi, sign, sin, sqrt
-from numpy.random import randint
 from six import string_types
 
 from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
@@ -28,7 +26,7 @@ def generate_motes(**kwargs):
     """
     nodes = [{"id": 0, "type": "root", "x": 0, "y": 0, "z": 0}]
     n = kwargs.pop('n', DEFAULTS["number-motes"])
-    min_range = kwargs.pop('min_range', DEFAULTS["minimum-distance-between-motes"])
+    min_range = kwargs.pop('min_range', DEFAULTS["minimum-distance-from-root"])
     max_range = kwargs.pop('max_range', DEFAULTS["area-square-side"])
     tx_range = kwargs.pop('tx_range', DEFAULTS["transmission-range"])
     # determine 'i', the number of steps for the algorithm
@@ -47,11 +45,11 @@ def generate_motes(**kwargs):
         angle_inc = 360 // min(n_step, n - nid)
         # then, divide the ring in quadrants and generate 1 node per quadrant with a 10% margin either
         #  for the angle or for the range
-        range_min, range_max = int((ns - 0.8) * range_inc), int((ns - 0.2) * range_inc)
-        for j in range(0, n_step):
-            angle_min, angle_max = int((j + 0.2) * angle_inc), int((j + 0.8) * angle_inc)
+        range_min, range_max = int((ns - 0.7) * range_inc), int((ns - 0.1) * range_inc)
+        for j in range(0, n_step, max(1, n_step // (n - nid))):
+            angle_min, angle_max = int((j + 0.25) * angle_inc), int((j + 0.75) * angle_inc)
             d, k = 0, 0
-            while d < min_range and k < 1000:
+            while not min_range < d < tx_range and k < 1000:
                 node_angle = randint(angle_min, angle_max) * pi / 180
                 node_range = randint(max(range_min, min_range), min(range_max, max_range))
                 # compute the coordinates and append the new node to the list
@@ -63,15 +61,16 @@ def generate_motes(**kwargs):
             if nid == n:
                 break
             nid += 1
-        range_inc *= 0.7
+        if nid == n:
+            break
+        range_inc *= 0.85
     # finally, add the malicious mote in the middle of the network
     x, y = 0, 0
-    for i in range(0, 1):
-        # get the average of the squared x and y deltas
-        avg_x = average([sign(n['x'] - x) * (n['x'] - x) ** 2 for n in nodes])
-        x = sign(avg_x) * sqrt(abs(avg_x))
-        avg_y = average([sign(n['y'] - y) * (n['y'] - y) ** 2 for n in nodes])
-        y = sign(avg_y) * sqrt(abs(avg_y))
+    # get the average of the squared x and y deltas
+    avg_x = average([sign(n['x'] - x) * (n['x'] - x) ** 2 for n in nodes])
+    x = sign(avg_x) * sqrt(abs(avg_x))
+    avg_y = average([sign(n['y'] - y) * (n['y'] - y) ** 2 for n in nodes])
+    y = sign(avg_y) * sqrt(abs(avg_y))
     nodes.append({'id': len(nodes), 'type': 'malicious', 'x': x, 'y': y, 'z': 0})
     return nodes
 
@@ -438,7 +437,7 @@ def validated_parameters(dictionary, silent=False):
     params["ext_lib"] = get_parameter(dictionary, "malicious", "external-library",
         lambda x: x is None or exists(x), "does not exist")
     # area dimensions and limits
-    params["min_range"] = get_parameter(dictionary, "simulation", "minimum-distance-between-motes",
+    params["min_range"] = get_parameter(dictionary, "simulation", "minimum-distance-from-root",
         lambda x: isinstance(x, (int, float)) and x > 0, "is not an integer greater than 0")
     params["tx_range"] = get_parameter(dictionary, "simulation", "transmission-range",
         lambda x: isinstance(x, (int, float)) and x > params["min_range"],
