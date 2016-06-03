@@ -236,15 +236,16 @@ def __run(name, **kwargs):
     """
     path = kwargs['path']
     check_structure(path, remove=True)
-    data, results = join(path, 'data'), join(path, 'results')
     with hide(*HIDDEN_ALL):
         for sim in ["without", "with"]:
+            sim_path = join(path, "{}-malicious".format(sim))
+            data, results = join(sim_path, 'data'), join(sim_path, 'results')
+            # the Makefile is at experiment's root ('path')
             with lcd(path):
                 logger.debug(" > Running simulation {} the malicious mote...".format(sim))
                 local("make run-{}-malicious".format(sim), capture=True)
-            remove_files(path,
-                         'COOJA.log',
-                         'COOJA.testlog')
+            # simulations are in their respective folders ('sim_path')
+            remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
             # once the execution is over, gather the screenshots into a single GIF and keep the first and
             #  the last screenshots ; move these to the results folder
             with lcd(data):
