@@ -4,75 +4,16 @@ from jinja2 import Environment, FileSystemLoader
 from jsmin import jsmin
 from json import dump, loads
 from math import sqrt
-from numpy import average, cos, pi, sign, sin, sqrt
 from os import listdir, makedirs, rename
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
-from random import randint
 from re import findall
 from six import string_types
 
 from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
-                       EXPERIMENT_FOLDER, TEMPLATES_FOLDER, WSN_DENSITY_FACTOR
+                       EXPERIMENT_FOLDER, TEMPLATES_FOLDER
 from .helpers import remove_files, replace_in_file
 from .logconfig import logger
-
-
-# ************************************** NETWORK GENERATION FUNCTION ****************************************
-def generate_motes(**kwargs):
-    """
-    This function generates a WSN with 1 root, n legitimate motes and 1 malicious mote
-
-    :return: the list of motes (formatted as dictionaries like hereafter)
-    """
-    nodes = [{"id": 0, "type": "root", "x": 0, "y": 0, "z": 0}]
-    n = kwargs.pop('n', DEFAULTS["number-motes"])
-    min_range = kwargs.pop('min_range', DEFAULTS["minimum-distance-from-root"])
-    max_range = kwargs.pop('max_range', DEFAULTS["area-square-side"])
-    tx_range = kwargs.pop('tx_range', DEFAULTS["transmission-range"])
-    # determine 'i', the number of steps for the algorithm
-    # at step i, the newtork must be filled with at most sum(f * 2 ** i)
-    #   e.g. if f = 3, with 10 nodes, root's proximity will hold 6 nodes then the 4 ones remaining in the next ring
-    i, s, nid = 1, 0, 1
-    while s <= n:
-        s += WSN_DENSITY_FACTOR * 2 ** i
-        i += 1
-    # now, generate the nodes
-    # first, the range increment is defined ; it will provide the interval of ranges for the quadrants
-    range_inc = min(tx_range, max_range / (i - 1))
-    for ns in range(1, i):
-        n_step = WSN_DENSITY_FACTOR * 2 ** ns
-        # determine the angle increment for the quadrants
-        angle_inc = 360 // min(n_step, n - nid)
-        # then, divide the ring in quadrants and generate 1 node per quadrant with a 10% margin either
-        #  for the angle or for the range
-        range_min, range_max = int((ns - 0.7) * range_inc), int((ns - 0.1) * range_inc)
-        for j in range(0, n_step, max(1, n_step // (n - nid))):
-            angle_min, angle_max = int((j + 0.25) * angle_inc), int((j + 0.75) * angle_inc)
-            d, k = 0, 0
-            while not min_range < d < tx_range and k < 1000:
-                node_angle = randint(angle_min, angle_max) * pi / 180
-                node_range = randint(max(range_min, min_range), min(range_max, max_range))
-                # compute the coordinates and append the new node to the list
-                x, y = node_range * cos(node_angle), node_range * sin(node_angle)
-                for node in nodes:
-                    d = min(d, sqrt((x - node['x'])**2 + (y - node['y'])**2))
-                k += 1
-            nodes.append({'id': nid, 'type': 'sensor', 'x': x, 'y': y, 'z': 0})
-            if nid == n:
-                break
-            nid += 1
-        if nid == n:
-            break
-        range_inc *= 0.85
-    # finally, add the malicious mote in the middle of the network
-    x, y = 0, 0
-    # get the average of the squared x and y deltas
-    avg_x = average([sign(n['x'] - x) * (n['x'] - x) ** 2 for n in nodes])
-    x = sign(avg_x) * sqrt(abs(avg_x))
-    avg_y = average([sign(n['y'] - y) * (n['y'] - y) ** 2 for n in nodes])
-    y = sign(avg_y) * sqrt(abs(avg_y))
-    nodes.append({'id': len(nodes), 'type': 'malicious', 'x': x, 'y': y, 'z': 0})
-    return nodes
+from .wsngenerator import generate_motes
 
 
 # *********************************************** GET FUNCTIONS ************************************************
@@ -275,17 +216,23 @@ def apply_replacements(contiki_rpl, replacements):
         replace_in_file(join(contiki_rpl, filename), replacement)
 
 
-def check_structure(path, files=None, remove=False):
+def check_structure(path, files=None, create=False, remove=False):
     """
     This function checks if the file structure given by the dictionary files exists at the input path.
 
     :param path: path to be checked for the file structure
     :param files: file structure as a dictionary
+    :param create: create subfolders if they do not exist
     :param remove: if this flag is True, non-matching files are removed
     :return: True if the file structure is respected, otherwise False
     """
+    if create and not exists(path):
+        makedirs(path)
     files = deepcopy(EXPERIMENT_STRUCTURE) if files is None else files
-    for item in listdir(path):
+    items = listdir(path)
+    if create:
+        items = [i for i, f in files.items() if not isinstance(f, bool)] + items
+    for item in items:
         wildcard = '{}.*'.format(splitext(item)[0])
         match = item if item in files.keys() else (wildcard if wildcard in files.keys() else None)
         if match is None:
@@ -293,7 +240,7 @@ def check_structure(path, files=None, remove=False):
                 remove_files(path, item)
             continue
         files[match] = True if isinstance(files[match], bool) else \
-            check_structure(join(path, match), deepcopy(files[match]), remove)
+            check_structure(join(path, match), deepcopy(files[match]), create, remove)
     return all(files.values())
 
 
@@ -331,7 +278,7 @@ def render_templates(path, only_malicious=False, **params):
     This function is aimed to adapt and render the base templates dictionary with provided parameters.
 
     :param path: experiment folder path
-    :param only_malicious: flag to indicate if all the templates have to be deployed or only malicious's one
+    :param only_malicious: flag to indicate if all the templates have to be deployed or only malicious' one
     :param params: dictionary with all the parameters for the experiment
     :return: eventual replacements to be made in ContikiRPL files
     """
@@ -343,21 +290,12 @@ def render_templates(path, only_malicious=False, **params):
         for c in constants.items()])
     if only_malicious:
         template_malicious = "motes/malicious.c"
-        write_template(path, env, template_malicious, **templates[template_malicious])
-        return
+        write_template(join(path, "with-malicious"), env, template_malicious, **templates[template_malicious])
+        return replacements
     # generate the list of motes (first one is the root, last one is the malicious mote)
-    motes = params['motes'] or generate_motes(**params)
-    # fill in and render malicious mote template directly in the simulation with malicious mote
-    write_template(join(path, 'with-malicious'), env, "motes/malicious.c", **templates.pop("motes/malicious.c"))
-    # fill in and render templates shared by both simulations
-    shared_templates = dict()
-    shared_templates["Makefile"] = templates.pop("Makefile")
-    shared_templates["Makefile"]["target"] = params["target"]
-    shared_templates["motes/root.c"] = templates.pop("motes/root.c")
-    shared_templates["motes/sensor.c"] = templates.pop("motes/sensor.c")
-    for name, kwargs in shared_templates.items():
-        write_template(path, env, name, **kwargs)
+    motes = params['motes'] or generate_motes(defaults=DEFAULTS, **params)
     # fill in simulation file templates
+    templates["motes/Makefile"]["target"] = params["target"]
     templates["script.js"]["timeout"] = 1000 * params["duration"]
     templates["script.js"]["sampling_period"] = templates["script.js"]["timeout"] // 100
     templates["simulation.csc"]["title"] = params["title"] + ' (with the malicious mote)'
@@ -377,11 +315,15 @@ def render_templates(path, only_malicious=False, **params):
         write_template(join(path, 'with-malicious'), env, name, **kwargs)
     with open(join(path, 'with-malicious', 'data', 'motes.json'), 'w') as f:
         dump({m['id']: (m['x'], m['y']) for m in motes}, f, sort_keys=True, indent=4)
-    # now, adapt the title, remove the malicious mote from the list and from the mote types
+    # now, adapt the title and mote source template
+    del templates["motes/Makefile"]
+    del templates["motes/root.c"]
+    del templates["motes/sensor.c"]
+    del templates["motes/malicious.c"]
     templates["simulation.csc"]["title"] = params["title"] + ' (without the malicious mote)'
     templates["simulation.csc"]["motes"] = motes[:-1]
     del templates["simulation.csc"]["mote_types"][-1]
-    # render the templates for the simulation with the malicious mote
+    # render the templates for the simulation without the malicious mote
     for name, kwargs in templates.items():
         write_template(join(path, 'without-malicious'), env, name, **kwargs)
     with open(join(path, 'without-malicious', 'data', 'motes.json'), 'w') as f:

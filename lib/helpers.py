@@ -199,7 +199,7 @@ def read_config(path, sep=' = '):
     """
     config = {}
     try:
-        with open(join(path, '.simulation.conf')) as f:
+        with open(join(path, 'simulation.conf')) as f:
             for line in f.readlines():
                 if line.strip().startswith('#'):
                     continue
@@ -213,7 +213,7 @@ def read_config(path, sep=' = '):
                     pass
                 config[k] = v
     except OSError:
-        logger.error("Configuration file '.simulation.conf' does not exist !")
+        logger.error("Configuration file 'simulation.conf' does not exist !")
     return config
 
 
@@ -226,6 +226,6 @@ def write_config(path, config, sep=' = '):
     :param sep: separator between the key and the value
     """
     width = max([len(k) for k in config.keys()])
-    with open(join(path, '.simulation.conf'), 'w') as f:
+    with open(join(path, 'simulation.conf'), 'w') as f:
         for k, v in sorted(config.items(), key=lambda x: x[0]):
             f.write('{}{}{}\n'.format(k.ljust(width), sep, ['{}', '"{}"'][isinstance(v, string_types)].format(v)))

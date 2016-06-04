@@ -79,8 +79,8 @@ def cooja(name, with_malicious=False, **kwargs):
     :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
     with hide(*HIDDEN_ALL):
-        with lcd(kwargs['path']):
-            local("make cooja-with{}-malicious".format("" if with_malicious else "out"))
+        with lcd(join(kwargs['path'], 'with{}-malicious'.format('' if with_malicious else 'out'))):
+            local("make cooja")
 
 
 def __make(name, ask=True, **kwargs):
@@ -103,60 +103,51 @@ def __make(name, ask=True, **kwargs):
         return False
     logger.debug(" > Creating simulation...")
     # create experiment's directories
-    get_path(path, 'motes', create=True)
-    for sim in ['without-malicious', 'with-malicious']:
-        get_path(join(path, sim), 'data', create=True)
-        get_path(join(path, sim), 'motes', create=True)
-        get_path(join(path, sim), 'results', create=True)
+    check_structure(path, create=True, remove=True)
     templates = get_path(path, 'templates', create=True)
     get_path(templates, 'motes', create=True)
     # select the right malicious mote template and duplicate the simulation file
-    copy_files(TEMPLATES_FOLDER, templates, 'motes/root.c', 'motes/sensor.c',
+    copy_files((TEMPLATES_FOLDER, 'experiment'), templates, 'motes/root.c', 'motes/sensor.c',
                ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'),
-               'Makefile', 'simulation.csc', 'script.js')
-    # create experiment's files from templates
+               'motes/Makefile', 'Makefile', 'simulation.csc', 'script.js')
+    # create experiment's files from templates then clean the templates folder
     replacements = render_templates(path, **params)
-    # then clean the temporary folder with templates
     remove_folder(templates)
     # now, write the config file without the list of motes
     del params['motes']
     write_config(path, params)
     # now compile
     with settings(hide(*HIDDEN_ALL), warn_only=True):
-        with lcd(path):
-            # for every simulation, root and sensor compilation is the same ;
-            #  then, if these were not previously compiled, proceed
-            without_malicious = join(path, 'without-malicious')
-            with_malicious = join(path, 'with-malicious')
-            croot = "motes/root.{}".format(params["target"])
-            csensor = "motes/sensor.{}".format(params["target"])
-            if reuse_bin_path is None or reuse_bin_path == path:
-                logger.debug(" > Making 'root.{}'...".format(params["target"]))
-                stderr(local)("make motes/root", capture=True)
-                logger.debug(" > Making 'sensor.{}'...".format(params["target"]))
-                stderr(local)("make motes/sensor", capture=True)
+        with_malicious = join(path, 'with-malicious', 'motes')
+        without_malicious = join(path, 'without-malicious', 'motes')
+        with lcd(with_malicious):
+            croot, csensor = 'root.{}'.format(params["target"]), 'sensor.{}'.format(params["target"])
+            if reuse_bin_path is None or reuse_bin_path == with_malicious:
+                logger.debug(" > Making '{}'...".format(croot))
+                stderr(local)("make root", capture=True)
+                logger.debug(" > Making '{}'...".format(csensor))
+                stderr(local)("make sensor", capture=True)
+                # here, files are moved ; otherwise, 'make clean' would also remove *.z1
+                move_files(with_malicious, without_malicious, croot, csensor)
                 # after compiling, clean artifacts
                 local('make clean')
-                remove_files(path, 'motes/root.c', 'motes/sensor.c')
-                copy_files(path, without_malicious, croot, csensor)
-                move_files(path, with_malicious, croot, csensor)
-                # save this path (can be reused while creating other simulations)
-                reuse_bin_path = without_malicious
-            # otherwise, reuse them by copying the compiled files to the current experiment folder
+                remove_files(with_malicious, 'root.c', 'sensor.c')
             else:
                 copy_files(reuse_bin_path, without_malicious, croot, csensor)
-                copy_files(reuse_bin_path, with_malicious, croot, csensor)
-            remove_folder((path, 'motes'))
             # now, handle the malicious mote compilation
+            malicious = 'malicious.{}'.format(params["malicious_target"])
             copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["target"]))
             contiki_rpl = join(with_malicious, 'core', 'net', 'rpl')
             if ext_lib is not None:
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)
-            logger.debug(" > Making 'malicious.{}'...".format(params["target"]))
-            stderr(local)("make with-malicious/motes/malicious CONTIKI={} TARGET={}"
+            logger.debug(" > Making '{}'...".format(malicious))
+            stderr(local)("make malicious CONTIKI={} TARGET={}"
                           .format(join(with_malicious, 'contiki'), params["malicious_target"]), capture=True)
+            move_files(with_malicious, without_malicious, malicious)
             local('make clean')
+            move_files(without_malicious, with_malicious, malicious)
+            copy_files(without_malicious, with_malicious, croot, csensor)
             remove_folder((with_malicious, 'contiki'))
 _make = CommandMonitor(__make)
 make = command(
@@ -185,36 +176,38 @@ def __remake(name, **kwargs):
     ext_lib = params.get("ext_lib")
     if ext_lib and not exists(ext_lib):
         logger.error("External library does not exist !")
-        logger.critical("Make aborded.")
+        logger.critical("Make aborted.")
         return False
     logger.debug(" > Recompiling malicious mote...")
     # remove former compiled malicious mote and prepare the template
-    motes = join(path, 'motes')
     templates = get_path(path, 'templates', create=True)
     get_path(templates, 'motes', create=True)
-    for f in listdir(motes):
-        if f.startswith('malicious.'):
-            remove_files((motes, f))
-    copy_files(TEMPLATES_FOLDER, templates,
-               ('Makefile', 'Makefile'),
+    copy_files((TEMPLATES_FOLDER, 'experiment'), templates,
                ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'))
     # recreate malicious C file from template and clean the temporary template
-    replacements = render_templates(path, True, **params)
+    replacements = render_templates(path, only_malicious=True, **params)
     # then clean the temporary folder with templates
     remove_folder(templates)
     # now recompile
     with settings(hide(*HIDDEN_ALL), warn_only=True):
-        with lcd(path):
+        with_malicious = join(path, 'with-malicious', 'motes')
+        without_malicious = join(path, 'without-malicious', 'motes')
+        with lcd(with_malicious):
+            malicious = 'malicious.{}'.format(params["malicious_target"])
+            croot, csensor = 'root.{}'.format(params["target"]), 'sensor.{}'.format(params["target"])
             # handle the malicious mote recompilation
-            copy_folder(CONTIKI_FOLDER, path, includes=get_contiki_includes(params["target"]))
-            contiki_rpl = join(path, 'contiki', 'core', 'net', 'rpl')
+            copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["target"]))
+            contiki_rpl = join(with_malicious, 'contiki', 'core', 'net', 'rpl')
             if ext_lib is not None:
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)
-            logger.debug(" > Making 'malicious.{}'...".format(params["target"]))
-            stderr(local)("make motes/malicious CONTIKI={}".format(join(path, 'contiki')), capture=True)
+            logger.debug(" > Making '{}'...".format(malicious))
+            stderr(local)("make malicious CONTIKI={}".format(join(with_malicious, 'contiki')), capture=True)
+            move_files(with_malicious, without_malicious, malicious)
             local('make clean')
-            remove_folder((path, 'contiki'))
+            move_files(without_malicious, with_malicious, malicious)
+            copy_files(without_malicious, with_malicious, croot, csensor)
+            remove_folder((with_malicious, 'contiki'))
 _remake = CommandMonitor(__remake)
 remake = command(
     autocomplete=lambda: list_experiments(),
@@ -241,9 +234,9 @@ def __run(name, **kwargs):
             sim_path = join(path, "{}-malicious".format(sim))
             data, results = join(sim_path, 'data'), join(sim_path, 'results')
             # the Makefile is at experiment's root ('path')
-            with lcd(path):
+            with lcd(sim_path):
                 logger.debug(" > Running simulation {} the malicious mote...".format(sim))
-                local("make run-{}-malicious".format(sim), capture=True)
+                local("make run", capture=True)
             # simulations are in their respective folders ('sim_path')
             remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
             # once the execution is over, gather the screenshots into a single GIF and keep the first and

@@ -55,7 +55,6 @@ CONTIKI_FILES = [
 ]
 
 # simulation default parameters
-WSN_DENSITY_FACTOR = 3
 MIN_DIST_BETWEEN_MOTES = 20.0
 MAX_DIST_BETWEEN_MOTES = 50.0
 DEFAULTS = {
@@ -78,6 +77,7 @@ DEFAULTS = {
 
 # Note: Cooja simulation file must be the last key in the following ordered dictionary
 TEMPLATES = OrderedDict([
+    ("motes/Makefile", {"contiki": CONTIKI_FOLDER}),
     ("motes/root.c", {}),
     ("motes/sensor.c", {}),
     ("motes/malicious.c", {}),
@@ -96,23 +96,26 @@ TEMPLATES = OrderedDict([
 ])
 
 EXPERIMENT_STRUCTURE = {
-    "Makefile": False,
-    ".simulation.conf": False,
-    "motes": {
-        "root.*": False,
-        "sensor.*": False,
-        "malicious.*": False,
-    },
-    "without-malicious": {
+    "simulation.conf": False,
+    "with-malicious": {
+        "Makefile": False,
         "simulation.csc": False,
         "script.js": False,
         "data": {"motes.json": False},
+        "motes": {
+            "Makefile": False,
+            "root.*": False,
+            "sensor.*": False,
+            "malicious.*": False,
+        },
         "results": {},
     },
-    "with-malicious": {
+    "without-malicious": {
+        "Makefile": False,
         "simulation.csc": False,
         "script.js": False,
         "data": {"motes.json": False},
+        "motes": {},
         "results": {},
     },
 }
