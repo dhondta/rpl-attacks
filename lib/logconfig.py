@@ -28,6 +28,10 @@ def set_logging(lvl='info'):
     coloredlogs.install(lvl, fmt=LOG_FORMAT)
     return True
 set_logging()
+# this avoids throwing e.g. FutureWarning or DeprecationWarning messages
+logging.captureWarnings(True)
+logger = logging.getLogger('py.warnings')
+logger.setLevel(logging.CRITICAL)
 
 
 # fabric verbose lists of options

@@ -463,7 +463,7 @@ def setup(silent=False):
         if answer == "yes":
             logger.debug(" > Upgrading msp430-gcc from version 4.6.3 to 4.7.0...")
             logger.warning("If you encounter problems with this upgrade, please refer to:\n"
-                            "https://github.com/contiki-os/contiki/wiki/MSP430X")
+                           "https://github.com/contiki-os/contiki/wiki/MSP430X")
             with lcd('src/'):
                 logger.warning(" > Upgrade now starts, this may take up to 30 minutes...")
                 sudo('./upgrade-msp430.sh')
@@ -485,4 +485,4 @@ def rip_my_slip(name, **kwargs):
     Run a demonstration.
     """
     # TODO: prepare 'rpl-attacks' campaign, make all its experiments then run them
-    pass
+    parsing_chain(join(kwargs.get('path'), 'with-malicious'))

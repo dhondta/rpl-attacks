@@ -34,9 +34,9 @@ class Test4Remake(ExperimentTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.t1 = getmtime(join(cls.path, 'motes', 'malicious.z1'))
+        cls.t1 = getmtime(join(cls.path, 'with-malicious', 'motes', 'malicious.z1'))
         remake(SIM, silent=True)
-        cls.t2 = getmtime(join(cls.path, 'motes', 'malicious.z1'))
+        cls.t2 = getmtime(join(cls.path, 'with-malicious', 'motes', 'malicious.z1'))
 
     def test1_experiment_structure_unchanged(self):
         """ Is the new experiment still correctly structured ? """

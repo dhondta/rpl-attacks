@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import sh
 import unittest
-from json import load
+from jsmin import jsmin
+from json import loads
 from os.path import exists, expanduser, join
 
 from lib.commands import drop, prepare
@@ -29,7 +30,7 @@ class Test6Prepare(ExperimentTestCase):
         """ Is the new experiment campaign a correct JSON file ? """
         try:
             with open(self.path) as f:
-                load(f)
+                loads(jsmin(f.read()))
             passed = True
         except:
             passed = False

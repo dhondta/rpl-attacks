@@ -60,7 +60,7 @@ MAX_DIST_BETWEEN_MOTES = 50.0
 DEFAULTS = {
     "area-square-side": 200.0,
     "building-blocks": [],
-    "duration": 300,
+    "duration": 600,
     "external-library": None,
     "goal": "",
     "transmission-range": MAX_DIST_BETWEEN_MOTES,
