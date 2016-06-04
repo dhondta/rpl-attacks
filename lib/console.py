@@ -235,6 +235,11 @@ class FrameworkConsole(Console):
                 self.pool.join()
             except KeyboardInterrupt:
                 logger.info(" > Terminating opened processes...")
+                for task_obj in self.tasklist.keys():
+                    try:
+                        task_obj.task.get(1)
+                    except TimeoutError:
+                        pass
                 self.pool.terminate()
                 self.pool.join()
 
