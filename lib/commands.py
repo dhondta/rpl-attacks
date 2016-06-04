@@ -14,7 +14,7 @@ from .helpers import copy_files, copy_folder, move_files, remove_files, remove_f
 from .install import check_cooja, modify_cooja, register_new_path_in_profile, \
                      update_cooja_build, update_cooja_user_properties
 from .logconfig import logger, HIDDEN_ALL
-from .parser import convert_pcap_to_csv, convert_powertracker_log_to_csv, draw_dodag
+from .parser import parsing_chain
 from .utils import apply_replacements, check_structure, generate_motes, get_contiki_includes, get_experiments, \
                    get_path, list_campaigns, list_experiments, render_campaign, render_templates, validated_parameters
 
@@ -228,32 +228,33 @@ def __run(name, **kwargs):
     :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
     path = kwargs['path']
-    check_structure(path, remove=True)
+#    check_structure(path, remove=True)
     with hide(*HIDDEN_ALL):
         for sim in ["without", "with"]:
             sim_path = join(path, "{}-malicious".format(sim))
-            data, results = join(sim_path, 'data'), join(sim_path, 'results')
-            # the Makefile is at experiment's root ('path')
-            with lcd(sim_path):
-                logger.debug(" > Running simulation {} the malicious mote...".format(sim))
-                local("make run", capture=True)
-            # simulations are in their respective folders ('sim_path')
-            remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
-            # once the execution is over, gather the screenshots into a single GIF and keep the first and
-            #  the last screenshots ; move these to the results folder
-            with lcd(data):
-                local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
-            network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data) \
-                              if fn.startswith('network_')}
-            move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))
-            net_start_old = network_images[min(network_images.keys())]
-            net_start, ext = splitext(net_start_old)
-            net_start_new = 'wsn-{}-malicious_start{}'.format(sim, ext)
-            net_end_old = network_images[max(network_images.keys())]
-            net_end, ext = splitext(net_end_old)
-            net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
-            move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
-            remove_files(data, *network_images.values())
+            # data, results = join(sim_path, 'data'), join(sim_path, 'results')
+            # # the Makefile is at experiment's root ('path')
+            # with lcd(sim_path):
+            #     logger.debug(" > Running simulation {} the malicious mote...".format(sim))
+            #     local("make run", capture=True)
+            # # simulations are in their respective folders ('sim_path')
+            # remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
+            # # once the execution is over, gather the screenshots into a single GIF and keep the first and
+            # #  the last screenshots ; move these to the results folder
+            # with lcd(data):
+            #     local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
+            # network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data) \
+            #                   if fn.startswith('network_')}
+            # move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))
+            # net_start_old = network_images[min(network_images.keys())]
+            # net_start, ext = splitext(net_start_old)
+            # net_start_new = 'wsn-{}-malicious_start{}'.format(sim, ext)
+            # net_end_old = network_images[max(network_images.keys())]
+            # net_end, ext = splitext(net_end_old)
+            # net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
+            # move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
+            # remove_files(data, *network_images.values())
+            parsing_chain(sim_path, with_malicious=sim=="with")
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
@@ -484,6 +485,4 @@ def rip_my_slip(name, **kwargs):
     Run a demonstration.
     """
     # TODO: prepare 'rpl-attacks' campaign, make all its experiments then run them
-    convert_pcap_to_csv(kwargs['path'])
-    convert_powertracker_log_to_csv(kwargs['path'])
-    draw_dodag(kwargs['path'])
+    pass

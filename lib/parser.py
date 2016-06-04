@@ -10,6 +10,14 @@ from subprocess import Popen, PIPE
 from .utils import get_available_platforms
 
 
+# *************************************** MAIN PARSING FUNCTION ****************************************
+def parsing_chain(path, **kwargs):
+    convert_pcap_to_csv(path)
+    convert_powertracker_log_to_csv(path)
+    draw_dodag(path, kwargs.get('with_malicious', False))
+
+
+# *********************************** SIMULATION PARSING FUNCTIONS *************************************
 def convert_pcap_to_csv(path):
     """
     This function creates a CSV file (to ./results) from a PCAP file (from ./data).
@@ -74,7 +82,7 @@ def convert_powertracker_log_to_csv(path):
 RELATIONSHIP_REGEX = r'^\d+\s+ID\:(?P<src_id>\d+)\s+#L\s+(?P<dst_id>\d+)\s+(?P<flag>\d+)$'
 
 
-def draw_dodag(path):
+def draw_dodag(path, with_malicious=False):
     """
     This function draws the DODAG (to ./results) from the list of motes (from ./data/motes.json) and the list of
      edges (from ./data/relationships.log).
@@ -90,7 +98,8 @@ def draw_dodag(path):
     colors = []
     for n, p in motes.items():
         dodag.node[n]['pos'] = p
-        colors.append('green' if n == 0 else ('yellow' if 0 < n < len(motes) - 1 else 'red'))
+        colors.append('green' if n == 0 else ('yellow' if not with_malicious or
+                                                          (with_malicious and 0 < n < len(motes) - 1) else 'red'))
     with open(join(data, 'relationships.log')) as f:
         for line in f.readlines():
             try:
@@ -104,4 +113,4 @@ def draw_dodag(path):
                 dodag.remove_edge(src, child)
             dodag.add_edge(src, dst)
     networkx.draw(dodag, motes, node_color=colors)
-    pyplot.show()
+    pyplot.savefig(join(results, 'dodag.png'))
