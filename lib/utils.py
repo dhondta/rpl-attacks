@@ -229,6 +229,8 @@ def check_structure(path, files=None, create=False, remove=False):
     if create and not exists(path):
         makedirs(path)
     files = deepcopy(EXPERIMENT_STRUCTURE) if files is None else files
+    if files.get('*'):
+        return True
     items = listdir(path)
     if create:
         items = [i for i, f in files.items() if not isinstance(f, bool)] + items

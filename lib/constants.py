@@ -108,15 +108,18 @@ EXPERIMENT_STRUCTURE = {
             "sensor.*": False,
             "malicious.*": False,
         },
-        "results": {},
+        "results": {"*": True},
     },
     "without-malicious": {
         "Makefile": False,
         "simulation.csc": False,
         "script.js": False,
         "data": {"motes.json": False},
-        "motes": {},
-        "results": {},
+        "motes": {
+            "root.*": False,
+            "sensor.*": False,
+        },
+        "results": {"*": True},
     },
 }
 

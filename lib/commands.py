@@ -76,7 +76,7 @@ def cooja(name, with_malicious=False, **kwargs):
 
     :param name: experiment name
     :param with_malicious: use the simulation WITH the malicious mote or not
-    :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
     with hide(*HIDDEN_ALL):
         with lcd(join(kwargs['path'], 'with{}-malicious'.format('' if with_malicious else 'out'))):
@@ -89,7 +89,7 @@ def __make(name, ask=True, **kwargs):
 
     :param name: experiment name (or path to the experiment, if expanded in the 'command' decorator)
     :param ask: ask confirmation
-    :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     global reuse_bin_path
@@ -168,7 +168,7 @@ def __remake(name, **kwargs):
      (meaning that it lets all simulation's files unchanged except ./motes/malicious.[target])
 
     :param name: experiment name
-    :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
     path = kwargs['path']
     logger.debug(" > Retrieving parameters...")
@@ -225,7 +225,7 @@ def __run(name, **kwargs):
     Run an experiment.
 
     :param name: experiment name
-    :param path: expaneded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
     path = kwargs['path']
     check_structure(path, remove=True)
