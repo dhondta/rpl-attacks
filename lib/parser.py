@@ -79,7 +79,7 @@ def convert_powertracker_log_to_csv(path):
             writer.writerow(row)
 
 
-RELATIONSHIP_REGEX = r'^\d+\s+ID\:(?P<src_id>\d+)\s+#L\s+(?P<dst_id>\d+)\s+(?P<flag>\d+)$'
+RELATIONSHIP_REGEX = r'^\d+\s+ID\:(?P<mote_id>\d+)\s+#L\s+(?P<parent_id>\d+)\s+(?P<flag>\d+)$'
 
 
 def draw_dodag(path, with_malicious=False):
@@ -107,11 +107,13 @@ def draw_dodag(path, with_malicious=False):
                 d = match(RELATIONSHIP_REGEX, line).groupdict()
                 if int(d['flag']) == 0:
                     continue
-                src, dst = int(d['src_id']), int(d['dst_id'])
+                mote, parent = int(d['mote_id']), int(d['parent_id'])
             except AttributeError:
                 continue
-            for child in dodag.successors(src):
-                dodag.remove_edge(src, child)
-            dodag.add_edge(src, dst)
+            # this removes every existing parent relationship from the current mote
+            for curr_parent in dodag.successors(mote):
+                dodag.remove_edge(mote, curr_parent)
+            # now add the new parent relationship
+            dodag.add_edge(mote, parent)
     networkx.draw(dodag, motes, node_color=colors)
     pyplot.savefig(join(results, 'dodag.png'), arrow_style=FancyArrowPatch)

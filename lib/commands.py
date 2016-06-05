@@ -549,7 +549,8 @@ def setup(silent=False):
 
 # **************************************** MAGIC COMMAND ****************************************
 @command(autocomplete=lambda: list_experiments(),
-         expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}))
+         expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}),
+         not_exists=('path', {'loglvl': 'error', 'msg': (" > Experiment '{}' does not exist !", 'name')}))
 def rip_my_slip(name, **kwargs):
     """
     Run a demonstration.
