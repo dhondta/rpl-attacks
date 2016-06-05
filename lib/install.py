@@ -86,12 +86,14 @@ def update_cooja_build(cooja_dir):
         if is_in_clean_block and '</target>' in line:
             while buffer[-1].strip().startswith('<delete dir='):
                 tmp.append(buffer.pop())
-            buffer.append('    <ant antfile="build.xml" dir="apps/visualizer_screenshot" target="clean" inheritAll="false"/>')
+            buffer.append('    <ant antfile="build.xml" dir="apps/visualizer_screenshot"'
+                          ' target="clean" inheritAll="false"/>')
             while len(tmp) > 0:
                 buffer.append(tmp.pop())
         # if in 'jar' block, just put the required line at the end of the block
         elif is_in_jar_block and '</target>' in line:
-            buffer.append('    <ant antfile="build.xml" dir="apps/visualizer_screenshot" target="jar" inheritAll="false"/>')
+            buffer.append('    <ant antfile="build.xml" dir="apps/visualizer_screenshot"'
+                          ' target="jar" inheritAll="false"/>')
         buffer.append(line)
     with open(cooja_build, 'w') as f:
         f.write('\n'.join(buffer))

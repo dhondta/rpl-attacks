@@ -41,7 +41,7 @@ def generate_motes(**kwargs):
         for j in range(0, n_step):
             ni += 1
             angle_min, angle_max = int((j + 0.25) * angle_inc), int((j + 0.75) * angle_inc)
-            d, k = 0, 0
+            d, k, x, y = 0, 0, 0, 0
             while not min_range < d < tx_range * 0.9 and k < 1000:
                 node_angle = randint(angle_min, angle_max) * pi / 180
                 node_range = randint(max(range_min, min_range), min(range_max, max_range))
@@ -53,7 +53,7 @@ def generate_motes(**kwargs):
             nodes.append({'id': node_ids[ni-1], 'type': 'sensor', 'x': x, 'y': y, 'z': 0})
         if ni == n:
             break
-        range_inc *= 0.85
+        range_inc *= 0.6
     # finally, add the malicious mote in the middle of the network
     # get the average of the squared x and y deltas
     avg_x = average([sign(n['x']) * n['x'] ** 2 for n in nodes])
@@ -66,4 +66,4 @@ def generate_motes(**kwargs):
         angle = arccos(x / radius)
         x, y = min_range * cos(angle), min_range * sin(angle)
     nodes.append({'id': len(nodes), 'type': 'malicious', 'x': x, 'y': y, 'z': 0})
-    return sorted(nodes, key=lambda x: x['id'])
+    return sorted(nodes, key=lambda o: o['id'])

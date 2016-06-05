@@ -32,7 +32,8 @@ def std_input(txt="Are you sure ? (yes|no) [default: no] ", color=None):
     This helper function is aimed to simplify user input regarding raw_input() (Python 2.X) and input()
      (Python 3.Y).
 
-    :param txt: text to be displayed at user input
+    :param txt: text to be displayed at prompt
+    :param color: to be used when displaying the prompt
     :return: user input
     """
     txt = txt if color is None else colored(txt, color)
@@ -75,6 +76,7 @@ def copy_folder(src_path, dst_path, includes=None):
 
     :param src_path: absolute or relative source path
     :param dst_path: absolute or relative destination path
+    :param includes: list of sub-folders and files to be included from the src_path and to be copied into dst_path
     """
     src_path, dst_path = __expand_folders(src_path, dst_path)
     if src_path != dst_path:

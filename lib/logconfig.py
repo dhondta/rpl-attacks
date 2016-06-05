@@ -7,9 +7,8 @@ LOG_FORMAT = '%(asctime)s %(name)s[%(process)d] %(levelname)s %(message)s'
 # colorize logging
 try:
     import coloredlogs
-    coloredlogs_installed = True
 except ImportError:
-    coloredlogs_installed = False
+    coloredlogs = None
     print("(Install 'coloredlogs' for colored logging)")
 
 
@@ -25,7 +24,8 @@ def set_logging(lvl='info'):
     except KeyError:
         return False
     logging.basicConfig(format=LOG_FORMAT, level=lvl)
-    coloredlogs.install(lvl, fmt=LOG_FORMAT)
+    if coloredlogs is not None:
+        coloredlogs.install(lvl, fmt=LOG_FORMAT)
     return True
 set_logging()
 # this avoids throwing e.g. FutureWarning or DeprecationWarning messages

@@ -71,7 +71,7 @@ class Console(Cmd, object):
         return line
 
     def default(self, line):
-        print(self.badcmd_msg.format(["Unknown", "Invalid"][len(line.split()) > 1], line))
+        print(self.badcmd_msg.format(["Unknown", "Invalid"][len(line.split()) > 1], line.lstrip('_')))
 
     def do_clear(self, line):
         """

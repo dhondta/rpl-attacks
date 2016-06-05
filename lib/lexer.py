@@ -26,12 +26,14 @@ class ArgumentsLexer(RegexLexer):
     tokens = {
         'root': [
             (r'\s+', Whitespace),
-            (r'([a-zA-Z]|[a-zA-Z][a-zA-Z0-9-_]*[a-zA-Z0-9])(=)(.+?)(\s+)', bygroups(Name, Operator, using(ValueLexer), Whitespace), 'kwargs'),
+            (r'([a-zA-Z]|[a-zA-Z][a-zA-Z0-9-_]*[a-zA-Z0-9])(=)(.+?)(\s+)',
+             bygroups(Name, Operator, using(ValueLexer), Whitespace), 'kwargs'),
             (r'(.+?)(\s+)', bygroups(using(ValueLexer), Whitespace), '#push'),
         ],
         'kwargs': [
             (r'\s+', Whitespace),
-            (r'([a-zA-Z]|[a-zA-Z][a-zA-Z0-9-_]*[a-zA-Z0-9])(=)(.+?)(\s+)', bygroups(Name, Operator, using(ValueLexer), Whitespace)),
+            (r'([a-zA-Z]|[a-zA-Z][a-zA-Z0-9-_]*[a-zA-Z0-9])(=)(.+?)(\s+)',
+             bygroups(Name, Operator, using(ValueLexer), Whitespace)),
         ],
     }
 

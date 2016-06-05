@@ -3,6 +3,7 @@ import networkx
 from csv import DictWriter
 from json import load
 from matplotlib import pyplot
+from matplotlib.patches import FancyArrowPatch
 from os.path import join
 from re import finditer, match, MULTILINE
 from subprocess import Popen, PIPE
@@ -70,9 +71,8 @@ def convert_powertracker_log_to_csv(path):
         writer.writeheader()
         for matches in zip(*iterables):
             row = {}
-            for match in matches:
-                #all(m.groupdict()['mote_id'] == matches[0].groupdict()['mote_id'] for m in matches)
-                row.update((k, int(v)) for k, v in match.groupdict().items())
+            for m in matches:
+                row.update((k, int(v)) for k, v in m.groupdict().items())
             for it in PT_ITEMS:
                 time_field = '{}_time'.format(it)
                 row[time_field] = float(row[time_field] / 10 ** 6)
@@ -88,6 +88,7 @@ def draw_dodag(path, with_malicious=False):
      edges (from ./data/relationships.log).
 
     :param path: path to the experiment
+    :param with_malicious: specifies if the graph contains the malicious mote or not (for drawing it in red)
     """
     data, results = join(path, 'data'), join(path, 'results')
     dodag = networkx.DiGraph()
@@ -99,7 +100,7 @@ def draw_dodag(path, with_malicious=False):
     for n, p in motes.items():
         dodag.node[n]['pos'] = p
         colors.append('green' if n == 0 else ('yellow' if not with_malicious or
-                                                          (with_malicious and 0 < n < len(motes) - 1) else 'red'))
+                                              (with_malicious and 0 < n < len(motes) - 1) else 'red'))
     with open(join(data, 'relationships.log')) as f:
         for line in f.readlines():
             try:
@@ -113,4 +114,4 @@ def draw_dodag(path, with_malicious=False):
                 dodag.remove_edge(src, child)
             dodag.add_edge(src, dst)
     networkx.draw(dodag, motes, node_color=colors)
-    pyplot.savefig(join(results, 'dodag.png'))
+    pyplot.savefig(join(results, 'dodag.png'), arrow_style=FancyArrowPatch)

@@ -43,10 +43,54 @@ For a single task, 3 functions exist :
  __[name]: the real task, with no special mechanism (input validation, exception handling, ...)
  _[name] : the task decorated by 'CommandMonitor', with an exception handling mechanism (pickable for multiprocessing)
  [name]  : the task decorated by 'command', with mechanisms of input validation, confirmation asking, ... (unpickable)
+
+The available parameters of the 'command' decorator are :
+
+    :param autocomplete: list of choices to be displayed when typing 2 x <TAB> (or another key if configured so in the
+                          console class)
+    :param examples: list of usage examples
+    :param expand: a tuple with the name of an argument to be expanded and a dictionary with 2 keys: 'new_arg'
+                    (optional) which gives the name of a new keyword-argument to be created with the expanded value
+                    and 'into' which is the folder that the value is to be expanded into
+    :param behavior: attribute to be associated to the decorated function for handling a particular behavior
+                      (default is DefaultCommand ; MultiprocessedCommand is used for handling multi-processing)
+    :param not_exists: a tuple with the name of an argument to be checked for non-existence and a dictionary with up to
+                        4 keys: 'loglvl' which indicates the log level for the message, 'msg' the message itself, 'ask'
+                        for asking the user for confirmation to continue and 'confirm' the message to be displayed
+                        when asking for confirmation
+    :param exists: same structure as for 'not_exists' but handling existence instead
+    :param start_msg: message to be displayed before calling 'f'
+    :param reexec_on_emptyline: boolean indicating if the command is to be re-executed when an empty line is
+                                 input in the console
+    :param add_console_to_kwargs: boolean indicating if the 'console' object is to be added to kwargs
+                                   (for usage inside command's code)
+    :param __base__: special parameter to be used if the command is to be multi-processed, it holds the
+                      "monitored" version of the command (that is, encapsulated inside a try-except)
+
 """
 
 
 # ****************************** TASKS ON INDIVIDUAL EXPERIMENT ******************************
+@command(autocomplete=lambda: list_experiments(),
+         examples=["my-simulation"],
+         expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}),
+         not_exists=('path', {'loglvl': 'error', 'msg': (" > Experiment '{}' does not exist !", 'name')}),
+         exists=('path', {'on_boolean': 'ask', 'confirm': "Before continuing, please check that your hardware is"
+                                                          " plugged.\n Are you ready ? (yes|no) [default: no] "}),
+         start_msg=("BUILDING MALICIOUS MOTE BASED ON EXPERIMENT '{}'", 'name'),
+         add_console_to_kwargs=True)
+def build(name, ask=True, **kwargs):
+    """
+    Build the malicious mote to its target hardware.
+
+    :param name: experiment name (or absolute path to experiment)
+    :param ask: ask confirmation
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    """
+    console = kwargs.get('console')
+    remake(name, build=True, **kwargs) if console is None else console.do_remake(name, build=True, **kwargs)
+
+
 @command(autocomplete=lambda: list_experiments(),
          examples=["my-simulation"],
          expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}),
@@ -146,6 +190,7 @@ def __make(name, ask=True, **kwargs):
                           .format(join(with_malicious, 'contiki'), params["malicious_target"]), capture=True)
             move_files(with_malicious, without_malicious, malicious)
             local('make clean')
+            remove_files(with_malicious, 'malicious.c')
             move_files(without_malicious, with_malicious, malicious)
             copy_files(without_malicious, with_malicious, croot, csensor)
             remove_folder((with_malicious, 'contiki'))
@@ -162,7 +207,7 @@ make = command(
 )(__make)
 
 
-def __remake(name, **kwargs):
+def __remake(name, build=False, **kwargs):
     """
     Remake the malicious mote of an experiment.
      (meaning that it lets all simulation's files unchanged except ./motes/malicious.[target])
@@ -202,9 +247,15 @@ def __remake(name, **kwargs):
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)
             logger.debug(" > Making '{}'...".format(malicious))
-            stderr(local)("make malicious CONTIKI={}".format(join(with_malicious, 'contiki')), capture=True)
+            stderr(local)("make malicious{} CONTIKI={}"
+                          .format(['', '.upload'][build], join(with_malicious, 'contiki')), capture=True)
+            if build:
+                build = get_path(path, 'build', create=True)
+                move_files(with_malicious, build, 'tmpimage.ihex')
+                copy_files(with_malicious, build, malicious)
             move_files(with_malicious, without_malicious, malicious)
             local('make clean')
+            remove_files(with_malicious, 'malicious.c')
             move_files(without_malicious, with_malicious, malicious)
             copy_files(without_malicious, with_malicious, croot, csensor)
             remove_folder((with_malicious, 'contiki'))
@@ -243,7 +294,7 @@ def __run(name, **kwargs):
             #  the last screenshots ; move these to the results folder
             with lcd(data):
                 local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
-            network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data) \
+            network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data)
                               if fn.startswith('network_')}
             move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))
             net_start_old = network_images[min(network_images.keys())]
@@ -254,7 +305,7 @@ def __run(name, **kwargs):
             net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
             move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
             remove_files(data, *network_images.values())
-            parsing_chain(sim_path, with_malicious=sim=="with")
+            parsing_chain(sim_path, with_malicious=sim == "with")
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
@@ -347,6 +398,25 @@ def prepare(exp_file, ask=True, **kwargs):
                      the JSON file is searched in the experiments folder)
     """
     render_campaign(exp_file)
+
+
+@command(autocomplete=lambda: list_campaigns(),
+         examples=["my-simulation-campaign"],
+         expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
+         not_exists=('exp_file', {'loglvl': 'error',
+                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}),
+         add_console_to_kwargs=True)
+def remake_all(exp_file, **kwargs):
+    """
+    Remake a campaign of experiments (that is, rebuild the malicious for each experiment).
+
+    :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
+                     the JSON file is searched in the experiments folder)
+    """
+    console = kwargs.get('console')
+    experiments = {k: v for k, v in get_experiments(exp_file).items() if k != 'BASE'}
+    for name, params in sorted(experiments.items(), key=lambda x: x[0]):
+        make(name, **params) if console is None else console.do_make(name, **params)
 
 
 @command(autocomplete=lambda: list_campaigns(),

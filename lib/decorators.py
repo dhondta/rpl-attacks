@@ -19,34 +19,35 @@ def command(**params):
     This decorator checks if 'f' has a its first argument of the type FrameworkConsole in order to
      return the function with the right arguments.
 
-    If first argument is a FrameworkConsole, args[1] is split as if it were input as a raw_input argument.
+    If first argument is a FrameworkConsole, args[1] is split as if it were input as from raw_input/input.
      Otherwise, arguments are used normally.
 
-    :param examples: list of usage examples
-    :param autocomplete: list of choices to be displayed when typing 2 x <TAB>
-    :param behavior: attribute to be associated to the decorated function for handling a particular behavior
-    :param not_exists: specifies a tuple (argument_name, error_message[, ])
-    :param exists:
-    :param start_msg: message to be displayed before calling 'f'
-    :param reexec_on_emptyline: boolean indicating if the command is to be reexecuted when an empty line is
-                                 input in the console
-    :param add_console_to_kwargs: boolean indicating if the 'console' object is to be added to kwargs
-                                   (for usage inside command's code)
-    :param __base__: special parameter to be used if the command is to be multi-processed, it holds the
-                      "monitored" version of the command (that is, encapsulated inside a try-except)
+    :param params: keyword-arguments defining extended functionalities around the decorated function
+                    (see docstring in `commands.py` for more details about parameters)
     :return: the decorator function
     """
     def decorator(f):
-        # set command attributes
-        params.setdefault('behavior', DefaultCommand)
-        params.setdefault('add_console_to_kwargs', False)
+        # set command attributes using decorator's keyword-arguments
+        params.setdefault('behavior', DefaultCommand)      # gives a non-multi-processed behavior by default
+        params.setdefault('add_console_to_kwargs', False)  # does not let add 'console' to keyword-arguments
         for key, val in params.items():
             setattr(f, key, val)
 
         @wraps(f)
         def wrapper(*args, **kwargs):
+            """
+            This is the wrapper for the 'command' decorator, handling the following execution flow :
+             - It first determines if this command is used with a console
+             - If so, and 'add_console_to_kwargs' is in the attributes, 'console' is added to keyword-arguments
+                (for usage INSIDE the decorated function itself)
+             - In case of console, it performs a lexical analysis
+             - Anyway, it performs a signature checking
+             - It handles 'expand' parameter
+             - It then handles 'exists' and 'not_exists' (in this order)
+             - It finally selects the right behavior using 'behavior'
+            """
             # specific argument existence check through the 'not_exists' and 'exists' attributes
-            def get_ask(sig, attrs):
+            def get_ask():
                 if attrs['on_boolean'] in kwargs.keys():
                     return kwargs[attrs['on_boolean']]
                 try:
@@ -65,11 +66,11 @@ def command(**params):
                     return
                 if isinstance(msg, tuple):
                     values = []
-                    for arg in msg[1:]:
+                    for a in msg[1:]:
                         try:
-                            values.append(args[list(sig.parameters.keys()).index(arg)])
+                            values.append(args[list(sig.parameters.keys()).index(a)])
                         except KeyError:
-                            value = kwargs.get(arg)
+                            value = kwargs.get(a)
                             if value is not None:
                                 values.append(value)
                     getattr(logger, lvl)(msg[0].format(*values))
@@ -131,7 +132,7 @@ def command(**params):
                             log_msg(attrs['loglvl'], attrs['msg'])
                         if attrs.get('loglvl') in ('error', 'critical') or \
                                 ((attrs.get('loglvl') in ('warning', 'info') or fattr == 'exists') and
-                                 get_ask(sig, attrs) and attrs.get('confirm') is not None and
+                                 get_ask() and attrs.get('confirm') is not None and
                                  not std_input(attrs['confirm'], 'yellow') == 'yes'):
                             return
             # run the command and catch exception if any
@@ -155,7 +156,7 @@ def command(**params):
 class CommandMonitor(object):
     """
     This ugly class decorator is aimed to make a function 'f' pickable (required for multiprocessing) while
-     using a decoration handling exceptions and returning a tuple ([status], [result/error message]).
+     using a decoration that handles exceptions and returns a tuple ([status], [result/error message]).
 
     :param f: the decorated function
     """

@@ -167,6 +167,10 @@ Commands
 
 Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-flood``) or in the framework's console (e.g. ``launch hello-flood``).
 
+- **`build`**`:name`
+
+> This will the malicious mote from the simulation directory named 'name' and upload it to the target hardware.
+
 - **`clean`**`:name`
 
 > This will clean the simulation directory named 'name'.
@@ -219,15 +223,19 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 - **`make_all`**`:simulation-campaign-json-file`
 
-> This will generate a campaign of simulations from a JSON file formatted and execute the chain `clean`|`new`|`make` for each simulation. See ``./templates/experiments.json`` for simulation campaign JSON format.
+> This will generate a campaign of simulations from a JSON file. See ``./templates/experiments.json`` for simulation campaign JSON format.
 
 - **`prepare`**`:simulation-campaign-json-file`
 
 > This will generate a campaign JSON file from the template located at `./templates/experiments.json`.
 
+- **`remake_all`**`:simulation-campaign-json-file`
+
+> This will re-generate malicious motes for a campaign of simulations from a JSON file.
+
 - **`run`**`:name`
 
-> This will execute the the given simulation, parse log files and generate the results.
+> This will execute the given simulation, parse log files and generate the results.
 
 - **`run_all`**`:simulation-campaign-json-file`
 

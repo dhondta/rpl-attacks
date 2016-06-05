@@ -86,7 +86,7 @@ def get_contiki_includes(target):
                 for line in f.readlines():
                     for item in matches.keys():
                         if item in line:
-                            matches[item].extend(findall(item + r'\/([a-zA-Z0-9]+)(?:\s+|\/)', line))
+                            matches[item].extend(findall(item + r'/([a-zA-Z0-9]+)(?:\s+|/)', line))
         except IOError:
             pass
     for item in matches.keys():
@@ -188,8 +188,8 @@ def list_campaigns():
 
     :return: list of JSON files
     """
-    return sorted([basename(f) for f in listdir(EXPERIMENT_FOLDER) \
-                   if isfile(join(EXPERIMENT_FOLDER, f)) and f.endswith('.json') and \
+    return sorted([basename(f) for f in listdir(EXPERIMENT_FOLDER)
+                   if isfile(join(EXPERIMENT_FOLDER, f)) and f.endswith('.json') and
                    is_valid_campaign(join(EXPERIMENT_FOLDER, f))])
 
 
@@ -199,8 +199,8 @@ def list_experiments():
 
     :return: list of experiments
     """
-    return sorted([d for d in listdir(EXPERIMENT_FOLDER) \
-                   if isdir(join(EXPERIMENT_FOLDER, d)) and not d.startswith('.') and \
+    return sorted([d for d in listdir(EXPERIMENT_FOLDER)
+                   if isdir(join(EXPERIMENT_FOLDER, d)) and not d.startswith('.') and
                    check_structure(join(EXPERIMENT_FOLDER, d))])
 
 
@@ -210,6 +210,7 @@ def apply_replacements(contiki_rpl, replacements):
     This function replaces lines in specified ContikiRPL files. Each replacement is formatted as follows:
         {"ContikiRPL_filename": ["source_line", "destination_line"]}
 
+    :param contiki_rpl: path to ContikiRPL custom library
     :param replacements: dictionary of replacement entries
     """
     for filename, replacement in replacements.items():
@@ -288,8 +289,7 @@ def render_templates(path, only_malicious=False, **params):
     env = Environment(loader=FileSystemLoader(join(path, 'templates')))
     # fill in the different templates with input parameters
     constants, replacements = get_constants_and_replacements(params["blocks"])
-    templates["motes/malicious.c"]["constants"] = "\n".join(["#define {} {}".format(*c) \
-        for c in constants.items()])
+    templates["motes/malicious.c"]["constants"] = "\n".join(["#define {} {}".format(*c) for c in constants.items()])
     if only_malicious:
         template_malicious = "motes/malicious.c"
         write_template(join(path, "with-malicious"), env, template_malicious, **templates[template_malicious])
@@ -348,7 +348,7 @@ def write_template(path, env, name, **kwargs):
         f.write(template)
 
 
-def validated_parameters(dictionary, silent=False):
+def validated_parameters(dictionary):
     """
     This function validates all parameters coming from a JSON dictionary parsed from the simulation
      campagin file.
@@ -359,40 +359,45 @@ def validated_parameters(dictionary, silent=False):
     params = dict(motes=dictionary.get('motes'))
     # simulation parameters
     params["title"] = get_parameter(dictionary, "simulation", "title",
-        lambda x: isinstance(x, string_types), "is not a string")
+                                    lambda x: isinstance(x, string_types), "is not a string")
     params["goal"] = get_parameter(dictionary, "simulation", "goal",
-        lambda x: isinstance(x, string_types), "is not a string")
+                                   lambda x: isinstance(x, string_types), "is not a string")
     params["notes"] = get_parameter(dictionary, "simulation", "notes",
-        lambda x: isinstance(x, string_types), "is not a string")
+                                    lambda x: isinstance(x, string_types), "is not a string")
     params["duration"] = get_parameter(dictionary, "simulation", "duration",
-        lambda x: isinstance(x, int) and x > 0, "is not an integer greater than 0")
+                                       lambda x: isinstance(x, int) and x > 0, "is not an integer greater than 0")
     params["n"] = get_parameter(dictionary, "simulation", "number-motes",
-        lambda x: isinstance(x, int) and x > 0, "is not an integer greater than 0")
+                                lambda x: isinstance(x, int) and x > 0, "is not an integer greater than 0")
     params["repeat"] = get_parameter(dictionary, "simulation", "repeat",
-        lambda x: isinstance(x, int) and x > 0, "is not an integer greater than 0")
+                                     lambda x: isinstance(x, int) and x > 0, "is not an integer greater than 0")
     params["target"] = get_parameter(dictionary, "simulation", "target",
-        lambda x: x in get_available_platforms(), "is not a valid platform")
+                                     lambda x: x in get_available_platforms(), "is not a valid platform")
     params["malicious_target"] = get_parameter(dictionary, "malicious", "target",
-        lambda x: x in get_available_platforms(), "is not a valid platform", default=params["target"])
+                                               lambda x: x in get_available_platforms(), "is not a valid platform",
+                                               default=params["target"])
     params["mtype"] = get_parameter(dictionary, "malicious", "type",
-        lambda x: x in ["root", "sensor"], "is not 'root' or 'sensor'")
+                                    lambda x: x in ["root", "sensor"], "is not 'root' or 'sensor'")
     params["blocks"] = get_parameter(dictionary, "malicious", "building-blocks",
-        [lambda x: x in get_building_blocks()])
+                                     [lambda x: x in get_building_blocks()])
     params["ext_lib"] = get_parameter(dictionary, "malicious", "external-library",
-        lambda x: x is None or exists(x), "does not exist")
+                                      lambda x: x is None or exists(x), "does not exist")
     # area dimensions and limits
     params["min_range"] = get_parameter(dictionary, "simulation", "minimum-distance-from-root",
-        lambda x: isinstance(x, (int, float)) and x > 0, "is not an integer greater than 0")
+                                        lambda x: isinstance(x, (int, float)) and x > 0,
+                                        "is not an integer greater than 0")
     params["tx_range"] = get_parameter(dictionary, "simulation", "transmission-range",
-        lambda x: isinstance(x, (int, float)) and x > params["min_range"],
-        "is not an integer greater than {}".format(params["min_range"]))
+                                       lambda x: isinstance(x, (int, float)) and x > params["min_range"],
+                                       "is not an integer greater than {}".format(params["min_range"]))
     params["int_range"] = get_parameter(dictionary, "simulation", "interference-range",
-        lambda x: isinstance(x, (int, float)) and x >= params["tx_range"],
-        "is not an integer greater than or equal to {}".format(params["tx_range"]), default=2*params["tx_range"])
+                                        lambda x: isinstance(x, (int, float)) and x >= params["tx_range"],
+                                        "is not an integer greater than or equal to {}".format(params["tx_range"]),
+                                        default=2*params["tx_range"])
     params["area_side"] = get_parameter(dictionary, "simulation", "area-square-side",
-        lambda x: isinstance(x, (int, float)) and x >= sqrt(2.0) * params["min_range"],
-        "is not an integer or a float greater or equal to sqrt(2)*{:.0f}".format(params["min_range"]))
+                                        lambda x: isinstance(x, (int, float)) and x >= sqrt(2.0) * params["min_range"],
+                                        "is not an integer or a float greater or equal to sqrt(2)*{:.0f}"
+                                        .format(params["min_range"]))
     params["max_range"] = get_parameter(dictionary, "simulation", "area-square-side",
-        lambda x: isinstance(x, (int, float)) and x >= params["min_range"],
-        "is not an integer or a float greater or equal to {:.0f}".format(params["min_range"]))
+                                        lambda x: isinstance(x, (int, float)) and x >= params["min_range"],
+                                        "is not an integer or a float greater or equal to {:.0f}"
+                                        .format(params["min_range"]))
     return params

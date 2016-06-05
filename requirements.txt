@@ -1,6 +1,8 @@
 cairocffi
 cffi
+coloredlogs
 dill
+fabric
 fabric3
 funcsigs
 jinja2
@@ -9,7 +11,10 @@ matplotlib
 networkx
 numpy
 pandas
+pygments
 pypng
 readline
 sh
 scipy
+termcolor
+terminaltables
