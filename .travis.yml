@@ -8,8 +8,12 @@ python:
   - "3.4"
   - "3.5"
 
-before_install: "sudo apt-get install -qq python-numpy python-scipy"
+before_install:
+  - sudo apt-get install gfortran libopenblas-dev liblapack-dev
+  - sudo apt-get install -qq python-numpy python-scipy
 
-install: "pip install -r requirements.txt"
+install:
+  - pip install -r requirements.txt
 
-script: "fab test"
+script:
+  - fab test
