@@ -7,7 +7,7 @@ from sys import modules
 from terminaltables import SingleTable
 
 from .behaviors import MultiprocessedCommand
-from .constants import CONTIKI_FOLDER, COOJA_FOLDER, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, TEMPLATES_FOLDER
+from .constants import CONTIKI_FOLDER, COOJA_FOLDER, DEFAULTS, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, TEMPLATES_FOLDER
 from .decorators import CommandMonitor, command, stderr
 from .helpers import copy_files, copy_folder, move_files, remove_files, remove_folder, \
                      std_input, read_config, write_config
@@ -372,7 +372,7 @@ def make_all(exp_file, **kwargs):
     if 'BASE' in experiments.keys():
         experiments['BASE']['silent'] = True
         sim_params = validated_parameters(experiments['BASE'])
-        motes = generate_motes(**sim_params)
+        motes = generate_motes(defaults=DEFAULTS, **sim_params)
         del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
         exp_params = {}
