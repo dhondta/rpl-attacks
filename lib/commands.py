@@ -114,7 +114,7 @@ def clean(name, ask=True, **kwargs):
          expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}),
          not_exists=('path', {'loglvl': 'error', 'msg': (" > Experiment '{}' does not exist !", 'name')}),
          start_msg=("STARTING COOJA WITH EXPERIMENT '{}'", 'name'))
-def cooja(name, with_malicious=False, **kwargs):
+def cooja(name, with_malicious=True, **kwargs):
     """
     Start an experiment in Cooja with/without the malicious mote.
 
@@ -379,23 +379,23 @@ def make_all(exp_file, **kwargs):
     """
     global reuse_bin_path
     console = kwargs.get('console')
-    clean_all(exp_file) if console is None else console.do_clean_all(exp_file, silent=True)
+    clean_all(exp_file, silent=True) if console is None else console.do_clean_all(exp_file, silent=True)
     experiments = get_experiments(exp_file)
-    sim_params, motes = None, None
+    sim_json, motes = None, None
     # if a simulation named 'BASE' is present, use it as a template simulation for all the other simulations
     if 'BASE' in experiments.keys():
         experiments['BASE']['silent'] = True
+        sim_json = experiments['BASE']['simulation']
         sim_params = validated_parameters(experiments['BASE'])
         motes = generate_motes(defaults=DEFAULTS, **sim_params)
         del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
-        exp_params = {}
-        if sim_params is not None:
-            exp_params.update(sim_params)
-        exp_params.update(params)
-        if sim_params is not None:
+        if sim_json is not None:
+            for k, v in sim_json.items():
+                params.setdefault('simulation', {})
+                params['simulation'][k] = v
             params['motes'] = motes
-        make(name, ask=False, **exp_params) if console is None else console.do_make(name, ask=False, **exp_params)
+        make(name, ask=False, **params) if console is None else console.do_make(name, ask=False, **params)
 
 
 @command(autocomplete=lambda: list_campaigns(),

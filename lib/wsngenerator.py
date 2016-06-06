@@ -53,7 +53,7 @@ def generate_motes(**kwargs):
             nodes.append({'id': node_ids[ni-1], 'type': 'sensor', 'x': x, 'y': y, 'z': 0})
         if ni == n:
             break
-        range_inc *= 0.8
+        range_inc *= 0.75
     # finally, add the malicious mote in the middle of the network
     # get the average of the squared x and y deltas
     avg_x = average([sign(n['x']) * n['x'] ** 2 for n in nodes])
