@@ -11,11 +11,14 @@ python:
 before_install:
   - sudo apt-get install gfortran libopenblas-dev liblapack-dev
   - sudo apt-get install -qq python-numpy python-scipy
-  - cd ~/ && git clone https://github.com/contiki-os/contiki.git
+  - sudo apt-get install imagemagick
+  - cd ~
+  - git clone https://github.com/contiki-os/contiki.git
   - mkdir ~/Experiments
+  - mkdir ~/Projects
+  - cd ~/Projects
 
 install:
-  - apt-get install imagemagick
   - pip install -r requirements.txt
 
 script:
