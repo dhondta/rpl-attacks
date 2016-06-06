@@ -7,6 +7,8 @@ python:
   - "3.4"
   - "3.5"
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install:
+  - travis_wait 30 pip install scipy
+  - pip install -r requirements.txt
 # command to run tests
 script: "fab test"
