@@ -14,7 +14,7 @@ def generate_motes(**kwargs):
     """
     defaults = kwargs.pop('defaults')
     nodes = [{"id": 0, "type": "root", "x": 0, "y": 0, "z": 0}]
-    n = kwargs.pop('n', kwargs["number-motes"])
+    n = kwargs.pop('n', defaults["number-motes"])
     min_range = kwargs.pop('min_range', defaults["minimum-distance-from-root"])
     max_range = kwargs.pop('max_range', defaults["area-square-side"] // 2)
     tx_range = kwargs.pop('tx_range', defaults["transmission-range"])
