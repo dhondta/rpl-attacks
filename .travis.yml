@@ -11,12 +11,11 @@ python:
 before_install:
   - sudo apt-get install gfortran libopenblas-dev liblapack-dev
   - sudo apt-get install -qq python-numpy python-scipy
+  - cd ~/ && git clone https://github.com/contiki-os/contiki.git
+  - mkdir ~/Experiments
 
 install:
   - pip install -r requirements.txt
-
-after_install:
-  - cd ~/ && git clone https://github.com/contiki-os/contiki.git
 
 script:
   - fab test
