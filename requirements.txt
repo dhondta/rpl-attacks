@@ -16,5 +16,6 @@ pypng
 readline
 sh
 scipy
+setuptools
 termcolor
 terminaltables
