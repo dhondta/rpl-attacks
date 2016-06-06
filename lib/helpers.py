@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 import ast
+import re
 import sh
 from os import makedirs
 from os.path import exists, expanduser, join, split
@@ -173,13 +174,23 @@ def replace_in_file(path, replacement):
     :param replacement: list of two strings formatted as [old_line_pattern, new_line_replacement]
     """
     tmp = path + '.tmp'
+    try:
+        regex = re.compile(replacement[0])
+    except re.error:
+        regex = None
     with open(tmp, 'w+') as nf:
         with open(path) as of:
             for line in of.readlines():
-                if replacement[0] in line:
-                    nf.write(line.replace(replacement[0], replacement[1]))
-                else:
-                    nf.write(line)
+                if regex is not None:
+                    match = regex.search(line)
+                    if match is not None:
+                        try:
+                            line = line.replace(match.groups(0)[0], replacement[1])
+                        except IndexError:
+                            line = line.replace(match.group(), replacement[1])
+                elif replacement[0] in line:
+                    line = line.replace(replacement[0], replacement[1])
+                nf.write(line)
     sh.rm(path)
     sh.mv(tmp, path)
 

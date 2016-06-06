@@ -15,8 +15,9 @@ from .install import check_cooja, modify_cooja, register_new_path_in_profile, \
                      update_cooja_build, update_cooja_user_properties
 from .logconfig import logger, HIDDEN_ALL
 from .parser import parsing_chain
-from .utils import apply_replacements, check_structure, generate_motes, get_contiki_includes, get_experiments, \
-                   get_path, list_campaigns, list_experiments, render_campaign, render_templates, validated_parameters
+from .utils import apply_debug_flags, apply_replacements, check_structure, generate_motes, \
+                   get_contiki_includes, get_experiments, get_path, list_campaigns, list_experiments, \
+                   render_campaign, render_templates, validated_parameters
 
 reuse_bin_path = None
 
@@ -164,13 +165,17 @@ def __make(name, ask=True, **kwargs):
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with_malicious = join(path, 'with-malicious', 'motes')
         without_malicious = join(path, 'without-malicious', 'motes')
+        copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["target"]))
+        contiki = join(with_malicious, 'contiki')
+        contiki_rpl = join(contiki, 'core', 'net', 'rpl')
+        apply_debug_flags(contiki_rpl, debug=['NONE', 'PRINT'][params["debug"]])
         with lcd(with_malicious):
             croot, csensor = 'root.{}'.format(params["target"]), 'sensor.{}'.format(params["target"])
             if reuse_bin_path is None or reuse_bin_path == with_malicious:
                 logger.debug(" > Making '{}'...".format(croot))
-                stderr(local)("make root", capture=True)
+                stderr(local)("make root CONTIKI={}".format(contiki), capture=True)
                 logger.debug(" > Making '{}'...".format(csensor))
-                stderr(local)("make sensor", capture=True)
+                stderr(local)("make sensor CONTIKI={}".format(contiki), capture=True)
                 # here, files are moved ; otherwise, 'make clean' would also remove *.z1
                 move_files(with_malicious, without_malicious, croot, csensor)
                 # after compiling, clean artifacts
@@ -180,20 +185,18 @@ def __make(name, ask=True, **kwargs):
                 copy_files(reuse_bin_path, without_malicious, croot, csensor)
             # now, handle the malicious mote compilation
             malicious = 'malicious.{}'.format(params["malicious_target"])
-            copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["target"]))
-            contiki_rpl = join(with_malicious, 'contiki', 'core', 'net', 'rpl')
             if ext_lib is not None:
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)
             logger.debug(" > Making '{}'...".format(malicious))
             stderr(local)("make malicious CONTIKI={} TARGET={}"
-                          .format(join(with_malicious, 'contiki'), params["malicious_target"]), capture=True)
+                          .format(contiki, params["malicious_target"]), capture=True)
             move_files(with_malicious, without_malicious, malicious)
             local('make clean')
             remove_files(with_malicious, 'malicious.c')
             move_files(without_malicious, with_malicious, malicious)
             copy_files(without_malicious, with_malicious, croot, csensor)
-            remove_folder((with_malicious, 'contiki'))
+            remove_folder(contiki)
 _make = CommandMonitor(__make)
 make = command(
     autocomplete=lambda: list_experiments(),

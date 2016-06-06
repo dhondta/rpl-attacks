@@ -54,6 +54,9 @@ CONTIKI_FILES = [
     "-tools/avr-make-symbols",
 ]
 
+# This is the list of files to be edited for changing the debug flag at compilation time
+DEBUG_FILES = ['rpl.c', 'rpl-dag.c', 'rpl-dag-root.c', 'rpl-icmp6.c', 'rpl-timers.c']
+
 # simulation default parameters
 MIN_DIST_BETWEEN_MOTES = 20.0
 MAX_DIST_BETWEEN_MOTES = 50.0
@@ -73,6 +76,7 @@ DEFAULTS = {
     "malicious-target": None,
     "title": "Default title",
     "type": "sensor",
+    "debug": True,
 }
 
 # Note: Cooja simulation file must be the last key in the following ordered dictionary

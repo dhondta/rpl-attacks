@@ -9,7 +9,7 @@ from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, 
 from re import findall
 from six import string_types
 
-from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
+from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEBUG_FILES, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
                        EXPERIMENT_FOLDER, TEMPLATES_FOLDER
 from .helpers import remove_files, replace_in_file
 from .logconfig import logger
@@ -205,6 +205,17 @@ def list_experiments():
 
 
 # ************************************** TEMPLATE AND PARAMETER FUNCTIONS **************************************
+def apply_debug_flags(contiki_rpl, debug='NONE'):
+    """
+    This function replaces debug flags in ContikiRPL files.
+
+    :param contiki_rpl: path to ContikiRPL custom library
+    :param debug: the new value to be set for the debug flag
+    """
+    for filename in DEBUG_FILES:
+        replace_in_file(join(contiki_rpl, filename), (r'^#define DEBUG DEBUG_([A-Z]+)$', debug))
+
+
 def apply_replacements(contiki_rpl, replacements):
     """
     This function replaces lines in specified ContikiRPL files. Each replacement is formatted as follows:
@@ -358,6 +369,8 @@ def validated_parameters(dictionary):
     """
     params = dict(motes=dictionary.get('motes'))
     # simulation parameters
+    params["debug"] = get_parameter(dictionary, "simulation", "debug",
+                                    lambda x: isinstance(x, bool), "is not a boolean")
     params["title"] = get_parameter(dictionary, "simulation", "title",
                                     lambda x: isinstance(x, string_types), "is not a string")
     params["goal"] = get_parameter(dictionary, "simulation", "goal",

@@ -29,6 +29,6 @@ Building blocks consist of either ContikiRPL configuration constants or single-l
     "RPL_CONF_MIN_HOPRANKINC": 128
   },
   "version": {
-    "rpl-icmp6.c": ["dag->version", "dag->version++"]
+    "rpl-icmp6.c": ["dag->version;", "dag->version++;"]
   }
 }
