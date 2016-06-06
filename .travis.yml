@@ -8,7 +8,7 @@ python:
   - "3.4"
   - "3.5"
 
-before_install: "apt-get install -qq python-numpy python-scipy"
+before_install: "sudo apt-get install -qq python-numpy python-scipy"
 
 install: "pip install -r requirements.txt"
 
