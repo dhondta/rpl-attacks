@@ -29,7 +29,6 @@ def command(**params):
     def decorator(f):
         # set command attributes using decorator's keyword-arguments
         params.setdefault('behavior', DefaultCommand)      # gives a non-multi-processed behavior by default
-        params.setdefault('add_console_to_kwargs', False)  # does not let add 'console' to keyword-arguments
         for key, val in params.items():
             setattr(f, key, val)
 
@@ -38,8 +37,6 @@ def command(**params):
             """
             This is the wrapper for the 'command' decorator, handling the following execution flow :
              - It first determines if this command is used with a console
-             - If so, and 'add_console_to_kwargs' is in the attributes, 'console' is added to keyword-arguments
-                (for usage INSIDE the decorated function itself)
              - In case of console, it performs a lexical analysis
              - Anyway, it performs a signature checking
              - It handles 'expand' parameter
@@ -78,7 +75,7 @@ def command(**params):
                     getattr(logger, lvl)(msg)
 
             console = args[0] if len(args) > 0 and isinstance(args[0], Cmd) else None
-            if console is not None and f.add_console_to_kwargs:
+            if console is not None:
                 kwargs['console'] = console
             # lexical analysis
             if len(args) > 1 and console is not None:
@@ -138,13 +135,13 @@ def command(**params):
             # run the command and catch exception if any
             if f.behavior is MultiprocessedCommand and console is not None:
                 console.clean_tasks()
-                if not any([i['name'] == args[0] and i['status'] == 'PENDING' for i in console.tasklist.values()]):
+                pending_tasks = {i['name']: str(o) for o, i in console.tasklist.items() if i['status'] == 'PENDING'}
+                if args[0] not in pending_tasks.keys():
                     if hasattr(f, 'start_msg'):
                         log_msg('info', f.start_msg)
                     f.behavior(console, f.__base__, args[0]).run(*args, **kwargs)
                 else:
-                    logger.warning("A task is still pending on this experiment ({})"
-                                   .format(f.__base__.__name__.lstrip('_')))
+                    logger.warning("A task is still pending on this experiment ({})".format(pending_tasks[args[0]]))
             else:
                 if hasattr(f, 'start_msg'):
                     log_msg('info', f.start_msg)

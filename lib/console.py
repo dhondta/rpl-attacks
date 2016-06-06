@@ -59,7 +59,7 @@ class Console(Cmd, object):
         try:
             import readline
             readline.set_completer_delims(' ')
-            super(Console, self).cmdloop(intro)
+            super(Console, self).cmdloop()
         except (KeyboardInterrupt, EOFError):
             self.cmdloop(' ')
 

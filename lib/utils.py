@@ -68,34 +68,45 @@ def get_constants_and_replacements(blocks):
     return constants, replacements
 
 
-def get_contiki_includes(target):
+def get_contiki_includes(target, malicious_target=None):
     """
     This function is aimed to compute the list of includes from the contiki folder based on a given list
      (CONTIKI_FILES) and the current target by parsing its (potentially existing) Makefile's.
 
     :param target: the mote's platform to be used for compilation
+    :param malicious_target: the malicious mote's platform to be used for compilation
     :return: the list of includes from Contiki for the specified target
     """
-    files = [f.format(target) if 'platform' in f else f for f in CONTIKI_FILES]
+    files = [f.format(target) if f.startswith('platform') else f for f in CONTIKI_FILES]
+    targets = [target]
+    if malicious_target is not None and malicious_target != target:
+        files += [f.format(malicious_target) if 'platform' in f else f for f in CONTIKI_FILES]
+        targets += [malicious_target]
+    # separate includes and excludes based on the heading '-'
     includes = [x for x in set(files) if not x.startswith('-')]
     excludes = [x[1:] for x in list(set(files) - set(includes))]
+    # collect the cpu's and dev's to be included based on the target(s) to be used
     matches = {'cpu': [], 'dev': []}
-    for makefile in ['Makefile.{}'.format(target), 'Makefile.common']:
-        try:
-            with open(join(CONTIKI_FOLDER, 'platform', target, makefile)) as f:
-                for line in f.readlines():
-                    for item in matches.keys():
-                        if item in line:
-                            matches[item].extend(findall(item + r'/([a-zA-Z0-9]+)(?:\s+|/)', line))
-        except IOError:
-            pass
+    for target in targets:
+        # search for cpu's and dev's in Makefile's for the selected target(s)
+        for makefile in ['Makefile.{}'.format(target), 'Makefile.common']:
+            try:
+                with open(join(CONTIKI_FOLDER, 'platform', target, makefile)) as f:
+                    for line in f.readlines():
+                        for item in matches.keys():
+                            if item in line:
+                                matches[item].extend(findall(item + r'/([a-zA-Z0-9]+)(?:\s+|/)', line))
+            except IOError:
+                pass
+    # then, for the cpu's and dev's matched, add these to the includes
     for item in matches.keys():
         if len(matches[item]) == 0:
             includes = [f.format('').rstrip('/') if item in f else f for f in includes]
         else:
             includes = [f for f in includes if item not in f]
             for match in set(matches[item]):
-                includes.append(join(item, match))
+                if exists(join(CONTIKI_FOLDER, item, match)):
+                    includes.append(join(item, match))
     folders = {}
     for exclude in excludes:
         folder, fn = split(exclude)

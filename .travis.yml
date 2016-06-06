@@ -15,6 +15,7 @@ before_install:
   - mkdir ~/Experiments
 
 install:
+  - apt-get install imagemagick
   - pip install -r requirements.txt
 
 script:

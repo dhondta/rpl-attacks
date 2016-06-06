@@ -63,8 +63,6 @@ The available parameters of the 'command' decorator are :
     :param start_msg: message to be displayed before calling 'f'
     :param reexec_on_emptyline: boolean indicating if the command is to be re-executed when an empty line is
                                  input in the console
-    :param add_console_to_kwargs: boolean indicating if the 'console' object is to be added to kwargs
-                                   (for usage inside command's code)
     :param __base__: special parameter to be used if the command is to be multi-processed, it holds the
                       "monitored" version of the command (that is, encapsulated inside a try-except)
 
@@ -78,8 +76,7 @@ The available parameters of the 'command' decorator are :
          not_exists=('path', {'loglvl': 'error', 'msg': (" > Experiment '{}' does not exist !", 'name')}),
          exists=('path', {'on_boolean': 'ask', 'confirm': "Before continuing, please check that your hardware is"
                                                           " plugged.\n Are you ready ? (yes|no) [default: no] "}),
-         start_msg=("BUILDING MALICIOUS MOTE BASED ON EXPERIMENT '{}'", 'name'),
-         add_console_to_kwargs=True)
+         start_msg=("BUILDING MALICIOUS MOTE BASED ON EXPERIMENT '{}'", 'name'))
 def build(name, ask=True, **kwargs):
     """
     Build the malicious mote to its target hardware.
@@ -105,9 +102,11 @@ def clean(name, ask=True, **kwargs):
     :param name: experiment name (or absolute path to experiment)
     :param ask: ask confirmation
     """
-    logger.debug(" > Cleaning folder...")
-    with hide(*HIDDEN_ALL):
-        local("rm -rf {}".format(kwargs['path']))
+    console = kwargs.get('console')
+    if console is None or not any([i['name'] == name and i['status'] == 'PENDING' for i in console.tasklist.values()]):
+        logger.debug(" > Cleaning folder...")
+        with hide(*HIDDEN_ALL):
+            local("rm -rf {}".format(kwargs['path']))
 
 
 @command(autocomplete=lambda: list_experiments(),
@@ -165,11 +164,14 @@ def __make(name, ask=True, **kwargs):
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with_malicious = join(path, 'with-malicious', 'motes')
         without_malicious = join(path, 'without-malicious', 'motes')
-        copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["target"]))
         contiki = join(with_malicious, 'contiki')
         contiki_rpl = join(contiki, 'core', 'net', 'rpl')
+        # copy a reduced version of Contiki where the debug flags can be set for RPL files set in DEBUG_FILES
+        copy_folder(CONTIKI_FOLDER, with_malicious,
+                    includes=get_contiki_includes(params["target"], params["malicious_target"]))
         apply_debug_flags(contiki_rpl, debug=['NONE', 'PRINT'][params["debug"]])
         with lcd(with_malicious):
+            # first, compile root and sensor mote types
             croot, csensor = 'root.{}'.format(params["target"]), 'sensor.{}'.format(params["target"])
             if reuse_bin_path is None or reuse_bin_path == with_malicious:
                 logger.debug(" > Making '{}'...".format(croot))
@@ -183,19 +185,23 @@ def __make(name, ask=True, **kwargs):
                 remove_files(with_malicious, 'root.c', 'sensor.c')
             else:
                 copy_files(reuse_bin_path, without_malicious, croot, csensor)
-            # now, handle the malicious mote compilation
+            # second, handle the malicious mote compilation
             malicious = 'malicious.{}'.format(params["malicious_target"])
             if ext_lib is not None:
+                remove_folder(contiki_rpl)
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)
             logger.debug(" > Making '{}'...".format(malicious))
             stderr(local)("make malicious CONTIKI={} TARGET={}"
                           .format(contiki, params["malicious_target"]), capture=True)
+            # temporary move compiled malicious mote, clean the compilation artifacts, move the malicious mote back
+            #  from the temporary location and copy compiled root and sensor motes
             move_files(with_malicious, without_malicious, malicious)
             local('make clean')
-            remove_files(with_malicious, 'malicious.c')
             move_files(without_malicious, with_malicious, malicious)
             copy_files(without_malicious, with_malicious, croot, csensor)
+            # finally, remove compilation sources
+            remove_files(with_malicious, 'malicious.c')
             remove_folder(contiki)
 _make = CommandMonitor(__make)
 make = command(
@@ -240,18 +246,20 @@ def __remake(name, build=False, **kwargs):
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with_malicious = join(path, 'with-malicious', 'motes')
         without_malicious = join(path, 'without-malicious', 'motes')
+        contiki = join(with_malicious, 'contiki')
+        contiki_rpl = join(contiki, 'core', 'net', 'rpl')
         with lcd(with_malicious):
             malicious = 'malicious.{}'.format(params["malicious_target"])
             croot, csensor = 'root.{}'.format(params["target"]), 'sensor.{}'.format(params["target"])
             # handle the malicious mote recompilation
-            copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["target"]))
-            contiki_rpl = join(with_malicious, 'contiki', 'core', 'net', 'rpl')
+            copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["malicious_target"]))
             if ext_lib is not None:
+                remove_folder(contiki_rpl)
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)
             logger.debug(" > Making '{}'...".format(malicious))
             stderr(local)("make malicious{} CONTIKI={}"
-                          .format(['', '.upload'][build], join(with_malicious, 'contiki')), capture=True)
+                          .format(['', '.upload'][build], contiki), capture=True)
             if build:
                 build = get_path(path, 'build', create=True)
                 move_files(with_malicious, build, 'tmpimage.ihex')
@@ -261,7 +269,7 @@ def __remake(name, build=False, **kwargs):
             remove_files(with_malicious, 'malicious.c')
             move_files(without_malicious, with_malicious, malicious)
             copy_files(without_malicious, with_malicious, croot, csensor)
-            remove_folder((with_malicious, 'contiki'))
+            remove_folder(contiki)
 _remake = CommandMonitor(__remake)
 remake = command(
     autocomplete=lambda: list_experiments(),
@@ -297,6 +305,7 @@ def __run(name, **kwargs):
             #  the last screenshots ; move these to the results folder
             with lcd(data):
                 local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
+                local('convert -quiet -delay 1 wsn-{}-malicious.avi wsn-{}-malicious.gif'.format(sim))
             network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data)
                               if fn.startswith('network_')}
             move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))
@@ -327,15 +336,18 @@ run = command(
          expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
          not_exists=('exp_file', {'loglvl': 'error',
                                   'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}))
-def clean_all(exp_file):
+def clean_all(exp_file, **kwargs):
     """
     Make a campaign of experiments.
 
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
     """
-    for name, params in get_experiments(exp_file).items():
-        clean(name, ask=False, silent=True)
+    console = kwargs.get('console')
+    silent = kwargs.get('silent', False)
+    experiments = {k: v for k, v in get_experiments(exp_file).items() if k != 'BASE'}
+    for name, params in experiments.items():
+        clean(name, ask=False, silent=silent) if console is None else console.do_clean(name, ask=False, silent=silent)
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -357,8 +369,7 @@ def drop(exp_file, ask=True, **kwargs):
          examples=["my-simulation-campaign"],
          expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
          not_exists=('exp_file', {'loglvl': 'error',
-                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}),
-         add_console_to_kwargs=True)
+                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}))
 def make_all(exp_file, **kwargs):
     """
     Make a campaign of experiments.
@@ -368,7 +379,7 @@ def make_all(exp_file, **kwargs):
     """
     global reuse_bin_path
     console = kwargs.get('console')
-    clean_all(exp_file)
+    clean_all(exp_file) if console is None else console.do_clean_all(exp_file, silent=True)
     experiments = get_experiments(exp_file)
     sim_params, motes = None, None
     # if a simulation named 'BASE' is present, use it as a template simulation for all the other simulations
@@ -384,7 +395,7 @@ def make_all(exp_file, **kwargs):
         exp_params.update(params)
         if sim_params is not None:
             params['motes'] = motes
-        make(name, **exp_params) if console is None else console.do_make(name, **exp_params)
+        make(name, ask=False, **exp_params) if console is None else console.do_make(name, ask=False, **exp_params)
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -407,8 +418,7 @@ def prepare(exp_file, ask=True, **kwargs):
          examples=["my-simulation-campaign"],
          expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
          not_exists=('exp_file', {'loglvl': 'error',
-                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}),
-         add_console_to_kwargs=True)
+                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}))
 def remake_all(exp_file, **kwargs):
     """
     Remake a campaign of experiments (that is, rebuild the malicious for each experiment).
@@ -419,15 +429,14 @@ def remake_all(exp_file, **kwargs):
     console = kwargs.get('console')
     experiments = {k: v for k, v in get_experiments(exp_file).items() if k != 'BASE'}
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
-        make(name, **params) if console is None else console.do_make(name, **params)
+        remake(name, **params) if console is None else console.do_remake(name, **params)
 
 
 @command(autocomplete=lambda: list_campaigns(),
          examples=["my-simulation-campaign"],
          expand=('exp_file', {'into': EXPERIMENT_FOLDER, 'ext': 'json'}),
          not_exists=('exp_file', {'loglvl': 'error',
-                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}),
-         add_console_to_kwargs=True)
+                                  'msg': (" > Experiment campaign '{}' does not exist !", 'exp_file')}))
 def run_all(exp_file, **kwargs):
     """
     Run a campaign of experiments.

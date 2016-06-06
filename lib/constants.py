@@ -37,8 +37,8 @@ CONTIKI_FILES = [
     "dev/{}",
     "platform/{}",
     "cpu/{}",
-    "tools",
     "Makefile.include",
+    "tools",
     "-tools/code-style",
     "-tools/coffee-manager",
     "-tools/collect-view",
@@ -55,7 +55,19 @@ CONTIKI_FILES = [
 ]
 
 # This is the list of files to be edited for changing the debug flag at compilation time
-DEBUG_FILES = ['rpl.c', 'rpl-dag.c', 'rpl-dag-root.c', 'rpl-icmp6.c', 'rpl-timers.c']
+#
+# WARNING: Interesting debug messages are essentially found in the following files:
+#           - rpl.c
+#           - rpl-dag.c
+#           - rpl-dag-root.c
+#           - rpl-icmp6.c
+#           - rpl-timers.c
+#          If using several of them, memory overflow error can be thrown, e.g. with the Sky mote, and a fix should
+#           ba applied in Makefile if more debugging is required.
+#          See e.g. http://stackoverflow.com/questions/27818056/contiki-os-rom-partition
+#                   http://lists.cetic.be/pipermail/6lbr-dev/2015-April/000478.html
+#
+DEBUG_FILES = ['rpl-icmp6.c']
 
 # simulation default parameters
 MIN_DIST_BETWEEN_MOTES = 20.0
