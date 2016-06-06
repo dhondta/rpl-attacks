@@ -181,7 +181,7 @@ def __make(name, ask=True, **kwargs):
             # now, handle the malicious mote compilation
             malicious = 'malicious.{}'.format(params["malicious_target"])
             copy_folder(CONTIKI_FOLDER, with_malicious, includes=get_contiki_includes(params["target"]))
-            contiki_rpl = join(with_malicious, 'core', 'net', 'rpl')
+            contiki_rpl = join(with_malicious, 'contiki', 'core', 'net', 'rpl')
             if ext_lib is not None:
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)

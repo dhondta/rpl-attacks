@@ -173,7 +173,7 @@ def replace_in_file(path, replacement):
     :param replacement: list of two strings formatted as [old_line_pattern, new_line_replacement]
     """
     tmp = path + '.tmp'
-    with open(tmp, 'w') as nf:
+    with open(tmp, 'w+') as nf:
         with open(path) as of:
             for line in of.readlines():
                 if replacement[0] in line:
