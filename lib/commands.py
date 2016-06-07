@@ -2,7 +2,7 @@
 from fabric.api import hide, lcd, local, settings, sudo
 from inspect import getmembers, isfunction
 from os import listdir
-from os.path import exists, expanduser, join, splitext
+from os.path import basename, exists, expanduser, join, splitext
 from sys import modules
 from terminaltables import SingleTable
 
@@ -16,6 +16,7 @@ from .install import check_cooja, modify_cooja, register_new_path_in_profile, \
 from .logconfig import logger, HIDDEN_ALL
 from .parser import parsing_chain
 from .utils import apply_debug_flags, apply_replacements, check_structure, generate_motes, \
+                   get_motes_from_simulation, set_motes_to_simulation, \
                    get_contiki_includes, get_experiments, get_path, list_campaigns, list_experiments, \
                    render_campaign, render_templates, validated_parameters
 
@@ -116,15 +117,32 @@ def clean(name, ask=True, **kwargs):
          start_msg=("STARTING COOJA WITH EXPERIMENT '{}'", 'name'))
 def cooja(name, with_malicious=True, **kwargs):
     """
-    Start an experiment in Cooja with/without the malicious mote.
+    Start an experiment in Cooja with/without the malicious mote and updates the experiment if motes' positions
+     were changed.
 
     :param name: experiment name
     :param with_malicious: use the simulation WITH the malicious mote or not
     :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
+    sim_path = join(kwargs['path'], 'with{}-malicious'.format(['out', ''][with_malicious is True]))
+    motes_before = get_motes_from_simulation(join(sim_path, 'simulation.csc'), as_dictionary=True)
     with hide(*HIDDEN_ALL):
-        with lcd(join(kwargs['path'], 'with{}-malicious'.format('' if with_malicious else 'out'))):
+        with lcd(sim_path):
             local("make cooja")
+    motes_after = get_motes_from_simulation(join(sim_path, 'simulation.csc'), as_dictionary=True)
+    # if there was a change, update the other simulation in this experiment
+    if len(set(motes_before.items()) & set(motes_after.items())) > 0:
+        other_sim_path = join(kwargs['path'], 'with{}-malicious'.format(['', 'out'][with_malicious is True]))
+        set_motes_to_simulation(join(other_sim_path, 'simulation.csc'), motes_after)
+    # if this experiment is part of a campaign, update this
+    campaign = read_config(kwargs['path']).get('campaign')
+    if campaign is not None:
+        for experiment in get_experiments(campaign):
+            if experiment in ['BASE', name]:
+                continue
+            exp_path = join(EXPERIMENT_FOLDER, experiment)
+            set_motes_to_simulation(join(exp_path, 'with-malicious', 'simulation.csc'), motes_after)
+            set_motes_to_simulation(join(exp_path, 'without-malicious', 'simulation.csc'), motes_after)
 
 
 def __make(name, ask=True, **kwargs):
@@ -303,9 +321,11 @@ def __run(name, **kwargs):
             remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
             # once the execution is over, gather the screenshots into a single GIF and keep the first and
             #  the last screenshots ; move these to the results folder
-            with lcd(data):
-                local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
-                local('convert -quiet -delay 1 wsn-{}-malicious.avi wsn-{}-malicious.gif'.format(sim))
+            with settings(warn_only=True):
+                with lcd(data):
+                    local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
+                    local('avconv -i network_%05d.png -r 10 -c:v libx264 -crf 20 -pix_fmt yuv420p'
+                          ' wsn-{}-malicious.mov'.format(sim))
             network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data)
                               if fn.startswith('network_')}
             move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))
@@ -390,6 +410,7 @@ def make_all(exp_file, **kwargs):
         motes = generate_motes(defaults=DEFAULTS, **sim_params)
         del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
+        params['campaign'] = splitext(basename(exp_file))[0]
         if sim_json is not None:
             for k, v in sim_json.items():
                 params.setdefault('simulation', {})
@@ -454,7 +475,7 @@ def run_all(exp_file, **kwargs):
 @command(autocomplete=["campaigns", "experiments"],
          examples=["experiments", "campaigns"],
          reexec_on_emptyline=True)
-def list(item_type):
+def list(item_type, **kwargs):
     """
     List all available items of a specified type.
 
@@ -475,7 +496,7 @@ def list(item_type):
 # ***************************************** SETUP COMMANDS *****************************************
 @command(examples=["/opt/contiki", "~/contiki ~/Documents/experiments"],
          start_msg="CREATING CONFIGURATION FILE AT '~/.rpl-attacks.conf'")
-def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silent=False):
+def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silent=False, **kwargs):
     """
     Create a new configuration file at `~/.rpl-attacks.conf`.
 
@@ -489,7 +510,7 @@ def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silen
 
 
 @command(start_msg="TESTING THE FRAMEWORK")
-def test():
+def test(**kwargs):
     """
     Run framework's tests.
     """
@@ -499,7 +520,7 @@ def test():
 
 
 @command(start_msg="SETTING UP OF THE FRAMEWORK")
-def setup(silent=False):
+def setup(silent=False, **kwargs):
     """
     Setup the framework.
     """

@@ -2,16 +2,16 @@
 from copy import deepcopy
 from jinja2 import Environment, FileSystemLoader
 from jsmin import jsmin
-from json import dump, loads
+from json import loads
 from math import sqrt
 from os import listdir, makedirs, rename
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
-from re import findall
+from re import findall, finditer, search, sub, DOTALL, MULTILINE
 from six import string_types
 
 from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEBUG_FILES, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
                        EXPERIMENT_FOLDER, TEMPLATES_FOLDER
-from .helpers import remove_files, replace_in_file
+from .helpers import move_files, remove_files, replace_in_file
 from .logconfig import logger
 from .wsngenerator import generate_motes
 
@@ -141,6 +141,31 @@ def get_experiments(exp_file):
     with open(exp_file) as f:
         experiments = loads(jsmin(f.read()))
     return experiments
+
+
+def get_motes_from_simulation(simfile, as_dictionary=True):
+    """
+    This function retrieves motes data from a simulation file (.csc).
+
+    :param simfile: path to the simulation file
+    :param as_dictionary: flag to indicate that the output has to be formatted as a dictionary
+    :return: the list of motes formatted as dictionaries with 'id', 'x', 'y' and 'motetype_identifier' keys if
+              short is False or a dictionary with each mote id as the key and its tuple (x, y) as the value
+    """
+    motes = []
+    with open(simfile) as f:
+        content = f.read()
+    iterables, fields = [], ['mote_id']
+    for it in ['id', 'x', 'y', 'motetype_identifier']:
+        iterables.append(finditer(r'^\s*<{0}>(?P<{0}>.*)</{0}>\s*$'.format(it), content, MULTILINE))
+    for matches in zip(*iterables):
+        mote = {}
+        for m in matches:
+            mote.update(m.groupdict())
+        motes.append(mote)
+    if as_dictionary:
+        motes = {int(m['id']): (float(m['x']), float(m['y'])) for m in motes}
+    return motes
 
 
 def get_parameter(dictionary, section, key, condition, reason=None, default=None):
@@ -337,8 +362,6 @@ def render_templates(path, only_malicious=False, **params):
     # render the templates for the simulation with the malicious mote
     for name, kwargs in templates.items():
         write_template(join(path, 'with-malicious'), env, name, **kwargs)
-    with open(join(path, 'with-malicious', 'data', 'motes.json'), 'w') as f:
-        dump({m['id']: (m['x'], m['y']) for m in motes}, f, sort_keys=True, indent=4)
     # now, adapt the title and mote source template
     del templates["motes/Makefile"]
     del templates["motes/root.c"]
@@ -350,9 +373,39 @@ def render_templates(path, only_malicious=False, **params):
     # render the templates for the simulation without the malicious mote
     for name, kwargs in templates.items():
         write_template(join(path, 'without-malicious'), env, name, **kwargs)
-    with open(join(path, 'without-malicious', 'data', 'motes.json'), 'w') as f:
-        dump({m['id']: (m['x'], m['y']) for m in motes[:-1]}, f, sort_keys=True, indent=4)
     return replacements
+
+
+def set_motes_to_simulation(simfile, motes):
+    """
+    This function replaces motes data from a list of motes (formatted as dictionaries with 'id', 'x', 'y' and
+     'motetype_identifier' keys) into a simulation file (.csc).
+
+    :param simfile: path to the simulation file
+    :param motes: list or dictionary of motes
+    """
+    if isinstance(motes, list):
+        motes = {int(m['id']): (float(m['x']), float(m['y'])) for m in motes}
+    tmp = simfile + '.tmp'
+    with open(simfile) as of:
+        content = of.read()
+    for m in finditer(r'^\s*<mote>(?P<block>.*?)</mote>\s*$', content, DOTALL | MULTILINE):
+        block = m.groups('block')[0]
+        idmatch = search(r'^\s*<id>(?P<mote_id>\d+?)</id>\s*$', block, MULTILINE)
+        if idmatch is None:
+            continue
+        mote_id = int(idmatch.groups('mote_id')[0])
+        # e.g. occurs when modifying the simulation without malicious and the simulation with malicious has to be
+        #  update ; id of malicious mote is found in the simulation file but not in the dictionary of motes
+        if mote_id not in motes.keys():
+            continue
+        mote_pos = motes[mote_id]
+        block = sub(r'<x>(.*?)</x>', '<x>{}</x>'.format(mote_pos[0]), block, flags=MULTILINE)
+        block = sub(r'<y>(.*?)</y>', '<y>{}</y>'.format(mote_pos[1]), block, flags=MULTILINE)
+        content = content.replace(m.groups('block')[0], block)
+    with open(tmp, 'w+') as nf:
+        nf.write(content)
+    move_files('', '', (tmp, simfile))
 
 
 def write_template(path, env, name, **kwargs):
@@ -378,7 +431,7 @@ def validated_parameters(dictionary):
     :param dictionary: input parameters
     :return: dictionary of validated parameters
     """
-    params = dict(motes=dictionary.get('motes'))
+    params = dict(motes=dictionary.get('motes'), campaign=dictionary.get('campaign'))
     # simulation parameters
     params["debug"] = get_parameter(dictionary, "simulation", "debug",
                                     lambda x: isinstance(x, bool), "is not a boolean")

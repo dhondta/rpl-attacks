@@ -8,7 +8,7 @@ from os.path import join
 from re import finditer, match, MULTILINE
 from subprocess import Popen, PIPE
 
-from .utils import get_available_platforms
+from .utils import get_available_platforms, get_motes_from_simulation
 
 
 # *************************************** MAIN PARSING FUNCTION ****************************************
@@ -84,7 +84,7 @@ RELATIONSHIP_REGEX = r'^\d+\s+ID\:(?P<mote_id>\d+)\s+#L\s+(?P<parent_id>\d+)\s+(
 
 def draw_dodag(path, with_malicious=False):
     """
-    This function draws the DODAG (to ./results) from the list of motes (from ./data/motes.json) and the list of
+    This function draws the DODAG (to ./results) from the list of motes (from ./simulation.csc) and the list of
      edges (from ./data/relationships.log).
 
     :param path: path to the experiment
@@ -92,13 +92,11 @@ def draw_dodag(path, with_malicious=False):
     """
     data, results = join(path, 'data'), join(path, 'results')
     dodag = networkx.DiGraph()
-    with open(join(data, 'motes.json')) as f:
-        motes = load(f)
-    motes = {int(k): v for k, v in motes.items()}
-    dodag.add_nodes_from([int(x) for x in motes.keys()])
+    motes = get_motes_from_simulation(join(path, 'simulation.csc'))
+    dodag.add_nodes_from(motes.keys())
     colors = []
     for n, p in motes.items():
-        dodag.node[n]['pos'] = p
+        dodag.node[n]['pos'] = p[::-1]
         colors.append('green' if n == 0 else ('yellow' if not with_malicious or
                                               (with_malicious and 0 < n < len(motes) - 1) else 'red'))
     with open(join(data, 'relationships.log')) as f:

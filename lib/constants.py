@@ -117,7 +117,7 @@ EXPERIMENT_STRUCTURE = {
         "Makefile": False,
         "simulation.csc": False,
         "script.js": False,
-        "data": {"motes.json": False},
+        "data": {},
         "motes": {
             "Makefile": False,
             "root.*": False,
@@ -130,7 +130,7 @@ EXPERIMENT_STRUCTURE = {
         "Makefile": False,
         "simulation.csc": False,
         "script.js": False,
-        "data": {"motes.json": False},
+        "data": {},
         "motes": {
             "root.*": False,
             "sensor.*": False,
