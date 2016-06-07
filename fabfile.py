@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from fabric.api import local, task
+from fabric.api import local, settings, task
 
 from lib.commands import get_commands
 
@@ -8,7 +8,8 @@ from lib.commands import get_commands
 @task
 def console():
     """ Open framework's console. """
-    local('python main.py')
+    with settings(remote_interrupt=False):
+        local('python main.py')
 
 
 for name, func in get_commands(exclude=['list']):
