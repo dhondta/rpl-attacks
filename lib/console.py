@@ -2,12 +2,12 @@
 import atexit
 import dill
 import os
-import signal
 from cmd import Cmd
 from copy import copy
 from funcsigs import signature
 from getpass import getuser
 from multiprocessing import cpu_count, Pool, TimeoutError
+from signal import signal, SIGINT, SIG_IGN
 from six.moves import zip_longest
 from socket import gethostname
 from sys import stdout
@@ -17,6 +17,7 @@ from types import MethodType
 
 from .commands import get_commands
 from .constants import BANNER, COMMAND_DOCSTRING, MIN_TERM_SIZE
+from .decorators import no_arg_command, no_arg_command_except
 from .logconfig import logger, set_logging
 from .termsize import get_terminal_size
 
@@ -61,7 +62,8 @@ class Console(Cmd, object):
             readline.set_completer_delims(' ')
             super(Console, self).cmdloop()
         except (KeyboardInterrupt, EOFError):
-            self.cmdloop(' ')
+            print('')
+            self.cmdloop()
 
     def precmd(self, line):
         if len(self.__history) == 0 or (not line.startswith('history') and line != self.__history[-1] and line != ''):
@@ -73,6 +75,7 @@ class Console(Cmd, object):
     def default(self, line):
         print(self.badcmd_msg.format(["Unknown", "Invalid"][len(line.split()) > 1], line.lstrip('_')))
 
+    @no_arg_command
     def do_clear(self, line):
         """
     Clear the screen.
@@ -81,6 +84,7 @@ class Console(Cmd, object):
         cprint(BANNER, 'cyan', 'on_grey')
         print(self.welcome)
 
+    @no_arg_command
     def do_EOF(self, line):
         """
     Exit the console by hitting Ctrl+D.
@@ -88,12 +92,14 @@ class Console(Cmd, object):
         print('')
         return True
 
+    @no_arg_command
     def do_exit(self, line):
         """
     Exit the console.
         """
         return True
 
+    @no_arg_command
     def do_history(self, line):
         """
     Print the history of commands.
@@ -124,7 +130,7 @@ class FrameworkConsole(Console):
             processes = cpu_count()
             self.__last_tasklist = None
             self.tasklist = {}
-            self.pool = Pool(processes, lambda: signal.signal(signal.SIGINT, signal.SIG_IGN))
+            self.pool = Pool(processes, lambda: signal(SIGINT, SIG_IGN))
             atexit.register(self.graceful_exit)
         self.reexec = []
         self.__bind_commands()
@@ -193,6 +199,7 @@ class FrameworkConsole(Console):
         if line != '' and set_logging(line):
             print(' [I] Verbose level is now set to: {}'.format(line))
 
+    @no_arg_command_except('restart')
     def do_status(self, line):
         """
     Display process pool status.

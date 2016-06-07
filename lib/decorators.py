@@ -3,6 +3,7 @@ from cmd import Cmd
 from funcsigs import signature
 from functools import update_wrapper, wraps
 from os.path import exists, expanduser, join
+from re import match
 
 from .behaviors import DefaultCommand, MultiprocessedCommand
 from .helpers import std_input
@@ -169,6 +170,40 @@ class CommandMonitor(object):
             return 'SUCCESS', self.f(*args, **kwargs) or 'No result'
         except Exception as e:
             return 'FAIL', '{}: {}'.format(e.__class__.__name__, str(e))
+
+
+def no_arg_command(f):
+    """
+    This small decorator is aimed to invalidate some badly formatted console commands, accepted by the base
+     Cmd class' methods as these do not handler special characters. E.g. 'clear$erlgihsevg' makes 'clear' apply.
+
+    :param f: the decorated console method
+    """
+    @wraps(f)
+    def wrapper(console, line):
+        if line != '':
+            console.default(console.lastcmd)
+        else:
+            return f(console, line)
+    return wrapper
+
+
+def no_arg_command_except(*words):
+    """
+    This small decorator does the same as the previous one, but handling exception words.
+     E.g. we want 'status restart' to work while any other argument is wrong.
+
+    :param f: the decorated console method
+    """
+    def decorator(f):
+        @wraps(f)
+        def wrapper(console, line):
+            if line != '' and match(r'^({})$'.format('|'.join(words)), line) is None:
+                console.default(console.lastcmd)
+            else:
+                return f(console, line)
+        return wrapper
+    return decorator
 
 
 # *************************************** COMMAND LOGGING DECORATORS ***************************************
