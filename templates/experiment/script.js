@@ -2,7 +2,6 @@ importPackage(java.io);
 
 // get plugin instances
 visualizer = mote.getSimulation().getCooja().getStartedPlugin("VisualizerScreenshot");
-timeline = mote.getSimulation().getCooja().getStartedPlugin("Timeline");
 powertracker = mote.getSimulation().getCooja().getStartedPlugin("PowerTracker");
 
 // create log file handlers
@@ -11,7 +10,6 @@ log_serial = new FileWriter("./data/serial.log");                // open serial 
 log_rpl = new FileWriter("./data/rpl.log");                      // open RPL messages log file
 log_relationships = new FileWriter("./data/relationships.log");  // open mote relationships log file
 log_power = new FileWriter("./data/powertracker.log");           // open power tracker logfile
-log_timeline = new FileWriter("./data/timeline.log");
 
 // re-frame visualizer view
 visualizer.resetViewport = 1;
@@ -19,11 +17,11 @@ visualizer.repaint();
 
 // set timeout and declare variables
 TIMEOUT({{ timeout }}, log.testOK());
-var c = 0, i = 0, period = {{ sampling_period }}, screenshot = false;
+var c = 0, i = 1, period = {{ sampling_period }}, screenshot = false, pad = "00000", nbr = "";
 
 // now, start the test
 log.log("Starting stript...\n");
-visualizer.takeScreenshot("./data/network_" + ("0" + i).slice(-3) + ".png", 0, 0);
+visualizer.takeScreenshot("./data/network_" + pad + ".png", 0, 0);
 while(1) {
   try {
     // first, log to serial file
@@ -44,10 +42,10 @@ while(1) {
     if (c < time) {
       log_power.write(powertracker.radioStatistics());
       log_power.flush();
-      //log_timeline.write(timeline.extractStatistics());
-      //log_timeline.flush();
       if (screenshot) {
-        visualizer.takeScreenshot("./data/network_" + ("0" + i).slice(-3) + ".png", 0, 0);
+        nbr = "" + i;
+        nbr = pad.substring(0, pad.length - nbr.length) + nbr;
+        visualizer.takeScreenshot("./data/network_" + nbr + ".png", 0, 0);
         i += 1;
       }
       c += period;
@@ -57,7 +55,6 @@ while(1) {
     log_rpl.close();
     log_relationships.close();
     log_power.close();
-    log_timeline.close();
     log.log("File writers closed\n");
     if (c == 0) { log.testFailed(); } else { break; }
     break;
