@@ -2,8 +2,8 @@
 import dill
 from datetime import datetime, timedelta
 
-from .constants import TASK_EXPIRATION
-from .logconfig import logger
+from core.conf.constants import TASK_EXPIRATION
+from core.conf.logconfig import logger
 
 
 class DefaultCommand(object):

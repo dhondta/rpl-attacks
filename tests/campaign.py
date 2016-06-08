@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sh
 import unittest
-from jsmin import jsmin
 from json import loads
 from os.path import exists, expanduser, join
 
-from lib.commands import drop, prepare
-from lib.constants import EXPERIMENT_FOLDER
+import sh
+from jsmin import jsmin
 
+from lib.commands import drop, prepare
+from lib.conf.constants import EXPERIMENT_FOLDER
 
 JSON = 'test-campaign.json'
 

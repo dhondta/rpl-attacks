@@ -5,10 +5,10 @@ from functools import update_wrapper, wraps
 from os.path import exists, expanduser, join
 from re import match
 
-from .behaviors import DefaultCommand, MultiprocessedCommand
-from .helpers import std_input
-from .lexer import ArgumentsLexer
-from .logconfig import logger
+from core.common.helpers import std_input
+from core.common.lexer import ArgumentsLexer
+from core.conf.logconfig import logger
+from core.utils.behaviors import DefaultCommand, MultiprocessedCommand
 
 
 lexer = ArgumentsLexer()

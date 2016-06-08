@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import atexit
-import dill
 import os
 from cmd import Cmd
 from copy import copy
@@ -15,33 +14,12 @@ from termcolor import colored, cprint
 from terminaltables import SingleTable
 from types import MethodType
 
-from .commands import get_commands
-from .constants import BANNER, COMMAND_DOCSTRING, MIN_TERM_SIZE
-from .decorators import no_arg_command, no_arg_command_except
-from .logconfig import logger, set_logging
-from .termsize import get_terminal_size
-
-
-def surround_ansi_escapes(prompt, start="\x01", end="\x02"):
-    """
-    See: https://bugs.python.org/issue17337
-    Other reference: http://stackoverflow.com/questions/9468435/look-how-to-fix-column-calculation-in
-                          -python-readline-if-use-color-prompt
-    This function allows to preprocess console's colored prompt in order to avoid incorrect prompt length
-     calculation by raw_input|input.
-    """
-    escaped = False
-    result = ""
-    for c in prompt:
-        if c == "\x1b" and not escaped:
-            result += start + c
-            escaped = True
-        elif c.isalpha() and escaped:
-            result += c + end
-            escaped = False
-        else:
-            result += c
-    return result
+from core.commands import get_commands
+from core.common.ansi import surround_ansi_escapes
+from core.common.termsize import get_terminal_size
+from core.conf.constants import BANNER, COMMAND_DOCSTRING, MIN_TERM_SIZE
+from core.conf.logconfig import logger, set_logging
+from core.utils.decorators import no_arg_command, no_arg_command_except
 
 
 class Console(Cmd, object):
@@ -122,7 +100,7 @@ class FrameworkConsole(Console):
     def __init__(self, parallel):
         self.continuation_prompt = self.prompt
         self.parallel = parallel
-        width, height = get_terminal_size()
+        width, height = get_terminal_size() or MIN_TERM_SIZE
         if any(map((lambda s: s[0] < s[1]), zip((height, width), MIN_TERM_SIZE))):
             stdout.write("\x1b[8;{rows};{cols}t".format(rows=max(MIN_TERM_SIZE[0], height),
                                                         cols=max(MIN_TERM_SIZE[1], width)))

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from fabric.api import local, settings, task
 
-from lib.commands import get_commands
+from core.commands import get_commands
 
 
 @task

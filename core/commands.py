@@ -6,19 +6,21 @@ from os.path import basename, exists, expanduser, join, splitext
 from sys import modules
 from terminaltables import SingleTable
 
-from .behaviors import MultiprocessedCommand
-from .constants import CONTIKI_FOLDER, COOJA_FOLDER, DEFAULTS, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, TEMPLATES_FOLDER
-from .decorators import CommandMonitor, command, stderr
-from .helpers import copy_files, copy_folder, move_files, remove_files, remove_folder, \
-                     std_input, read_config, write_config
-from .install import check_cooja, modify_cooja, register_new_path_in_profile, \
-                     update_cooja_build, update_cooja_user_properties
-from .logconfig import logger, HIDDEN_ALL
-from .parser import parsing_chain
-from .utils import apply_debug_flags, apply_replacements, check_structure, generate_motes, \
-                   get_motes_from_simulation, set_motes_to_simulation, \
-                   get_contiki_includes, get_experiments, get_path, list_campaigns, list_experiments, \
-                   render_campaign, render_templates, validated_parameters
+from core.common.helpers import copy_files, copy_folder, move_files, remove_files, remove_folder, std_input
+from core.conf.constants import CONTIKI_FOLDER, COOJA_FOLDER, DEFAULTS, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, \
+                                TEMPLATES_FOLDER
+from core.conf.install import check_cooja, modify_cooja, register_new_path_in_profile, \
+                              update_cooja_build, update_cooja_user_properties
+from core.conf.logconfig import logger, HIDDEN_ALL
+from core.utils.behaviors import MultiprocessedCommand
+from core.utils.decorators import CommandMonitor, command, stderr
+from core.utils.helpers import read_config, write_config
+from core.utils.parser import parsing_chain
+from core.utils.rpla import apply_debug_flags, apply_replacements, check_structure, generate_motes, \
+    get_motes_from_simulation, set_motes_to_simulation, \
+    get_contiki_includes, get_experiments, get_path, list_campaigns, list_experiments, \
+    render_campaign, render_templates, validated_parameters
+
 
 reuse_bin_path = None
 

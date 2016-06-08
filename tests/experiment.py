@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sh
 import unittest
 from os.path import exists, expanduser, getmtime, join
 
-from lib.commands import clean, make, remake
-from lib.constants import EXPERIMENT_FOLDER
-from lib.utils import check_structure
+import sh
 
+from lib.commands import clean, make, remake
+from lib.conf.constants import EXPERIMENT_FOLDER
+from lib.utils.rpla import check_structure
 
 SIM = 'test-simulation'
 

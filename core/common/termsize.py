@@ -1,16 +1,13 @@
 #!/usr/bin/env python
-
-from lib.constants import MIN_TERM_SIZE
-
-"""
-Source: https://gist.githubusercontent.com/jtriley/1108174/raw/6ec4c846427120aa342912956c7f717b586f1ddb/terminalsize.py
-"""
-
 import os
 import shlex
 import struct
 import platform
 import subprocess
+
+"""
+Source: https://gist.githubusercontent.com/jtriley/1108174/raw/6ec4c846427120aa342912956c7f717b586f1ddb/terminalsize.py
+"""
 
 
 def get_terminal_size():
@@ -29,8 +26,6 @@ def get_terminal_size():
             # needed for window's python in cygwin's xterm!
     if current_os in ['Linux', 'Darwin'] or current_os.startswith('CYGWIN'):
         tuple_xy = _get_terminal_size_linux()
-    if tuple_xy is None:
-        tuple_xy = MIN_TERM_SIZE  # default value
     return tuple_xy
 
 

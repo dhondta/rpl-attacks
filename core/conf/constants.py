@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+from collections import OrderedDict
 try:  # for Python2
     import ConfigParser as configparser
 except ImportError:  # for Python3
@@ -6,10 +7,8 @@ except ImportError:  # for Python3
 from os import makedirs
 from os.path import abspath, dirname, exists, expanduser, join, pardir
 
-from collections import OrderedDict
 
-
-VERSION = '1.2'
+VERSION = '1.3'
 
 # configuration parsing and main constants setting
 confparser = configparser.ConfigParser()

@@ -1,7 +1,8 @@
 # -*- coding: utf8 -*-
 from os.path import expanduser, join
 
-from .logconfig import logger
+from core.conf.logconfig import logger
+
 
 PATTERN = 'if (args.length > 0 && args[0].startsWith("-hidden="))'
 

@@ -1,19 +1,20 @@
 # -*- coding: utf8 -*-
 from copy import deepcopy
-from jinja2 import Environment, FileSystemLoader
-from jsmin import jsmin
 from json import loads
 from math import sqrt
 from os import listdir, makedirs, rename
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
 from re import findall, finditer, search, sub, DOTALL, MULTILINE
+
+from jinja2 import Environment, FileSystemLoader
+from jsmin import jsmin
 from six import string_types
 
-from .constants import CONTIKI_FILES, CONTIKI_FOLDER, DEBUG_FILES, DEFAULTS, EXPERIMENT_STRUCTURE, TEMPLATES, \
-                       EXPERIMENT_FOLDER, TEMPLATES_FOLDER
-from .helpers import move_files, remove_files, replace_in_file
-from .logconfig import logger
-from .wsngenerator import generate_motes
+from core.common.helpers import move_files, remove_files, replace_in_file
+from core.common.wsngenerator import generate_motes
+from core.conf.constants import CONTIKI_FILES, CONTIKI_FOLDER, DEBUG_FILES, DEFAULTS, EXPERIMENT_STRUCTURE, \
+                                EXPERIMENT_FOLDER, TEMPLATES, TEMPLATES_FOLDER
+from core.conf.logconfig import logger
 
 
 # *********************************************** GET FUNCTIONS ************************************************
