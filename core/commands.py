@@ -405,15 +405,15 @@ def make_all(exp_file, **kwargs):
     if 'BASE' in experiments.keys():
         experiments['BASE']['silent'] = True
         sim_json = experiments['BASE']['simulation']
-        sim_params = validated_parameters(experiments['BASE'])
-        motes = generate_motes(defaults=DEFAULTS, **sim_params)
+        motes = generate_motes(defaults=DEFAULTS, **validated_parameters(experiments['BASE']))
         del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
         params['campaign'] = splitext(basename(exp_file))[0]
         if sim_json is not None:
+            params.setdefault('simulation', {})
             for k, v in sim_json.items():
-                params.setdefault('simulation', {})
-                params['simulation'][k] = v
+                if k not in params['simulation'].keys():
+                    params['simulation'][k] = v
             params['motes'] = motes
         make(name, ask=False, **params) if console is None else console.do_make(name, ask=False, **params)
 

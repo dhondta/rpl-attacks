@@ -160,8 +160,7 @@ class FrameworkConsole(Console):
         """
     Kill a task from the pool.
         """
-        tasks = [str(t) for t in self.tasklist.keys()]
-        if task in tasks:
+        if task in [str(t) for t in self.tasklist.keys()]:
             task_obj = [t for t in self.tasklist.keys() if str(t) == task][0]
             try:
                 task_obj.task.get(1)
