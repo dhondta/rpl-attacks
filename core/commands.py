@@ -404,7 +404,7 @@ def make_all(exp_file, **kwargs):
     # if a simulation named 'BASE' is present, use it as a template simulation for all the other simulations
     if 'BASE' in experiments.keys():
         experiments['BASE']['silent'] = True
-        sim_json = experiments['BASE']['simulation']
+        sim_json = dict(experiments['BASE']['simulation'])
         motes = generate_motes(defaults=DEFAULTS, **validated_parameters(experiments['BASE']))
         del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
