@@ -227,5 +227,5 @@ def stderr(f):
                 filtered.append(line)
             logger.critical("Command '{}' returned error code {} with the following error:\n"
                             .format(cmd, out.return_code) + '\n'.join(filtered))
-            return
+            raise Exception("Command '{}' failed.".format(cmd))
     return wrapper
