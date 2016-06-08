@@ -25,7 +25,7 @@ except (configparser.NoOptionError, configparser.NoSectionError):
 del confparser
 if not exists(EXPERIMENT_FOLDER):
     makedirs(EXPERIMENT_FOLDER)
-FRAMEWORK_FOLDER = join(dirname(__file__), pardir)
+FRAMEWORK_FOLDER = join(dirname(__file__), pardir, pardir)
 TEMPLATES_FOLDER = join(FRAMEWORK_FOLDER, "templates")
 
 # Contiki template list of includes for specific mote target compilation (subfolders for 'dev', 'cpu', 'platform'
