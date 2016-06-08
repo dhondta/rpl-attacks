@@ -497,7 +497,7 @@ def list(item_type, **kwargs):
          start_msg="CREATING CONFIGURATION FILE AT '~/.rpl-attacks.conf'")
 def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silent=False, **kwargs):
     """
-    Create a new configuration file at `~/.rpl-attacks.conf`.
+    Create a new configuration file at ~/.rpl-attacks.conf.
 
     :param contiki_folder: Contiki folder
     :param experiments_folder: experiments folder

@@ -24,7 +24,7 @@ def command(**params):
      Otherwise, arguments are used normally.
 
     :param params: keyword-arguments defining extended functionalities around the decorated function
-                    (see docstring in `commands.py` for more details about parameters)
+                    (see docstring in commands.py for more details about parameters)
     :return: the decorator function
     """
     def decorator(f):
