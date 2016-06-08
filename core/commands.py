@@ -92,7 +92,7 @@ def build(name, ask=True, **kwargs):
     remake(name, build=True, **kwargs) if console is None else console.do_remake(name, build=True, **kwargs)
 
 
-@command(autocomplete=lambda: list_experiments(),
+@command(autocomplete=lambda: list_experiments(check=False),
          examples=["my-simulation"],
          expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}),
          not_exists=('path', {'loglvl': 'error', 'msg': (" > Experiment '{}' does not exist !", 'name')}),

@@ -230,15 +230,15 @@ def list_campaigns():
                    is_valid_campaign(join(EXPERIMENT_FOLDER, f))])
 
 
-def list_experiments():
+def list_experiments(check=True):
     """
     This function gets the list of existing experiments.
 
     :return: list of experiments
     """
     return sorted([d for d in listdir(EXPERIMENT_FOLDER)
-                   if isdir(join(EXPERIMENT_FOLDER, d)) and not d.startswith('.') and
-                   check_structure(join(EXPERIMENT_FOLDER, d))])
+                   if isdir(join(EXPERIMENT_FOLDER, d)) and not d.startswith('.') and (not check or
+                   check_structure(join(EXPERIMENT_FOLDER, d)))])
 
 
 # ************************************** TEMPLATE AND PARAMETER FUNCTIONS **************************************
