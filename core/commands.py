@@ -323,11 +323,8 @@ def __run(name, **kwargs):
             remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
             # once the execution is over, gather the screenshots into a single GIF and keep the first and
             #  the last screenshots ; move these to the results folder
-            with settings(warn_only=True):
-                with lcd(data):
-                    local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
-                    local('avconv -i network_%05d.png -r 10 -c:v libx264 -crf 20 -pix_fmt yuv420p'
-                          ' wsn-{}-malicious.mov'.format(sim))
+            with lcd(data):
+                local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
             network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data)
                               if fn.startswith('network_')}
             move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))
