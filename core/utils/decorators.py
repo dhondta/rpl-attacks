@@ -99,7 +99,8 @@ def command(**params):
             #    display an error
             if len(args) < len(no_var_args) - len(no_def_args):
                 logger.critical("Bad input arguments !")
-                logger.info("This command has the following signature: {}{}".format(f.__name__, str(sig)))
+                logger.info("This command has the following signature: {}{}"
+                            .format(f.__name__, str(sig).replace(', **kwargs', '')))
                 logger.info("Please check the documentation for more information.")
                 return
             # expand a specified argument to a path
@@ -134,7 +135,7 @@ def command(**params):
                                  not std_input(attrs['confirm'], 'yellow') == 'yes'):
                             return
             # run the command and catch exception if any
-            if console is not None:
+            if console is not None and len(args) > 0:
                 console.clean_tasks()
                 pending_tasks = {i['name']: str(o) for o, i in console.tasklist.items() if i['status'] == 'PENDING'}
                 if args[0] not in pending_tasks.keys():

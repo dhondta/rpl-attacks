@@ -176,15 +176,21 @@ def replace_in_file(path, replacement):
     with open(tmp, 'w+') as nf:
         with open(path) as of:
             for line in of.readlines():
-                if regex is not None:
+                # try a simple string match
+                if replacement[0] in line:
+                    if replacement[1] in (None, ''):
+                        continue
+                    line = line.replace(replacement[0], replacement[1])
+                # then try a regex match
+                elif regex is not None:
                     match = regex.search(line)
                     if match is not None:
+                        if replacement[1] in (None, ''):
+                            continue
                         try:
                             line = line.replace(match.groups(0)[0], replacement[1])
                         except IndexError:
                             line = line.replace(match.group(), replacement[1])
-                elif replacement[0] in line:
-                    line = line.replace(replacement[0], replacement[1])
                 nf.write(line)
     sh.rm(path)
     sh.mv(tmp, path)
