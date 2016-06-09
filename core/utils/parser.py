@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 import networkx
-from csv import DictWriter
+import numpy
+from csv import DictReader, DictWriter
 from matplotlib import pyplot
 from matplotlib.patches import FancyArrowPatch
 from os.path import basename, join, normpath
@@ -15,6 +16,7 @@ def parsing_chain(path):
     convert_pcap_to_csv(path)
     convert_powertracker_log_to_csv(path)
     draw_dodag(path)
+    draw_power_barchart(path)
 
 
 # *********************************** SIMULATION PARSING FUNCTIONS *************************************
@@ -23,7 +25,7 @@ def convert_pcap_to_csv(path):
     This function creates a CSV file (to ./results) from a PCAP file (from ./data).
     This is inspired from https://github.com/sieben/makesense/blob/master/makesense/parser.py.
 
-    :param path: path to the experiment
+    :param path: path to the experiment (including [with-|without-malicious])
     """
     data, results = join(path, 'data'), join(path, 'results')
     with open(join(results, 'pcap.csv'), 'wb') as f:
@@ -54,7 +56,7 @@ def convert_powertracker_log_to_csv(path):
     This function creates a CSV file (to ./results) from a PowerTracker log file (from ./data).
     This is inspired from https://github.com/sieben/makesense/blob/master/makesense/parser.py.
 
-    :param path: path to the experiment
+    :param path: path to the experiment (including [with-|without-malicious])
     """
     platforms = [p.capitalize() for p in get_available_platforms()]
     data, results = join(path, 'data'), join(path, 'results')
@@ -86,7 +88,7 @@ def draw_dodag(path):
     This function draws the DODAG (to ./results) from the list of motes (from ./simulation.csc) and the list of
      edges (from ./data/relationships.log).
 
-    :param path: path to the experiment
+    :param path: path to the experiment (including [with-|without-malicious])
     """
     pyplot.clf()
     with_malicious = (basename(normpath(path)) == 'with-malicious')
@@ -118,3 +120,41 @@ def draw_dodag(path):
     # finally, draw the graph
     networkx.draw(dodag, motes, node_color=colors, with_labels=True)
     pyplot.savefig(join(results, 'dodag.png'), arrow_style=FancyArrowPatch)
+
+
+def draw_power_barchart(path):
+    """
+    This function plots the power tracking data parsed in the CSV at:
+     [EXPERIMENT]/[with-|without-malicious]/results/powertracker.csv
+
+    :param path: path to the experiment (including [with-|without-malicious])
+    :return:
+    """
+    pyplot.clf()
+    last_measures = {}
+    with open(join(path, 'results', 'powertracker.csv')) as f:
+        for row in DictReader(f):
+            last_measures[row['mote_id']] = {
+                'on': float(row['on_time']),
+                'tx': float(row['tx_time']),
+                'rx': float(row['rx_time']),
+                'int': float(row['int_time']),
+            }
+    on, tx, rx, interf = [], [], [], []
+    for mote, measures in sorted(last_measures.items(), key=lambda x: x[0]):
+        on.append(measures['on_time'])
+        tx.append(measures['tx_time'])
+        rx.append(measures['rx_time'])
+        interf.append(measures['int_time'])
+    ind = numpy.arange(len(last_measures))
+    width = 0.5
+    p_on = pyplot.bar(ind, on, width, color='r')
+    p_tx = pyplot.bar(ind, tx, width, color='b')
+    p_rx = pyplot.bar(ind, rx, width, color='g')
+    p_int = pyplot.bar(ind, interf, width, color='y')
+    pyplot.title("Power tracking per mote")
+    pyplot.xticks(ind + width / 2., tuple(last_measures.keys()))
+    pyplot.yticks(numpy.arange(0, 101, 10))
+    pyplot.ylabel("Consumed power (%)")
+    pyplot.legend((p_on[0], p_tx[0], p_rx[0], p_int[0]), ('ON', 'TX', 'RX', 'INT'))
+    pyplot.savefig(join(path, 'results', 'powertracking.png'))
