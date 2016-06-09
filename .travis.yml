@@ -1,4 +1,5 @@
 language: python
+sudo: required
 
 python:
   - "2.6"
@@ -19,7 +20,7 @@ addons:
     - python-scipy
 
 before_install:
-  - git clone https://github.com/contiki-os/contiki.git ~/
+  - git clone https://github.com/contiki-os/contiki.git ~/contiki
   - mkdir ~/Experiments
   - mkdir ~/Projects
 
