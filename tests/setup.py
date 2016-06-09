@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sh
 import unittest
 from os.path import exists, expanduser, join
 
-import sh
-
-from lib.commands import config, setup
-from lib.conf.constants import COOJA_FOLDER
+from core.commands import config, setup
+from core.conf.constants import COOJA_FOLDER
 
 
 class Test1Config(unittest.TestCase):
