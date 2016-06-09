@@ -12,6 +12,22 @@ python:
 addons:
   apt:
     packages:
+    - build-essential
+    - binutils-msp430
+    - gcc-msp430
+    - msp430-libc
+    - msp430mcu
+    - mspdebug
+    - binutils-avr
+    - gcc-avr
+    - gdb-avr
+    - avr-libc
+    - avrdude
+    - openjdk-7-jdk
+    - openjdk-7-jre
+    - ant
+    - libncurses5-dev
+    - lib32ncurses5
     - libopenblas-dev
     - liblapack-dev
     - gfortran
@@ -20,7 +36,7 @@ addons:
     - python-scipy
 
 before_install:
-  - git clone https://github.com/contiki-os/contiki.git ~/contiki
+  - git clone git://github.com/contiki-os/contiki.git ~/contiki
   - mkdir ~/Experiments
   - mkdir ~/Projects
 
