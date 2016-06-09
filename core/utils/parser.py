@@ -124,37 +124,37 @@ def draw_dodag(path):
 
 def draw_power_barchart(path):
     """
-    This function plots the power tracking data parsed in the CSV at:
+    This function plots the average power tracking data from the CSV at:
      [EXPERIMENT]/[with-|without-malicious]/results/powertracker.csv
 
     :param path: path to the experiment (including [with-|without-malicious])
     :return:
     """
     pyplot.clf()
-    last_measures = {}
+    items = ['on', 'tx', 'rx', 'int']
+    series = {i: [] for i in items}
+    averages, c = {}, 0
     with open(join(path, 'results', 'powertracker.csv')) as f:
         for row in DictReader(f):
-            last_measures[row['mote_id']] = {
-                'on': float(row['on_time']),
-                'tx': float(row['tx_time']),
-                'rx': float(row['rx_time']),
-                'int': float(row['int_time']),
-            }
-    on, tx, rx, interf = [], [], [], []
-    for mote, measures in sorted(last_measures.items(), key=lambda x: x[0]):
-        on.append(measures['on_time'])
-        tx.append(measures['tx_time'])
-        rx.append(measures['rx_time'])
-        interf.append(measures['int_time'])
-    ind = numpy.arange(len(last_measures))
+            mid = int(row['mote_id'])
+            averages.setdefault(mid, {i: 0.0 for i in items})
+            for s, k in zip(items, [i + '_time' for i in items]):
+                averages[mid][s] += float(row[k])
+            c += 1
+    n = len(averages)
+    ind = numpy.arange(n)
+    c //= n
+    averages = {mid: {k: v / c for k, v in avg.items()} for mid, avg in averages.items()}
+    for mid, avg in sorted(averages.items(), key=lambda x: x[0]):
+        for k, v in series.items():
+            v.append(avg[k])
     width = 0.5
-    p_on = pyplot.bar(ind, on, width, color='r')
-    p_tx = pyplot.bar(ind, tx, width, color='b')
-    p_rx = pyplot.bar(ind, rx, width, color='g')
-    p_int = pyplot.bar(ind, interf, width, color='y')
+    plots = []
+    for s, color in zip(items, ['r', 'b', 'g', 'y']):
+        plots.append(pyplot.bar(ind, series[s], width, color=color))
     pyplot.title("Power tracking per mote")
-    pyplot.xticks(ind + width / 2., tuple(last_measures.keys()))
-    pyplot.yticks(numpy.arange(0, 101, 10))
+    pyplot.xticks(ind + width / 2., tuple(sorted(averages.keys())))
+    pyplot.yticks(numpy.arange(0, 31, 10))
     pyplot.ylabel("Consumed power (%)")
-    pyplot.legend((p_on[0], p_tx[0], p_rx[0], p_int[0]), ('ON', 'TX', 'RX', 'INT'))
+    pyplot.legend((p[0] for p in plots), (i.upper() for i in items))
     pyplot.savefig(join(path, 'results', 'powertracking.png'))
