@@ -12,6 +12,15 @@ class DefaultCommand(object):
     """
     is_multiprocessed = False
 
+    def __init__(self, console, command, name):
+        super(DefaultCommand, self).__init__()
+        self.tasklist = console.tasklist
+        self.command = command
+        self.name = name
+
+    def run(self, *args, **kwargs):
+        return self.command(*args, **kwargs)
+
 
 class MultiprocessedCommand(object):
     """

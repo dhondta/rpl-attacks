@@ -134,13 +134,14 @@ def command(**params):
                                  not std_input(attrs['confirm'], 'yellow') == 'yes'):
                             return
             # run the command and catch exception if any
-            if f.behavior is MultiprocessedCommand and console is not None:
+            if console is not None:
                 console.clean_tasks()
                 pending_tasks = {i['name']: str(o) for o, i in console.tasklist.items() if i['status'] == 'PENDING'}
                 if args[0] not in pending_tasks.keys():
                     if hasattr(f, 'start_msg'):
                         log_msg('info', f.start_msg)
-                    f.behavior(console, f.__base__, args[0]).run(*args, **kwargs)
+                    f.behavior(console, f.__base__ if f.behavior is MultiprocessedCommand else f, args[0]) \
+                        .run(*args, **kwargs)
                 else:
                     logger.warning("A task is still pending on this experiment ({})".format(pending_tasks[args[0]]))
             else:
