@@ -1,12 +1,11 @@
 # -*- coding: utf8 -*-
+import networkx
 from csv import DictWriter
+from matplotlib import pyplot
+from matplotlib.patches import FancyArrowPatch
 from os.path import basename, join, normpath
 from re import finditer, match, MULTILINE
 from subprocess import Popen, PIPE
-
-import networkx
-from matplotlib import pyplot
-from matplotlib.patches import FancyArrowPatch
 
 from core.utils.rpla import get_available_platforms, get_motes_from_simulation
 

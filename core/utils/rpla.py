@@ -1,13 +1,12 @@
 # -*- coding: utf8 -*-
 from copy import deepcopy
+from jinja2 import Environment, FileSystemLoader
+from jsmin import jsmin
 from json import loads
 from math import sqrt
 from os import listdir, makedirs, rename
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
 from re import findall, finditer, search, sub, DOTALL, MULTILINE
-
-from jinja2 import Environment, FileSystemLoader
-from jsmin import jsmin
 from six import string_types
 
 from core.common.helpers import move_files, remove_files, replace_in_file
