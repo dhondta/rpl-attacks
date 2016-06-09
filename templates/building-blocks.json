@@ -24,10 +24,10 @@ Building blocks consist of either ContikiRPL configuration constants or single-l
     "RPL_CONF_DIS_INTERVAL": 1,
     "RPL_CONF_DIS_START_DELAY": 0
   },
-  "sinkhole": {
-    "RPL_CONF_MIN_HOPRANKINC": 128
-  },
-  "version": {
+  "increased-version": {
     "rpl-icmp6.c": ["dag->version;", "dag->version++;"]
+  },
+  "decreased-rank": {
+    "RPL_CONF_MIN_HOPRANKINC": 128
   }
 }
