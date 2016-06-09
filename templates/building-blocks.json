@@ -30,6 +30,6 @@ Building blocks consist of either ContikiRPL configuration constants or single-l
   },
   "decreased-rank": {
     "RPL_CONF_MIN_HOPRANKINC": 0,
-    "rpl-timers.c": ["rpl_recalculate_ranks();", ""]
+    "rpl-timers.c": ["rpl_recalculate_ranks();", null]
   }
 }
