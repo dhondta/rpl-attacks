@@ -26,7 +26,9 @@ Installation
 2. Install system requirements
 
  ```
- sudo apt-get install gcc-msp430 libcairo2-dev libffi-dev
+ sudo apt-get install gfortran libopenblas-dev liblapack-dev
+ sudo apt-get install -qq python-numpy python-scipy
+ sudo apt-get install imagemagick gcc-msp430 libcairo2-dev libffi-dev
  ```
 
 3. Install Python requirements
