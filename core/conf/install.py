@@ -110,14 +110,18 @@ def update_cooja_user_properties():
     cooja_user_properties = join(expanduser('~'), '.cooja.user.properties')
     with open(cooja_user_properties) as f:
         source = f.read()
-    buffer = []
+    buffer, plugin_appended = [], False
     for line in source.split('\n'):
         if line.startswith('DEFAULT_PROJECTDIRS='):
             if '[APPS_DIR]/visualizer_screenshot' in line:
                 return
             else:
+                plugin_appended = True
                 line += ';[APPS_DIR]/visualizer_screenshot'
         buffer.append(line)
+    if not plugin_appended:
+        buffer.append('DEFAULT_PROJECTDIRS=[APPS_DIR]/mrm;[APPS_DIR]/serial_socket;[APPS_DIR]/collect-view;'
+                      '[APPS_DIR]/powertracker;[APPS_DIR]/visualizer_screenshot')
     with open(cooja_user_properties, 'w') as f:
         f.write('\n'.join(buffer))
     logger.debug(" > Cooja user properties modified")
