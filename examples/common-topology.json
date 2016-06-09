@@ -1,0 +1,35 @@
+{
+  "BASE": {
+    "simulation": {
+      "number_motes": 10,
+      "target": "z1",
+      "duration": 300
+    }
+  },
+  "test1": {
+    "simulation": {
+      "title": "Test simulation",
+      "goal": "Create a new simulation",
+      "notes": ""
+    },
+    "malicious": {
+      "type": "sensor",
+      "building-blocks": [
+        "increased-version"
+      ]
+    }
+  },
+  "test2": {
+    "simulation": {
+      "title": "Another test simulation",
+      "goal": "Create another new simulation",
+      "notes": ""
+    },
+    "malicious": {
+      "type": "sensor",
+      "building-blocks": [
+        "hello-flood"
+      ]
+    }
+  }
+}

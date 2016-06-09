@@ -1,0 +1,34 @@
+{
+  "test1": {
+    "simulation": {
+      "title": "Test simulation",
+      "goal": "Create a new simulation",
+      "notes": "",
+      "number_motes": 5,
+      "target": "z1",
+      "duration": 60
+    },
+    "malicious": {
+      "type": "sensor",
+      "building-blocks": [
+        "sinkhole"
+      ]
+    }
+  },
+  "test2": {
+    "simulation": {
+      "title": "Another test simulation",
+      "goal": "Create another new simulation",
+      "notes": "",
+      "number_motes": 10,
+      "target": "sky",
+      "duration": 120
+    },
+    "malicious": {
+      "type": "sensor",
+      "building-blocks": [
+        "hello-flood"
+      ]
+    }
+  }
+}
