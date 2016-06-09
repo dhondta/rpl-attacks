@@ -502,6 +502,7 @@ def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silen
     :param contiki_folder: Contiki folder
     :param experiments_folder: experiments folder
     """
+    get_path(experiments_folder, create=True)
     with open(expanduser('~/.rpl-attacks.conf'), 'w') as f:
         f.write('[RPL Attacks Framework Configuration]\n')
         f.write('contiki_folder = {}\n'.format(contiki_folder))
