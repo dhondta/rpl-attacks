@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 from csv import DictWriter
-from os.path import join
+from os.path import basename, join, normpath
 from re import finditer, match, MULTILINE
 from subprocess import Popen, PIPE
 
@@ -12,10 +12,10 @@ from core.utils.rpla import get_available_platforms, get_motes_from_simulation
 
 
 # *************************************** MAIN PARSING FUNCTION ****************************************
-def parsing_chain(path, **kwargs):
+def parsing_chain(path):
     convert_pcap_to_csv(path)
     convert_powertracker_log_to_csv(path)
-    draw_dodag(path, kwargs.get('with_malicious', False))
+    draw_dodag(path)
 
 
 # *********************************** SIMULATION PARSING FUNCTIONS *************************************
@@ -82,23 +82,28 @@ def convert_powertracker_log_to_csv(path):
 RELATIONSHIP_REGEX = r'^\d+\s+ID\:(?P<mote_id>\d+)\s+#L\s+(?P<parent_id>\d+)\s+(?P<flag>\d+)$'
 
 
-def draw_dodag(path, with_malicious=False):
+def draw_dodag(path):
     """
     This function draws the DODAG (to ./results) from the list of motes (from ./simulation.csc) and the list of
      edges (from ./data/relationships.log).
 
     :param path: path to the experiment
-    :param with_malicious: specifies if the graph contains the malicious mote or not (for drawing it in red)
     """
+    pyplot.clf()
+    with_malicious = (basename(normpath(path)) == 'with-malicious')
     data, results = join(path, 'data'), join(path, 'results')
     dodag = networkx.DiGraph()
+    # retrieve motes and their colors
     motes = get_motes_from_simulation(join(path, 'simulation.csc'))
     dodag.add_nodes_from(motes.keys())
     colors = []
     for n, p in motes.items():
-        dodag.node[n]['pos'] = p[::-1]
+        x, y = p
+        dodag.node[n]['pos'] = motes[n] = (x, -y)
         colors.append('green' if n == 0 else ('yellow' if not with_malicious or
                                               (with_malicious and 0 < n < len(motes) - 1) else 'red'))
+    # retrieve edges from relationships.log
+    edges = {}
     with open(join(data, 'relationships.log')) as f:
         for line in f.readlines():
             try:
@@ -108,10 +113,9 @@ def draw_dodag(path, with_malicious=False):
                 mote, parent = int(d['mote_id']), int(d['parent_id'])
             except AttributeError:
                 continue
-            # this removes every existing parent relationship from the current mote
-            for curr_parent in dodag.successors(mote):
-                dodag.remove_edge(mote, curr_parent)
-            # now add the new parent relationship
-            dodag.add_edge(mote, parent)
-    networkx.draw(dodag, motes, node_color=colors)
+            edges[mote] = parent
+    # now, fill in the graph with edges
+    dodag.add_edges_from(edges.items())
+    # finally, draw the graph
+    networkx.draw(dodag, motes, node_color=colors, with_labels=True)
     pyplot.savefig(join(results, 'dodag.png'), arrow_style=FancyArrowPatch)

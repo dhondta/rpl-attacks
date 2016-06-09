@@ -168,6 +168,10 @@ class FrameworkConsole(Console):
                 self.tasklist[task_obj]['status'] = 'CANCELLED'
                 self.tasklist[task_obj]['result'] = 'None'
                 logger.warning('Task {} interrupted'.format(task_obj))
+            except UnicodeEncodeError:
+                self.tasklist[task_obj]['status'] = 'CRASHED'
+                self.tasklist[task_obj]['result'] = 'None'
+                logger.warning('Task {} crashed'.format(task_obj))
 
     def do_loglevel(self, line):
         """

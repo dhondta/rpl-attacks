@@ -336,7 +336,7 @@ def __run(name, **kwargs):
             net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
             move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
             remove_files(data, *network_images.values())
-            parsing_chain(sim_path, with_malicious=sim == "with")
+            parsing_chain(sim_path)
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
