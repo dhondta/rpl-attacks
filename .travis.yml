@@ -8,15 +8,20 @@ python:
   - "3.4"
   - "3.5"
 
+addons:
+  apt:
+    packages:
+    - libopenblas-dev
+    - liblapack-dev
+    - gfortran
+    - imagemagick
+    - python-numpy
+    - python-scipy
+
 before_install:
-  - sudo apt-get install gfortran libopenblas-dev liblapack-dev
-  - sudo apt-get install -qq python-numpy python-scipy
-  - sudo apt-get install imagemagick
-  - cd ~
-  - git clone https://github.com/contiki-os/contiki.git
+  - git clone https://github.com/contiki-os/contiki.git ~/
   - mkdir ~/Experiments
   - mkdir ~/Projects
-  - cd ~/Projects
 
 install:
   - pip install -r requirements.txt
