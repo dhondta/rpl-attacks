@@ -55,19 +55,19 @@ How to create a campaign of simulations ?
  
  **BASE**: (mandatory)
  
-  >> **simulation**
+  > **simulation**
  
- **Field** | **Value**
- --- | ---
- `title` | string
- `goal` | string
- `notes` | string
+    **Field** | **Value**
+    --- | ---
+    `title` | string
+    `goal` | string
+    `notes` | string
 
-> Inside the simulation file (.CSC), the text in the SimulationNotes plugin will be generated with the following layout:
->
-> `Goal: [goal]`
-> 
-> `[notes]`
+    > Inside the simulation file (.CSC), the text in the SimulationNotes plugin will be generated with the following layout:
+    >
+    > `Goal: [goal]`
+    > 
+    > `[notes]`
 
  **Field** | **Value**
  --- | ---
