@@ -1,7 +1,6 @@
-How to create a campaign of simulations ?
-=========================================
+# How to create a campaign of simulations ?
 
-# 1. Prepare your JSON
+## 1. Prepare your JSON
 
 With the interactive console:
  
@@ -23,28 +22,28 @@ Or with Fabric:
  - Malicious mote types (the C files prefixed with `malicious-` in `[FRAMEWORK_FOLDER]/templates/experiment/motes/`)
 
 
-# 2. Tune the JSON according to the following structure
+## 2. Tune the JSON according to the following structure
 
-## With a common topology for all simulations
+### With a common topology for all simulations
  
  ```javascript
  {
-   "BASE": {
-     "simulation": { 
+   "**BASE**": {
+     "**simulation**": { 
        "[field]": [value],
        ...
      },
-     "malicious": {
+     "**malicious**": {
        "[field]": [value],
        ...
      }
    },
-   "[experiment]": {
+   "**[experiment]**": {
      "simulation": { 
        "[field]": [value],
        ...
      },
-     "malicious": {
+     "**malicious**": {
        "[field]": [value],
        ...
      }
@@ -104,6 +103,6 @@ Or with Fabric:
    >> This means that the malicious mote can be compiled with a platform different than the rest of the WSN.
 
 
-## With a specific topology for each simulation
+### With a specific topology for each simulation
  
 Same as for the structure with **BASE**, except that this block is not present and each experiment holds a **simulation** section with the same available parameters (if this section is not mentioned, default parameters are used).
