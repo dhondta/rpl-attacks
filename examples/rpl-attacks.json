@@ -1,0 +1,62 @@
+/*
+Available Building Blocks :
+ - version
+ - hello-flood
+ - sinkhole
+
+
+{
+  "BASE": {
+    "simulation": {
+      "number-motes": 10,
+      "target": "z1",
+      "duration": 120
+    }
+  },
+  "versioning-attack": {
+    "simulation": {
+      "title": "Versioning Attack",
+      "goal": "Demonstration of the versioning attack",
+      "notes": ""
+    },
+    "malicious": {
+      "type": "sensor",
+      "building-blocks": [
+        "increased-version"
+      ]
+    }
+  },
+  "blackhole-attack": {
+    "simulation": {
+      "title": "Blackhole Attack",
+      "goal": "Demonstration of the Blackhole attack",
+      "number-motes": 10,
+      "notes": ""
+    },
+    "malicious": {
+      "type": "sensor",
+      "target": "z1",
+      "building-blocks": [
+        "decreased-rank"/*,
+	"drop-messages"*/
+      ]
+    }
+  },
+  "hello-flood": {
+    "simulation": {
+      "title": "HELLO Flood Attack",
+      "goal": "Measure power influence on attacked motes",
+      "notes": "",
+      "number-motes": 10,
+      "target": "z1",
+      "duration": 120,
+      "repeat": 3
+    },
+    "malicious": {
+      "type": "sensor",
+      "building-blocks": [
+        "hello-flood"
+      ]
+    }
+  }
+}
