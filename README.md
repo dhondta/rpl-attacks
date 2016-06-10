@@ -140,7 +140,7 @@ experiments_folder = ~/simulations
  ../rpl-attacks$ python3 main.py
  ```
 
- ![RPL Attacks Framework console](doc/rpl-attacks.png)
+ ![RPL Attacks Framework console](doc/imgs/rpl-attacks.png)
 
 2. Create a campaign of simulations
 
@@ -297,8 +297,8 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 Example JSON for a campaign with a BASE simulation as a template for the other simulations (with the same topology) :
 
- ![RPL Attacks Framework console](doc/json-base-simulations.png)
+ ![RPL Attacks Framework console](doc/imgs/json-base-simulations.png)
 
 Example JSON for a campaign of heterogeneous simulations (with randomized topologies) :
 
- ![RPL Attacks Framework console](doc/json-randomized-simulations.png)
+ ![RPL Attacks Framework console](doc/imgs/json-randomized-simulations.png)
