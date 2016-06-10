@@ -1,23 +1,22 @@
-RPL Attacks Framework
-=====================
+# RPL Attacks Framework
 
 This project is aimed to provide a simple and convenient way to generate simulations and deploy malicious motes for a Wireless Sensor Network (WSN) that uses Routing Protocol for Low-power and lossy devices (RPL) as its network layer.
 
 With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants, modifying single lines from the ContikiRPL library or using an own external RPL library. Moreover, experiments in a campaign can be generated either based on a same or a randomized topology for each simulation.
 
-**An example of blackhole attack made with the framework**:
+### An example of blackhole attack made with the framework
 
 Legitimate DODAG                                          |  Blackhole attack in action
 :--------------------------------------------------------:|:------------------------------------------------------:
 ![Legitimate DODAG](doc/blackhole-attack-ex1-without.png) | ![Blackhole attack](doc/blackhole-attack-ex1-with.png)
 
-**Another blackhole attack example**:
+### Another blackhole attack example
 
 Legitimate DODAG                                          |  Blackhole attack in action
 :--------------------------------------------------------:|:------------------------------------------------------:
 ![Legitimate DODAG](doc/blackhole-attack-ex2-without.png) | ![Blackhole attack](doc/blackhole-attack-ex2-with.png)
 
-**Another test case: a flooding attack**
+### Another test case: a flooding attack
 
 ![The malicious mote has 3, 7, 10 in its range](doc/flooding-dag.png)
 
@@ -26,16 +25,14 @@ Power tracking without the malicious mote                                       
 ![Power tracking without the malicious mote](doc/flooding-powertracking-without.png) | ![Power tracking with the malicious mote](doc/flooding-powertracking-with.png)
 
 
-System Requirements
--------------------
+## System Requirements
 
 This framework was tested on an **InstantContiki** appliance (that is, an Ubuntu 14.04).
 
 It was tested with **Python 2 and 3**.
 
 
-Installation
-------------
+## Installation
 
 1. Clone this repository
 
@@ -76,8 +73,7 @@ Installation
  ```
 
 
-Non-Standard Configuration
---------------------------
+## Non-Standard Configuration
 
 **This section only applies if you want to tune Contiki's source folder and/or your experiments folder.**
 
@@ -114,8 +110,7 @@ experiments_folder = ~/simulations
 ```
 
 
-Quick Start (using the integrated console)
-------------------------------------------
+## Quick Start (using the integrated console)
 
 1. Open the console (you should see something like in the following screenshot)
 
@@ -162,8 +157,7 @@ See ![How to create a campaign of simulations ?](templates/README.md) for more i
 **Hint** : You can type ``status`` during ``make_all`` and ``run_all`` processing for getting the status of pending tasks.
 
 
-Quick Start (using `fabric`)
-----------------------------
+## Quick Start (using `fabric`)
 
 1. Create a simulation campaign file from the template
 
@@ -186,8 +180,7 @@ Quick Start (using `fabric`)
  ```
 
 
-Commands
---------
+## Commands
 
 Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-flood``) or in the framework's console (e.g. ``launch hello-flood``).
 
@@ -290,8 +283,7 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 > This will test the framework.
 
 
-Simulation campaign
--------------------
+## Simulation campaign
 
 Example JSON for a campaign with a BASE simulation as a template for the other simulations (with the same topology) :
 
