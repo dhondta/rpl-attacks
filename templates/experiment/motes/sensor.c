@@ -1,133 +1,134 @@
 /*
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Institute nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * This file is part of the Contiki operating system.
- *
- */
-
+  *
+  * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  * SUCH DAMAGE.
+  *
+*/
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
 
 #include <string.h>
-
-#define DEBUG DEBUG_FULL
-#include "net/ip/uip-debug.h"
-#include "dev/watchdog.h"
-#include "dev/leds.h"
-#include "net/rpl/rpl.h"
-#include "dev/button-sensor.h"
-#include "debug.h"
-
-#define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
-#define UIP_UDP_BUF  ((struct uip_udp_hdr *)&uip_buf[uip_l2_l3_hdr_len])
-
-#define MAX_PAYLOAD_LEN 120
-
-static struct uip_udp_conn *server_conn;
-static char buf[MAX_PAYLOAD_LEN];
-static uint16_t len;
-/*---------------------------------------------------------------------------*/
-PROCESS(sensor_process, "Sensor process");
-AUTOSTART_PROCESSES(&sensor_process);
-/*---------------------------------------------------------------------------*/
-static void tcpip_handler(void) {
-  memset(buf, 0, MAX_PAYLOAD_LEN);
-  if(uip_newdata()) {
-    leds_on(LEDS_RED);
-    len = uip_datalen();
-    memcpy(buf, uip_appdata, len);
-    PRINTF("%u bytes from [", len);
-    PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
-    PRINTF("]:%u\n", UIP_HTONS(UIP_UDP_BUF->srcport));
-    uip_ipaddr_copy(&server_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
-    server_conn->rport = UIP_UDP_BUF->srcport;
-
-    uip_udp_packet_send(server_conn, buf, len);
-    /* Restore server connection to allow data from any node */
-    uip_create_unspecified(&server_conn->ripaddr);
-    server_conn->rport = 0;
-  }
-  leds_off(LEDS_RED);
-  return;
-}
-/*---------------------------------------------------------------------------*/
-#if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
-static void print_stats() {
-  PRINTF("tl=%lu, ts=%lu, bs=%lu, bc=%lu\n",
-         RIMESTATS_GET(toolong), RIMESTATS_GET(tooshort),
-         RIMESTATS_GET(badsynch), RIMESTATS_GET(badcrc));
-  PRINTF("llrx=%lu, lltx=%lu, rx=%lu, tx=%lu\n", RIMESTATS_GET(llrx),
-         RIMESTATS_GET(lltx), RIMESTATS_GET(rx), RIMESTATS_GET(tx));
-}
-#endif
-/*---------------------------------------------------------------------------*/
-static void print_local_addresses(void) {
-  int i;
-  uint8_t state;
-
-  PRINTF("Server IPv6 addresses:\n");
-  for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
-    state = uip_ds6_if.addr_list[i].state;
-    if(uip_ds6_if.addr_list[i].isused && (state == ADDR_TENTATIVE || state
-        == ADDR_PREFERRED)) {
-      PRINTF("  ");
-      PRINT6ADDR(&uip_ds6_if.addr_list[i].ipaddr);
-      PRINTF("\n");
-      if(state == ADDR_TENTATIVE) {
-        uip_ds6_if.addr_list[i].state = ADDR_PREFERRED;
-      }
-    }
-  }
-}
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(sensor_process, ev, data) {
-  PROCESS_BEGIN();
-  PRINTF("Starting UDP server\n");
-
-#if BUTTON_SENSOR_ON
-  PRINTF("Button 1: Print RIME stats\n");
+#define DEBUG 1
+#if DEBUG
+#include <stdio.h>
+#define PRINTF(...) printf(__VA_ARGS__)
+#define PRINT6ADDR(addr) PRINTF(" %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x ", ((u8_t *)addr)[0], ((u8_t *)addr)[1], ((u8_t *)addr)[2], ((u8_t *)addr)[3], ((u8_t *)addr)[4], ((u8_t *)addr)[5], ((u8_t *)addr)[6], ((u8_t *)addr)[7], ((u8_t *)addr)[8], ((u8_t *)addr)[9], ((u8_t *)addr)[10], ((u8_t *)addr)[11], ((u8_t *)addr)[12], ((u8_t *)addr)[13], ((u8_t *)addr)[14], ((u8_t *)addr)[15])
+#define PRINTLLADDR(lladdr) PRINTF(" %02x:%02x:%02x:%02x:%02x:%02x ",(lladdr)->addr[0], (lladdr)->addr[1], (lladdr)->addr[2], (lladdr)->addr[3],(lladdr)->addr[4], (lladdr)->addr[5])
+#else
+#define PRINTF(...)
+#define PRINT6ADDR(addr)
+#define PRINTLLADDR(addr)
 #endif
 
-  server_conn = udp_new(NULL, UIP_HTONS(0), NULL);
-  udp_bind(server_conn, UIP_HTONS(3000));
+#define SEND_INTERVAL        15 * CLOCK_SECOND
+#define MAX_PAYLOAD_LEN        40
 
-  PRINTF("Listen port: 3000, TTL=%u\n", server_conn->ttl);
+ static struct uip_udp_conn *client_conn;
+ static uip_ipaddr_t srvipaddr;
 
-  while(1) {
-    PROCESS_YIELD();
-    if(ev == tcpip_event) {
-      tcpip_handler();
-#if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
-    } else if(ev == sensors_event && data == &button_sensor) {
-      print_stats();
-#endif
-    }
-  }
-
-  PROCESS_END();
-}
 /*---------------------------------------------------------------------------*/
+ PROCESS(udp_client_process, "UDP client process");
+ AUTOSTART_PROCESSES(&udp_client_process);
+/*---------------------------------------------------------------------------*/
+ static void
+ tcpip_handler(void)
+ {
+   char *str;
 
+    if(uip_newdata()) {
+     str = uip_appdata;
+     str[uip_datalen()] = '\0';
+     printf("Response from the server: '%s'\n", str);
+   }
+ }
+/*---------------------------------------------------------------------------*/
+ static void
+ timeout_handler(void)
+ {
+   static int seq_id;
+   char buf[MAX_PAYLOAD_LEN];
+ 
+   printf("Client sending to: ");
+   PRINT6ADDR(&srvipaddr);
+   sprintf(buf, "Hello %d from the client %s", ++seq_id, &client_conn->ripaddr);
+   printf(" (msg: %s)\n", buf);
+   uip_udp_packet_sendto(client_conn, buf, strlen(buf),
+                        &srvipaddr, UIP_HTONS(3000));
+ }
+ /*---------------------------------------------------------------------------*/
+static void
+ print_local_addresses(void)
+ {
+   int i;
+   uint8_t state;
+
+   PRINTF("Client IPv6 addresses: ");
+   for(i = 0; i < UIP_CONF_NETIF_MAX_ADDRESSES; i++) {
+     state = uip_ds6_if.addr_list[i].state;
+     if(state == ADDR_TENTATIVE || state == ADDR_PREFERRED) {
+       PRINT6ADDR(&uip_ds6_if.addr_list[i].ipaddr);
+       PRINTF("\n");
+     }
+   }
+ }
+/*---------------------------------------------------------------------------*/
+ static void
+ set_connection_address(uip_ipaddr_t *ipaddr)
+ {
+   // specify the root ip address!
+   uip_ip6addr(ipaddr,0xaaaa,0,0,0,0xc30c,0,0,0);
+ }
+/*---------------------------------------------------------------------------*/
+ PROCESS_THREAD(udp_client_process, ev, data)
+ {
+   static struct etimer periodic;
+   uip_ipaddr_t ipaddr;
+
+   PROCESS_BEGIN();
+   PRINTF("UDP client process started\n");
+
+   // wait 5 second, in order to have the IP addresses well configured
+   etimer_set(&periodic, CLOCK_CONF_SECOND*5);
+
+   // wait until the timer has expired
+   PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_TIMER);
+
+   print_local_addresses();
+   set_connection_address(&srvipaddr);
+   /* new connection with remote host */
+   client_conn = udp_new(NULL, UIP_HTONS(3000), NULL);
+   if(client_conn == NULL) {
+      PRINTF("No UDP connection available, exiting the process!\n");
+      PROCESS_EXIT();
+   }
+
+   udp_bind(client_conn, UIP_HTONS(3001)); 
+   PRINTF("Created a connection with the server ");
+   PRINT6ADDR(&client_conn->ripaddr);
+   PRINTF("local/remote port %u/%u\n",
+   UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
+
+   etimer_set(&periodic, SEND_INTERVAL);
+   while(1) {
+     PROCESS_YIELD();
+     if(etimer_expired(&periodic)) {
+       timeout_handler();
+       etimer_restart(&periodic);
+     } else if(ev == tcpip_event) {
+       tcpip_handler();
+     }
+   }
+
+   PROCESS_END();
+ }
+ /*---------------------------------------------------------------------------*/

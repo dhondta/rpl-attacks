@@ -43,17 +43,36 @@
 
 #define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define UIP_UDP_BUF  ((struct uip_udp_hdr *)&uip_buf[uip_l2_l3_hdr_len])
-#define UDP_IP_BUF   ((struct uip_udpip_hdr *)&uip_buf[UIP_LLH_LEN])
-#define MAX_PAYLOAD_LEN 120
 
-{{ constants }}
+#define MAX_PAYLOAD_LEN 120
 
 static struct uip_udp_conn *server_conn;
 static char buf[MAX_PAYLOAD_LEN];
 static uint16_t len;
 /*---------------------------------------------------------------------------*/
-PROCESS(sensor_process, "Malicious sensor process");
+PROCESS(sensor_process, "Sensor process");
 AUTOSTART_PROCESSES(&sensor_process);
+/*---------------------------------------------------------------------------*/
+static void tcpip_handler(void) {
+  memset(buf, 0, MAX_PAYLOAD_LEN);
+  if(uip_newdata()) {
+    leds_on(LEDS_RED);
+    len = uip_datalen();
+    memcpy(buf, uip_appdata, len);
+    PRINTF("%u bytes from [", len);
+    PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
+    PRINTF("]:%u\n", UIP_HTONS(UIP_UDP_BUF->srcport));
+    uip_ipaddr_copy(&server_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
+    server_conn->rport = UIP_UDP_BUF->srcport;
+
+    uip_udp_packet_send(server_conn, buf, len);
+    /* Restore server connection to allow data from any node */
+    uip_create_unspecified(&server_conn->ripaddr);
+    server_conn->rport = 0;
+  }
+  leds_off(LEDS_RED);
+  return;
+}
 /*---------------------------------------------------------------------------*/
 #if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
 static void print_stats() {
@@ -69,7 +88,7 @@ static void print_local_addresses(void) {
   int i;
   uint8_t state;
 
-  PRINTF("Malicious sensor IPv6 addresses:\n");
+  PRINTF("Server IPv6 addresses:\n");
   for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
     state = uip_ds6_if.addr_list[i].state;
     if(uip_ds6_if.addr_list[i].isused && (state == ADDR_TENTATIVE || state
@@ -84,35 +103,31 @@ static void print_local_addresses(void) {
   }
 }
 /*---------------------------------------------------------------------------*/
- static void
- tcpip_handler(void)
- {
-   static int seq_id;
-   char buf[MAX_PAYLOAD_LEN];
-   if(uip_newdata()) {
-	/*do something...*/
-   }
- }
-
-/*---------------------------------------------------------------------------*/
-  PROCESS_THREAD(sensor_process, ev, data) {
+PROCESS_THREAD(sensor_process, ev, data) {
   PROCESS_BEGIN();
-  PRINTF("Starting UDP server (malicious)\n");
+  PRINTF("Starting UDP server\n");
 
 #if BUTTON_SENSOR_ON
   PRINTF("Button 1: Print RIME stats\n");
 #endif
-  print_local_addresses();
+
   server_conn = udp_new(NULL, UIP_HTONS(0), NULL);
   udp_bind(server_conn, UIP_HTONS(3000));
-  PRINTF("Malicious sensor listening on UDP port %u\n", UIP_HTONS(server_conn->lport));
 
-   while(1) {
-     PROCESS_YIELD();
-     if(ev == tcpip_event) {
-       tcpip_handler();
-     }
-   }
-   PROCESS_END();
+  PRINTF("Listen port: 3000, TTL=%u\n", server_conn->ttl);
+
+  while(1) {
+    PROCESS_YIELD();
+    if(ev == tcpip_event) {
+      tcpip_handler();
+#if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
+    } else if(ev == sensors_event && data == &button_sensor) {
+      print_stats();
+#endif
+    }
+  }
+
+  PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
+
