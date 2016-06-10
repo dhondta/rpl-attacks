@@ -55,7 +55,7 @@ How to create a campaign of simulations ?
  
  **BASE**: (mandatory)
  
-   **simulation**
+  >> **simulation**
  
  **Field** | **Value**
  --- | ---
