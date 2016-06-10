@@ -161,36 +161,48 @@ def remove_folder(path):
         pass
 
 
-def replace_in_file(path, replacement):
+def replace_in_file(path, replacements):
     """
     This helper function performs a line replacement in the file located at 'path'.
 
     :param path: path to the file to be altered
-    :param replacement: list of two strings formatted as [old_line_pattern, new_line_replacement]
+    :param replacements: list of string pairs formatted as [old_line_pattern, new_line_replacement]
     """
     tmp = path + '.tmp'
-    try:
-        regex = re.compile(replacement[0])
-    except re.error:
-        regex = None
+    if isinstance(replacements[0], string_types):
+        replacements = [replacements]
+    regexs = []
+    for replacement in replacements:
+        try:
+            regex = re.compile(replacement[0])
+        except re.error:
+            regex = None
+        regexs.append(regex)
     with open(tmp, 'w+') as nf:
         with open(path) as of:
             for line in of.readlines():
-                # try a simple string match
-                if replacement[0] in line:
-                    if replacement[1] in (None, ''):
-                        continue
-                    line = line.replace(replacement[0], replacement[1])
-                # then try a regex match
-                elif regex is not None:
-                    match = regex.search(line)
-                    if match is not None:
+                skip = False
+                for replacement, regex in zip(replacements, regexs):
+                    # try a simple string match
+                    if replacement[0] in line:
                         if replacement[1] in (None, ''):
-                            continue
-                        try:
-                            line = line.replace(match.groups(0)[0], replacement[1])
-                        except IndexError:
-                            line = line.replace(match.group(), replacement[1])
-                nf.write(line)
+                            skip = True
+                        else:
+                            line = line.replace(replacement[0], replacement[1])
+                        break
+                    # then try a regex match
+                    else:
+                        if regex is not None:
+                            match = regex.search(line)
+                            if match is not None:
+                                if replacement[1] in (None, ''):
+                                    skip = True
+                                try:
+                                    line = line.replace(match.groups(0)[0], replacement[1])
+                                except IndexError:
+                                    line = line.replace(match.group(), replacement[1])
+                                break
+                if not skip:
+                    nf.write(line)
     sh.rm(path)
     sh.mv(tmp, path)

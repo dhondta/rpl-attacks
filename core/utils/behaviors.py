@@ -59,6 +59,12 @@ class MultiprocessedCommand(object):
         else:
             self.__set_info('UNDEFINED')
 
+    def cancelled(self):
+        self.__set_info('CANCELLED')
+
+    def crashed(self):
+        self.__set_info('CRASHED')
+
     def is_expired(self):
         return datetime.now() > (self.tasklist[self]['expires'] or datetime.now())
 

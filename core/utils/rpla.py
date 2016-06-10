@@ -240,6 +240,17 @@ def list_experiments(check=True):
                    check_structure(join(EXPERIMENT_FOLDER, d)))])
 
 
+def list_mote_types(mote_type, strip=True):
+    """
+    This function gets the list of existing non-malicious mote types.
+
+    :return: list of non-malicious mote types
+    """
+    return sorted([basename(f).replace('.c', '').replace(mote_type + '-', '') if strip else basename(f)
+                   for f in listdir(join(TEMPLATES_FOLDER, 'experiment', 'motes'))
+                   if f.endswith('.c') and f.startswith(mote_type)])
+
+
 # ************************************** TEMPLATE AND PARAMETER FUNCTIONS **************************************
 def apply_debug_flags(contiki_rpl, debug='NONE'):
     """
@@ -317,9 +328,16 @@ def render_campaign(exp_file):
 
     :param exp_file: path to the experiment file to be created
     """
+    def list_of(t, a=None):
+        return [' - {}'.format(m) + ['', ' [default]'][m == DEFAULTS[a or t]] for m in list_mote_types(t)]
+
     path = dirname(exp_file)
     write_template(path, Environment(loader=FileSystemLoader(TEMPLATES_FOLDER)), 'experiments.json',
-                   available_building_blocks='\n'.join([' - {}'.format(b) for b in get_building_blocks()]))
+                   available_building_blocks='\n'.join([' - {}'.format(b) for b in get_building_blocks()]),
+                   available_root_mote_types='\n'.join(list_of('root')),
+                   available_sensor_mote_types='\n'.join(list_of('sensor')),
+                   available_malicious_mote_type='\n'.join(list_of('malicious', 'type')),
+                   area_side=DEFAULTS["area-square-side"], tx_range=DEFAULTS["transmission-range"])
     rename(join(path, 'experiments.json'), exp_file)
 
 
@@ -429,7 +447,7 @@ def write_template(path, env, name, **kwargs):
 def validated_parameters(dictionary):
     """
     This function validates all parameters coming from a JSON dictionary parsed from the simulation
-     campagin file.
+     campaign file.
 
     :param dictionary: input parameters
     :return: dictionary of validated parameters
@@ -455,8 +473,15 @@ def validated_parameters(dictionary):
     params["malicious_target"] = get_parameter(dictionary, "malicious", "target",
                                                lambda x: x in get_available_platforms(), "is not a valid platform",
                                                default=params["target"])
-    params["mtype"] = get_parameter(dictionary, "malicious", "type",
-                                    lambda x: x in ["root", "sensor"], "is not 'root' or 'sensor'")
+    params["mtype_root"] = "root-{}".format(get_parameter(dictionary, "simulation", "root",
+                                            lambda x: x in list_mote_types("root"),
+                                            "is not an available root mote type"))
+    params["mtype_sensor"] = "sensor-{}".format(get_parameter(dictionary, "simulation", "sensor",
+                                                lambda x: x in list_mote_types("sensor"),
+                                                "is not an available sensor mote type"))
+    params["mtype_malicious"] = "malicious-{}".format(get_parameter(dictionary, "malicious", "type",
+                                                      lambda x: x in list_mote_types("malicious"),
+                                                      "is not an available malicious mote type"))
     params["blocks"] = get_parameter(dictionary, "malicious", "building-blocks",
                                      [lambda x: x in get_building_blocks()])
     params["ext_lib"] = get_parameter(dictionary, "malicious", "external-library",

@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-from os.path import expanduser, join
+from os.path import exists, expanduser, join
 
 from core.conf.logconfig import logger
 
@@ -108,6 +108,14 @@ def update_cooja_user_properties():
     :return: None
     """
     cooja_user_properties = join(expanduser('~'), '.cooja.user.properties')
+    # if it does not exist, create it from 'src' folder's template
+    if not exists(cooja_user_properties):
+        with open('src/cooja-user-properties') as tf:
+            with open(cooja_user_properties) as nf:
+                nf.write(tf.read())
+        logger.debug(" > Cooja user properties created")
+        return
+    # if it exists, append plugin's reference inside
     with open(cooja_user_properties) as f:
         source = f.read()
     buffer, plugin_appended = [], False
@@ -119,9 +127,14 @@ def update_cooja_user_properties():
                 plugin_appended = True
                 line += ';[APPS_DIR]/visualizer_screenshot'
         buffer.append(line)
+    # if the line with the correct constant name was not found, create it from 'src' folder's template
     if not plugin_appended:
-        buffer.append('DEFAULT_PROJECTDIRS=[APPS_DIR]/mrm;[APPS_DIR]/serial_socket;[APPS_DIR]/collect-view;'
-                      '[APPS_DIR]/powertracker;[APPS_DIR]/visualizer_screenshot')
+        with open('src/cooja-user-properties') as f:
+            for line in f.readlines():
+                if 'DEFAULT_PROJECTDIRS=' in line:
+                    buffer.append(line)
+                    break
+    # then write the modified .cooja.user.properties
     with open(cooja_user_properties, 'w') as f:
         f.write('\n'.join(buffer))
     logger.debug(" > Cooja user properties modified")

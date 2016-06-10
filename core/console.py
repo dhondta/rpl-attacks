@@ -161,17 +161,13 @@ class FrameworkConsole(Console):
     Kill a task from the pool.
         """
         if task in [str(t) for t in self.tasklist.keys()]:
-            task_obj = [t for t in self.tasklist.keys() if str(t) == task][0]
+            tobj = [t for t in self.tasklist.keys() if str(t) == task and self.tasklist[t]['status'] == 'PENDING'][0]
             try:
-                task_obj.task.get(1)
+                tobj.task.get(1)
             except TimeoutError:
-                self.tasklist[task_obj]['status'] = 'CANCELLED'
-                self.tasklist[task_obj]['result'] = 'None'
-                logger.warning('Task {} interrupted'.format(task_obj))
+                tobj.cancelled()
             except UnicodeEncodeError:
-                self.tasklist[task_obj]['status'] = 'CRASHED'
-                self.tasklist[task_obj]['result'] = 'None'
-                logger.warning('Task {} crashed'.format(task_obj))
+                tobj.crashed()
 
     def do_loglevel(self, line):
         """

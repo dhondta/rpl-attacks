@@ -1,11 +1,29 @@
 /*
+
 Available Building Blocks :
  - version
  - hello-flood
  - sinkhole
 
+Available Root mote types :
+ - dummy [default]
+ - echo
+
+Available Sensor mote types :
+ - dummy [default]
+ - echo
+
+Available Malicious mote types :
+ - root
+ - sensor [default]
+
+ */
 
 {
+  /*
+   All simulations will have the same topology with 10 motes of platform Z1, spread in an square of 200m side, with
+    a communication range of 50m
+   */
   "BASE": {
     "simulation": {
       "number-motes": 10,
@@ -13,50 +31,36 @@ Available Building Blocks :
       "duration": 120
     }
   },
-  "versioning-attack": {
+  "hello-flood": {
     "simulation": {
-      "title": "Versioning Attack",
-      "goal": "Demonstration of the versioning attack",
-      "notes": ""
+      "title": "Flooding Attack",
+      "goal": "Demonstrate this attack through power tracking results.",
+      "notes": "The expected impact is that the nodes in the neighborhood of the malicious node exhaust their energy."
     },
     "malicious": {
-      "type": "sensor",
-      "building-blocks": [
-        "increased-version"
-      ]
+      "building-blocks": ["hello-flood"]
+    }
+  },
+  "version-number-attack": {
+    "simulation": {
+      "title": "Version Number Modification Attack",
+      "goal": "Demonstrate this attack through power tracking results.",
+      "notes": "The expected impact is that the nodes in the neighborhood of the malicious node exhaust their energy."
+    },
+    "malicious": {
+      "building-blocks": ["increased-version"]
     }
   },
   "blackhole-attack": {
     "simulation": {
-      "title": "Blackhole Attack",
-      "goal": "Demonstration of the Blackhole attack",
-      "number-motes": 10,
-      "notes": ""
+      "title": "Decreased Rank Attack",
+      "goal": "Demonstrate this attack through topology and DAG screenshots.",
+      "notes": "The expected impact is that the nodes in the neighborhood of the malicious node choose it as their parent."
+      "root": "echo",
+      "sensor": "echo"
     },
     "malicious": {
-      "type": "sensor",
-      "target": "z1",
-      "building-blocks": [
-        "decreased-rank"/*,
-	"drop-messages"*/
-      ]
-    }
-  },
-  "hello-flood": {
-    "simulation": {
-      "title": "HELLO Flood Attack",
-      "goal": "Measure power influence on attacked motes",
-      "notes": "",
-      "number-motes": 10,
-      "target": "z1",
-      "duration": 120,
-      "repeat": 3
-    },
-    "malicious": {
-      "type": "sensor",
-      "building-blocks": [
-        "hello-flood"
-      ]
+      "building-blocks": ["decreased-rank"] // "drop-messages" still missing...
     }
   }
 }

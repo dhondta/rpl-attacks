@@ -86,6 +86,8 @@ DEFAULTS = {
     "target": "z1",
     "malicious-target": None,
     "title": "Default title",
+    "root": "dummy",
+    "sensor": "dummy",
     "type": "sensor",
     "debug": True,
 }

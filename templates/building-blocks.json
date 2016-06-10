@@ -27,12 +27,13 @@ Building blocks consist of either ContikiRPL configuration constants or single-l
   },
   "increased-version": {
     "rpl-icmp6.c": ["dag->version;", "dag->version++;"]
-
   },
   "decreased-rank": {
-    "rpl-private.h": ["#define RPL_MIN_HOPRANKINC          256", "#define RPL_MIN_HOPRANKINC          0"],
-    "rpl-private.h": ["#define RPL_MAX_RANKINC             (7 * RPL_MIN_HOPRANKINC)", "#define RPL_MAX_RANKINC             (0 * RPL_MIN_HOPRANKINC)"],
-    "rpl-private.h": ["#define INFINITE_RANK                   0xffff", "#define INFINITE_RANK                   256"],
+    "RPL_CONF_MIN_HOPRANKINC": 0,
+    "rpl-private.h": [
+      ["#define RPL_MAX_RANKINC             (7 * RPL_MIN_HOPRANKINC)", "#define RPL_MAX_RANKINC 0"],
+      ["#define INFINITE_RANK                   0xffff", "#define INFINITE_RANK 256"]
+    ],
     "rpl-timers.c": ["rpl_recalculate_ranks();", null]
   }
 }

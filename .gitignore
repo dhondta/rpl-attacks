@@ -62,9 +62,4 @@ target/
 # RPL-Attacks
 makesense
 .idea
-config-notes.txt
-templates/rpl/
-templates/simulation_with_malicious.csc
-templates/simulation_without_malicious.csc
-templates/motes/malicious.c
 tmp

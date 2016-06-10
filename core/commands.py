@@ -171,8 +171,10 @@ def __make(name, ask=True, **kwargs):
     templates = get_path(path, 'templates', create=True)
     get_path(templates, 'motes', create=True)
     # select the right malicious mote template and duplicate the simulation file
-    copy_files((TEMPLATES_FOLDER, 'experiment'), templates, 'motes/root.c', 'motes/sensor.c',
-               ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'),
+    copy_files((TEMPLATES_FOLDER, 'experiment'), templates,
+               ('motes/{}.c'.format(params["mtype_root"]), 'motes/root.c'),
+               ('motes/{}.c'.format(params["mtype_sensor"]), 'motes/sensor.c'),
+               ('motes/{}.c'.format(params["mtype_malicious"]), 'motes/malicious.c'),
                'motes/Makefile', 'Makefile', 'simulation.csc', 'script.js')
     # create experiment's files from templates then clean the templates folder
     replacements = render_templates(path, **params)
@@ -257,7 +259,7 @@ def __remake(name, build=False, **kwargs):
     templates = get_path(path, 'templates', create=True)
     get_path(templates, 'motes', create=True)
     copy_files((TEMPLATES_FOLDER, 'experiment'), templates,
-               ('motes/malicious-{}.c'.format(params["mtype"]), 'motes/malicious.c'))
+               ('motes/{}.c'.format(params["mtype_malicious"]), 'motes/malicious.c'))
     # recreate malicious C file from template and clean the temporary template
     replacements = render_templates(path, only_malicious=True, **params)
     # then clean the temporary folder with templates

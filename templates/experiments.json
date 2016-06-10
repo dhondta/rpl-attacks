@@ -1,21 +1,41 @@
 /*
+
 Available Building Blocks :
 {{ available_building_blocks }}
-*/
+
+Available Root mote types :
+{{ available_root_mote_types }}
+
+Available Sensor mote types :
+{{ available_sensor_mote_types }}
+
+Available Malicious mote types :
+{{ available_malicious_mote_types }}
+
+ */
 
 {
+  /*
+   All simulations will have the same topology with 10 motes of platform Z1, spread in an square of {{ area_side }}m side, with
+    a communication range of {{ tx_range }}m and will last 120 seconds.
+   */
+  "BASE": {
+    "simulation": {
+      "number-motes": 10,
+      "target": "z1",
+      "duration": 120
+    }
+  },
   "test": {
     "simulation": {
       "title": "Test simulation",
       "goal": "Create a new simulation",
-      "notes": "",
-      "number_motes": 10,
-      "target": "z1",
-      "duration": 300
+      "root": "echo"
     },
     "malicious": {
       "type": "sensor",
       "building-blocks": [
+        "hello-flood"
       ]
     }
   }
