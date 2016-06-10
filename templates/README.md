@@ -25,21 +25,43 @@ How to create a campaign of simulations ?
 
 2. Tune the JSON according to the following structure:
 
- Fields in **bold** are mandatory.
-
  a. With a common topology for all simulations
  
- `{`
+ ```javascript
+ {
+   "BASE": {
+     "simulation": { 
+       "[field]": [value],
+       ...
+     },
+     "malicious": {
+       "[field]": [value],
+       ...
+     }
+   },
+   "[experiment]": {
+     "simulation": { 
+       "[field]": [value],
+       ...
+     },
+     "malicious": {
+       "[field]": [value],
+       ...
+     }
+   },
+   [other experiment blocks]
+ }
+ ```
  
- `  "`**`BASE`**`": {`
+ **BASE**: (mandatory)
  
- `    "`**`simulation`**`": {`
+   **simulation**
  
- `      "title":` string
- 
- `      "goal":` string
- 
- `      "notes":` string
+ **Field** | **Value**
+ --- | ---
+ `title` | string
+ `goal` | string
+ `notes` | string
 
 > Inside the simulation file (.CSC), the text in the SimulationNotes plugin will be generated with the following layout:
 >
@@ -47,31 +69,19 @@ How to create a campaign of simulations ?
 > 
 > `[notes]`
 
- `      "number-motes":` non-null positive integer (this is the number of non-root motes)
- 
- `      "target":` string amongst the available platforms in `[CONTIKI_FOLDER]/platform/`
- 
- `      "duration":` non-null positive integer, duration in seconds
- 
- `      "debug":` boolean, for printing debug messages of the ContikiRPL library
- 
- `      "repeat":` non-null positive integer, number of simulation repetitions [NOT IMPLEMENTED YET]
- 
- `      "root":` string amongst the suffixes (that is, excluding `root-`) of C files in `[FRAMEWORK_FOLDER]/templates/experiment/motes/`
- 
- `      "sensor":` string amongst the suffixes (that is, excluding `sensor-`) of C files in `[FRAMEWORK_FOLDER]/templates/experiment/motes/`
- 
- `      "minimum-distance-from-root":` non-null positive integer determining the minimal distance *of the malicious mote* from the root
- 
- `      "transmission-range":` positive integer greater than or equal to `minimum-distance-from-root`
- 
- `      "interference-range":` positive integer greater than or equal to `transmission-range`
- 
- `      "area-square-side":` positive integer greater than or equal to `sqrt(2) * minimum-distance-from-root`
- 
- `    }`
- 
- `  },`
+ **Field** | **Value**
+ --- | ---
+ `number-motes` | non-null positive integer (this is the number of non-root motes)
+ `target` | string amongst the available platforms in `[CONTIKI_FOLDER]/platform/`
+ `duration` | non-null positive integer, duration in seconds
+ `debug` | boolean, for printing debug messages of the ContikiRPL library
+ `repeat` | non-null positive integer, number of simulation repetitions [NOT IMPLEMENTED YET]
+ `root` | string amongst the suffixes (that is, excluding `root-`) of C files in `[FRAMEWORK_FOLDER]/templates/experiment/motes/`
+ `sensor` | string amongst the suffixes (that is, excluding `sensor-`) of C files in `[FRAMEWORK_FOLDER]/templates/experiment/motes/`
+ `minimum-distance-from-root` | non-null positive integer determining the minimal distance *of the malicious mote* from the root
+ `transmission-range` | positive integer greater than or equal to `minimum-distance-from-root`
+ `interference-range` | positive integer greater than or equal to `transmission-range`
+ `area-square-side` | positive integer greater than or equal to `sqrt(2) * minimum-distance-from-root
  
 > Note that no `malicious` section is present in `BASE`.
 > The experiments start after the `BASE` definition.
