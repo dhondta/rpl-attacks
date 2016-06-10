@@ -5,21 +5,25 @@ This project is aimed to provide a simple and convenient way to generate simulat
 
 With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants, modifying single lines from the ContikiRPL library or using an own external RPL library. Moreover, experiments in a campaign can be generated either based on a same or a randomized topology for each simulation.
 
-A few samples of DODAG's drawn with the framework (blackhole attack):
+**An example of blackhole attack made with the framework**:
 
-Solarized dark                                            |  Solarized Ocean
+Legitimate DODAG                                          |  Blackhole attack in action
 :--------------------------------------------------------:|:------------------------------------------------------:
 ![Legitimate DODAG](doc/blackhole-attack-ex1-without.png) | ![Blackhole attack](doc/blackhole-attack-ex1-with.png)
 
-Solarized dark                                            |  Solarized Ocean
+**Another blackhole attack example**:
+
+Legitimate DODAG                                          |  Blackhole attack in action
 :--------------------------------------------------------:|:------------------------------------------------------:
 ![Legitimate DODAG](doc/blackhole-attack-ex2-without.png) | ![Blackhole attack](doc/blackhole-attack-ex2-with.png)
 
-Test case: a flooding attack
+**Another test case: a flooding attack**
 
 ![The malicious mote has 3, 7, 10 in its range](doc/flooding-dag.png)
 
-![Power tracking without the malicious mote](doc/flooding-powertracking-without.png) ![Power tracking with the malicious mote](doc/flooding-powertracking-with.png)
+Power tracking without the malicious mote                                            |  Power tracking with the malicious mote
+:-----------------------------------------------------------------------------------:|:------------------------------------------------------------------------------:
+![Power tracking without the malicious mote](doc/flooding-powertracking-without.png) | ![Power tracking with the malicious mote](doc/flooding-powertracking-with.png)
 
 
 System Requirements
