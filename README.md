@@ -5,6 +5,18 @@ This project is aimed to provide a simple and convenient way to generate simulat
 
 With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants, modifying single lines from the ContikiRPL library or using an own external RPL library. Moreover, experiments in a campaign can be generated either based on a same or a randomized topology for each simulation.
 
+A few samples of DODAG's drawn with the framework (blackhole attack):
+
+![Legitimate DODAG](blackhole-attack-ex1-without.png) ![Blackhole attack](blackhole-attack-ex1-with.png)
+
+![Legitimate DODAG](blackhole-attack-ex2-without.png) ![Blackhole attack](blackhole-attack-ex2-with.png)
+
+Test case: a flooding attack
+
+![The malicious mote has 3, 7, 10 in its range](flooding-dag.png)
+
+![Power tracking without the malicious mote](flooding-powertracking-without.png) ![Power tracking with the malicious mote](flooding-powertracking-with.png)
+
 
 System Requirements
 -------------------
@@ -27,8 +39,14 @@ Installation
 
  ```
  sudo apt-get install gfortran libopenblas-dev liblapack-dev
- sudo apt-get install -qq python-numpy python-scipy
- sudo apt-get install imagemagick gcc-msp430 libcairo2-dev libffi-dev
+ sudo apt-get install python-numpy python-scipy
+ sudo apt-get install imagemagick libcairo2-dev libffi-dev
+ ```
+
+   If not using InstantContiki appliance, also install :
+
+ ```
+ sudo apt-get install build-essential binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug binutils-avr gcc-avr gdb-avr avr-libc avrdude openjdk-7-jdk openjdk-7-jre ant libncurses5-dev lib32ncurses5
  ```
 
 3. Install Python requirements
@@ -119,6 +137,8 @@ Quick Start (using the integrated console)
 
 3. Go to your experiments folder (default: `~/Experiments`) and edit your new `sample-attacks.json` to suit your needs
 
+See ![How to create a campaign of simulations ?](templates/README.md) for more information.
+
 4. Make the simulations
 
  ```
@@ -138,12 +158,6 @@ Quick Start (using `fabric`)
 ----------------------------
 
 1. Create a simulation campaign file from the template
-
- ```
- ../rpl-attacks$ fab prepare
- ```
-
- or create a simulation campaign file with a custom name
 
  ```
  ../rpl-attacks$ fab prepare:test-campaign
@@ -201,31 +215,43 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 >
 >  `type-of-item`: `experiments` or `campaigns`
 
-- **`make`**`:name[, n, mtype, max_range, blocks, ext_lib, duration, title, goal, notes, target]`
+- **`make`**`:name[, n, ...]`
 
 > This will create a simulation named 'name' with specified parameters and also build all firmwares from ``root.c``, ``sensor.c`` and ``malicious.c`` templates with the specified target mote type. This can alternatively make the malicious mote with an external library by providing its path.
 >
->  `n`: number of sensors (excluding the root and malicious motes) [default: 10]
+>  `n`: number of sensors (excluding the root and malicious motes)
 >
->  `mtype`: malicious mote type (`root` or `sensor`) [default: `sensor`]
+>  `duration`: simulation duration in seconds
 >
->  `max_range`: malicious mote's maximum range from the root [default:
+>  `title`: simulation title
 >
->  `blocks`: building blocks for building the malicious mote, as defined in `./templates/building-blocks.json` [default: empty]
+>  `goal`: simulation goal (displayed in the Notes pane)
 >
->  `ext_lib`: external RPL library for building the malicious mote [default empty]
+>  `notes`: simulation notes (appended behind the goal in the Notes pane)
 >
->  `duration`: simulation duration in seconds [default: 300]
+>  `min_range`: malicious mote's maximum range from the root
 >
->  `title`: simulation title [default: empty]
+>  `tx_range`: transmission range
 >
->  `goal`: simulation goal (displayed in the Notes pane) [default: empty]
+>  `int_range`: interference range
 >
->  `notes`: simulation notes (appended behind the goal in the Notes pane) [default: empty]
+>  `area_side`: side of the square area of the WSN
+>
+>  `mtype_root`: root mote type
+>
+>  `mtype_sensor`: sensor mote type
+>
+>  `mtype_malicious`: malicious mote type
+>
+>  `malicious_target`: external RPL library for building the malicious mote
+>
+>  `blocks`: building blocks for building the malicious mote, as defined in `./templates/building-blocks.json`
+>
+>  `ext_lib`: external RPL library for building the malicious mote
 
 - **`make_all`**`:simulation-campaign-json-file`
 
-> This will generate a campaign of simulations from a JSON file. See ``./templates/experiments.json`` for simulation campaign JSON format.
+> This will generate a campaign of simulations from a JSON file.
 
 - **`prepare`**`:simulation-campaign-json-file`
 
@@ -233,7 +259,7 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 - **`remake_all`**`:simulation-campaign-json-file`
 
-> This will re-generate malicious motes for a campaign of simulations from a JSON file.
+> This will re-generate malicious motes for a campaign of simulations from the selected malicious mote template (which can then be modified to refine only the malicious mote without re-generating the entire campaign).
 
 - **`run`**`:name`
 
@@ -241,15 +267,15 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 - **`run_all`**`:simulation-campaign-json-file`
 
-> This will the simulation campaign. See ``./templates/experiments.json`` for simulation campaign JSON format.
+> This will run the entire simulation campaign.
 
 - **`setup`**
 
-> This will setup Contiki, Cooja nad upgrade msp430-gcc for RPL Attacks.
+> This will setup Contiki, Cooja and upgrade `msp430-gcc` for RPL Attacks.
 
 - **`status`**
 
-> This will the status of current multi-processed tasks.
+> This will show the status of current multi-processed tasks.
 
 - **`test`**
 
