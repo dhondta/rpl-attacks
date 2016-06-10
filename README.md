@@ -7,9 +7,13 @@ With this framework, it is possible to easily define campaign of simulations eit
 
 A few samples of DODAG's drawn with the framework (blackhole attack):
 
-![Legitimate DODAG](doc/blackhole-attack-ex1-without.png) ![Blackhole attack](doc/blackhole-attack-ex1-with.png)
+Solarized dark                                            |  Solarized Ocean
+:--------------------------------------------------------:|:------------------------------------------------------:
+![Legitimate DODAG](doc/blackhole-attack-ex1-without.png) | ![Blackhole attack](doc/blackhole-attack-ex1-with.png)
 
-![Legitimate DODAG](doc/blackhole-attack-ex2-without.png) ![Blackhole attack](doc/blackhole-attack-ex2-with.png)
+Solarized dark                                            |  Solarized Ocean
+:--------------------------------------------------------:|:------------------------------------------------------:
+![Legitimate DODAG](doc/blackhole-attack-ex2-without.png) | ![Blackhole attack](doc/blackhole-attack-ex2-with.png)
 
 Test case: a flooding attack
 
