@@ -127,6 +127,7 @@ void create_dag() {
 PROCESS_THREAD(dodag_root_process, ev, data) {
   PROCESS_BEGIN();
   PRINTF("Starting UDP server\n");
+
 #if BUTTON_SENSOR_ON
   PRINTF("Button 1: Print RIME stats\n");
 #endif
