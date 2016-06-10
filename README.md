@@ -7,15 +7,15 @@ With this framework, it is possible to easily define campaign of simulations eit
 
 A few samples of DODAG's drawn with the framework (blackhole attack):
 
-![Legitimate DODAG](blackhole-attack-ex1-without.png) ![Blackhole attack](blackhole-attack-ex1-with.png)
+![Legitimate DODAG](doc/blackhole-attack-ex1-without.png) ![Blackhole attack](doc/blackhole-attack-ex1-with.png)
 
-![Legitimate DODAG](blackhole-attack-ex2-without.png) ![Blackhole attack](blackhole-attack-ex2-with.png)
+![Legitimate DODAG](doc/blackhole-attack-ex2-without.png) ![Blackhole attack](doc/blackhole-attack-ex2-with.png)
 
 Test case: a flooding attack
 
-![The malicious mote has 3, 7, 10 in its range](flooding-dag.png)
+![The malicious mote has 3, 7, 10 in its range](doc/flooding-dag.png)
 
-![Power tracking without the malicious mote](flooding-powertracking-without.png) ![Power tracking with the malicious mote](flooding-powertracking-with.png)
+![Power tracking without the malicious mote](doc/flooding-powertracking-without.png) ![Power tracking with the malicious mote](doc/flooding-powertracking-with.png)
 
 
 System Requirements
