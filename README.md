@@ -19,11 +19,11 @@ The malicious mote has 3, 7, 10 in its range                               |  Po
 
 Legitimate DODAG                                         |  Versioning attack in action (global repair)
 :-------------------------------------------------------:|:-----------------------------------------------------:
-![Legitimate DODAG](doc/imgs/versioning-dag-without.png) | ![Blackhole attack](doc/imgs/versioning-dag-with.png)
+![Legitimate DODAG](doc/imgs/versioning-dag-without.png) | ![Versioning attack](doc/imgs/versioning-dag-with.png)
 
 Power tracking without the malicious mote                          |  Power tracking with the malicious mote
 :-----------------------------------------------------------------:|:---------------------------------------------------------------:
-![Legitimate DODAG](doc/imgs/versioning-powertracking-without.png) | ![Blackhole attack](doc/imgs/versioning-powertracking-with.png)
+![Power tracking without the malicious mote](doc/imgs/versioning-powertracking-without.png) | ![Power tracking with the malicious mote](doc/imgs/versioning-powertracking-with.png)
 
 #### Test case 3a: blackhole attack
 
