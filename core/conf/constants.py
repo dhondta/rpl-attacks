@@ -8,8 +8,6 @@ from os import makedirs
 from os.path import abspath, dirname, exists, expanduser, join, pardir
 
 
-VERSION = '1.3'
-
 # configuration parsing and main constants setting
 confparser = configparser.ConfigParser()
 confparser.read(expanduser('~/.rpl-attacks.conf'))
