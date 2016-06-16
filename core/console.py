@@ -28,7 +28,7 @@ class Console(Cmd, object):
     ruler = None
     badcmd_msg = " [!] {} command: {}"
     max_history_entries = 10
-    welcome = "\nType help or ? to list commands.\nNB: DO NOT use spaces in arguments !\n"
+    welcome = "\nType help or ? to list commands.\nNB: Spaces are separators ; DO NOT use spaces in arguments !\n"
 
     def __init__(self, *args, **kwargs):
         super(Console, self).__init__(*args, **kwargs)

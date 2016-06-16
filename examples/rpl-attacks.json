@@ -31,7 +31,7 @@ Available Malicious mote types :
       "duration": 120
     }
   },
-  "hello-flood": {
+  "hello-flood-attack": {
     "simulation": {
       "title": "Flooding Attack",
       "goal": "Demonstrate this attack through power tracking results.",
@@ -55,7 +55,7 @@ Available Malicious mote types :
     "simulation": {
       "title": "Decreased Rank Attack",
       "goal": "Demonstrate this attack through topology and DAG screenshots.",
-      "notes": "The expected impact is that the nodes in the neighborhood of the malicious node choose it as their parent."
+      "notes": "The expected impact is that the nodes in the neighborhood of the malicious node choose it as their parent.",
       "root": "echo",
       "sensor": "echo"
     },

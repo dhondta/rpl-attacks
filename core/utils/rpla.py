@@ -1,15 +1,13 @@
 # -*- coding: utf8 -*-
 from copy import deepcopy
 from jinja2 import Environment, FileSystemLoader
-from jsmin import jsmin
-from json import loads
 from math import sqrt
 from os import listdir, makedirs, rename
 from os.path import basename, dirname, exists, expanduser, isdir, isfile, join, split, splitext
 from re import findall, finditer, search, sub, DOTALL, MULTILINE
 from six import string_types
 
-from core.common.helpers import move_files, remove_files, replace_in_file
+from core.common.helpers import is_valid_commented_json, move_files, remove_files, replace_in_file
 from core.common.wsngenerator import generate_motes
 from core.conf.constants import CONTIKI_FILES, CONTIKI_FOLDER, DEBUG_FILES, DEFAULTS, EXPERIMENT_STRUCTURE, \
                                 EXPERIMENT_FOLDER, TEMPLATES, TEMPLATES_FOLDER
@@ -36,9 +34,8 @@ def get_building_blocks():
 
     :return: List of strings representing the available building blocks
     """
-    with open(join(TEMPLATES_FOLDER, 'building-blocks.json')) as f:
-        blocks = loads(jsmin(f.read()))
-    return blocks
+    return is_valid_commented_json(join(TEMPLATES_FOLDER, 'building-blocks.json'),
+                                   return_json=True, logger=logger) or {}
 
 
 def get_constants_and_replacements(blocks):
@@ -122,11 +119,12 @@ def get_contiki_includes(target, malicious_target=None):
     return includes
 
 
-def get_experiments(exp_file):
+def get_experiments(exp_file, silent=False):
     """
     This function retrieves the dictionary of experiments with their parameters from a JSON campaign file.
 
     :param exp_file: input JSON simulation campaign file
+    :param silent: specify whether an eventual error is to be raised or not
     :return: dictionary with the parsed experiments and their parameters
     """
     if dirname(exp_file) == '':
@@ -138,9 +136,7 @@ def get_experiments(exp_file):
         logger.critical("Simulation campaign JSON file does not exist !")
         logger.warning("Make sure you've generated a JSON simulation campaign file by using 'prepare' fabric command.")
         return
-    with open(exp_file) as f:
-        experiments = loads(jsmin(f.read()))
-    return experiments
+    return is_valid_commented_json(exp_file, return_json=True, logger=logger if not silent else None) or {}
 
 
 def get_motes_from_simulation(simfile, as_dictionary=True):
@@ -226,7 +222,7 @@ def list_campaigns():
     """
     return sorted([basename(f) for f in listdir(EXPERIMENT_FOLDER)
                    if isfile(join(EXPERIMENT_FOLDER, f)) and f.endswith('.json') and
-                   is_valid_campaign(join(EXPERIMENT_FOLDER, f))])
+                   is_valid_commented_json(join(EXPERIMENT_FOLDER, f))])
 
 
 def list_experiments(check=True):
@@ -303,22 +299,6 @@ def check_structure(path, files=None, create=False, remove=False):
         files[match] = True if isinstance(files[match], bool) else \
             check_structure(join(path, match), deepcopy(files[match]), create, remove)
     return all(files.values())
-
-
-def is_valid_campaign(path):
-    """
-    This function checks if the given JSON file is a valid campaign file.
-
-    :param path: JSON file to be checked
-    :return: True if valid file, otherwise False
-    """
-    try:
-        # TODO: check JSON file structure
-        with open(path) as f:
-            loads(jsmin(f.read()))
-        return True
-    except ValueError:
-        return False
 
 
 def render_campaign(exp_file):

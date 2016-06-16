@@ -2,6 +2,7 @@
 from cmd import Cmd
 from funcsigs import signature
 from functools import update_wrapper, wraps
+from os import system
 from os.path import exists, expanduser, join
 from re import match
 
@@ -118,6 +119,9 @@ def command(**params):
                     args = tuple([a if i != arg_idx else expanded for i, a in enumerate(args)])
                 elif attrs['new_arg'] not in list(sig.parameters.keys()):
                     kwargs[attrs['new_arg']] = expanded if attrs.get('apply') is None else attrs['apply'](expanded)
+            # if next commands require sudo, prompt now for privilege elevation
+            if getattr(f, 'requires_sudo', False):
+                system('sudo ls')
             # check for existence (or not) and ask for a confirmation to continue if required
             for fattr in ['exists', 'not_exists']:
                 if hasattr(f, fattr):
@@ -220,8 +224,10 @@ def stderr(f):
     """
     @wraps(f)
     def wrapper(cmd, *args, **kwargs):
+        if f.__name__ == 'local':
+            kwargs['capture'] = True
         out = f(cmd + ' 2>&1 /dev/null', *args, **kwargs)
-        if out.return_code != 0:
+        if out is not None and out.return_code != 0:
             filtered = []
             for line in out.split('\n'):
                 if any([line.startswith(s) for s in ['cp ', 'mkdir ', '  CC', '  AR']]) or 'warning' in line:

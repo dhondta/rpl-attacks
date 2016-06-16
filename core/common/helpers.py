@@ -1,6 +1,8 @@
 # -*- coding: utf8 -*-
 import re
 import sh
+from jsmin import jsmin
+from json import loads
 from os import makedirs
 from os.path import exists, expanduser, join, split
 from six import string_types
@@ -206,3 +208,24 @@ def replace_in_file(path, replacements):
                     nf.write(line)
     sh.rm(path)
     sh.mv(tmp, path)
+
+
+# **************************************** JSON-RELATED HELPER *****************************************
+def is_valid_commented_json(path, return_json=False, logger=None):
+    """
+    This function checks if the given file path is a valid commented JSON file.
+
+    :param path: JSON file to be checked
+    :param return_json: specify whether the return value (in case of success) should be the json object or True
+    :param logger: pass a logger object to log a message in case of error
+    :return: True if valid file, otherwise False
+    """
+    try:
+        # TODO: check JSON file structure
+        with open(path) as f:
+            content = loads(jsmin(f.read()))
+        return content if return_json else True
+    except ValueError:
+        if logger is not None:
+            logger.error("JSON file '{}' cannot be read ! (check that the syntax is correct)".format(path))
+        return False

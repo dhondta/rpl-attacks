@@ -1,10 +1,11 @@
 # -*- coding: utf8 -*-
-from fabric.api import hide, lcd, local, settings, sudo
+from fabric.api import hide, lcd, local, settings
 from inspect import getmembers, isfunction
 from os import listdir
 from os.path import basename, exists, expanduser, join, splitext
 from sys import modules
 from terminaltables import SingleTable
+from time import sleep
 
 from core.common.helpers import copy_files, copy_folder, move_files, remove_files, remove_folder, std_input
 from core.conf.constants import CONTIKI_FOLDER, COOJA_FOLDER, DEFAULTS, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, \
@@ -79,7 +80,8 @@ The available parameters of the 'command' decorator are :
          not_exists=('path', {'loglvl': 'error', 'msg': (" > Experiment '{}' does not exist !", 'name')}),
          exists=('path', {'on_boolean': 'ask', 'confirm': "Before continuing, please check that your hardware is"
                                                           " plugged.\n Are you ready ? (yes|no) [default: no] "}),
-         start_msg=("BUILDING MALICIOUS MOTE BASED ON EXPERIMENT '{}'", 'name'))
+         start_msg=("BUILDING MALICIOUS MOTE BASED ON EXPERIMENT '{}'", 'name'),
+         requires_sudo=True)
 def build(name, ask=True, **kwargs):
     """
     Build the malicious mote to its target hardware.
@@ -88,7 +90,20 @@ def build(name, ask=True, **kwargs):
     :param ask: ask confirmation
     :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
+    def is_device_present():
+        with settings(hide(*HIDDEN_ALL), warn_only=True):
+            return local("if [ -c /dev/ttyUSB0 ]; then echo 'ok'; else echo 'nok'; fi", capture=True) == 'ok'
+
     console = kwargs.get('console')
+    counter, interval = 0.0, 0.5
+    while not is_device_present():
+        sleep(interval)
+        counter += interval
+        if counter % 5 == 0:
+            logger.warning("Waiting for mote to be detected...")
+        elif counter >= 120:
+            logger.error("Something failed with the mote ; check that it mounts to /dev/ttyUSB0")
+            return
     remake(name, build=True, **kwargs) if console is None else console.do_remake(name, build=True, **kwargs)
 
 
@@ -279,13 +294,17 @@ def __remake(name, build=False, **kwargs):
                 remove_folder(contiki_rpl)
                 copy_folder(ext_lib, contiki_rpl)
             apply_replacements(contiki_rpl, replacements)
-            logger.debug(" > Making '{}'...".format(malicious))
-            stderr(local)("make malicious{} CONTIKI={}"
-                          .format(['', '.upload'][build], contiki), capture=True)
             if build:
+                logger.debug(" > Building '{}'...".format(malicious))
+                stderr(local)("sudo make malicious.upload CONTIKI={} TARGET={}".format(contiki,
+                                                                                       params["malicious_target"]))
                 build = get_path(path, 'build', create=True)
                 move_files(with_malicious, build, 'tmpimage.ihex')
                 copy_files(with_malicious, build, malicious)
+            else:
+                logger.debug(" > Making '{}'...".format(malicious))
+                stderr(local)("make malicious CONTIKI={} TARGET={}".format(contiki, params["malicious_target"]),
+                              capture=True)
             move_files(with_malicious, without_malicious, malicious)
             local('make clean')
             remove_files(with_malicious, 'malicious.c')
@@ -401,7 +420,7 @@ def make_all(exp_file, **kwargs):
     global reuse_bin_path
     console = kwargs.get('console')
     clean_all(exp_file, silent=True) if console is None else console.do_clean_all(exp_file, silent=True)
-    experiments = get_experiments(exp_file)
+    experiments = get_experiments(exp_file, silent=True)
     sim_json, motes = None, None
     # if a simulation named 'BASE' is present, use it as a template simulation for all the other simulations
     if 'BASE' in experiments.keys():
@@ -521,7 +540,7 @@ def test(**kwargs):
             local("python -m unittest tests")
 
 
-@command(start_msg="SETTING UP OF THE FRAMEWORK")
+@command(start_msg="SETTING UP OF THE FRAMEWORK", requires_sudo=True)
 def setup(silent=False, **kwargs):
     """
     Setup the framework.
@@ -555,7 +574,7 @@ def setup(silent=False, **kwargs):
         imagemagick_apt_output = local('apt-cache policy imagemagick', capture=True)
         if 'Unable to locate package' in imagemagick_apt_output:
             logger.debug(" > Installing imagemagick package...")
-            sudo("apt-get install imagemagick -y &")
+            local('sudo apt-get install imagemagick -y &')
         else:
             logger.debug(" > Imagemagick is installed")
     # install msp430 (GCC) upgrade
@@ -571,8 +590,8 @@ def setup(silent=False, **kwargs):
                            "https://github.com/contiki-os/contiki/wiki/MSP430X")
             with lcd('src/'):
                 logger.warning(" > Upgrade now starts, this may take up to 30 minutes...")
-                sudo('./upgrade-msp430.sh')
-                sudo('rm -r tmp/')
+                local('sudo ./upgrade-msp430.sh')
+                local('sudo rm -r tmp/')
                 local('export PATH=/usr/local/msp430/bin:$PATH')
                 register_new_path_in_profile()
         else:
