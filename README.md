@@ -201,7 +201,6 @@ See ![How to create a campaign of simulations ?](doc/README.md) for more informa
 5. Once done, just go to the experiment's ``results`` folders to get pictures and logs of the simulations. The related paths are the followings :
 
  ``[EXPERIMENTS_FOLDER]/[experiment_name]/without-malicious/results/``
- 
  ``[EXPERIMENTS_FOLDER]/[experiment_name]/with-malicious/results/``
 
 
