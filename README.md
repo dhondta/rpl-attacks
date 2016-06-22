@@ -153,7 +153,7 @@ experiments_folder = ~/simulations
 
 3. Go to your experiments folder (default: `~/Experiments`) and edit your new `sample-attacks.json` to suit your needs
 
-See ![How to create a campaign of simulations ?](doc/README.md) for more information.
+  See ![How to create a campaign of simulations ?](doc/README.md) for more information.
 
 4. Make the simulations
 
@@ -167,12 +167,11 @@ See ![How to create a campaign of simulations ?](doc/README.md) for more informa
  user@instant-contiki:rpl-attacks>> run_all sample-attacks
  ```
 
-**Hint** : You can type ``status`` during ``make_all`` and ``run_all`` processing for getting the status of pending tasks.
+  **Hint** : You can type ``status`` during ``make_all`` and ``run_all`` processing for getting the status of pending tasks.
 
 6. Once tasks are in status ``SUCCESS`` in the status tables (visible by typing ``status``), just go to the experiment's ``results`` folders to get pictures and logs of the simulations. The related paths are the followings :
 
  ``[EXPERIMENTS_FOLDER]/[experiment_name]/without-malicious/results/``
- 
  ``[EXPERIMENTS_FOLDER]/[experiment_name]/with-malicious/results/``
 
 
