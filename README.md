@@ -169,6 +169,12 @@ See ![How to create a campaign of simulations ?](doc/README.md) for more informa
 
 **Hint** : You can type ``status`` during ``make_all`` and ``run_all`` processing for getting the status of pending tasks.
 
+6. Once tasks are in status ``SUCCESS`` in the status tables (visible by typing ``status``), just go to the experiment's ``results`` folders to get pictures and logs of the simulations. The related paths are the followings :
+
+ ``[EXPERIMENTS_FOLDER]/[experiment_name]/without-malicious/results/``
+ 
+ ``[EXPERIMENTS_FOLDER]/[experiment_name]/with-malicious/results/``
+
 
 ## Quick Start (using `fabric`)
 
@@ -191,6 +197,12 @@ See ![How to create a campaign of simulations ?](doc/README.md) for more informa
  ```
  ../rpl-attacks$ fab run_all:test-campaign
  ```
+
+5. Once done, just go to the experiment's ``results`` folders to get pictures and logs of the simulations. The related paths are the followings :
+
+ ``[EXPERIMENTS_FOLDER]/[experiment_name]/without-malicious/results/``
+ 
+ ``[EXPERIMENTS_FOLDER]/[experiment_name]/with-malicious/results/``
 
 
 ## Commands
