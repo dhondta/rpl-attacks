@@ -225,15 +225,15 @@ experiments_folder = ~/simulations
 
 Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-flood``) or in the framework's console (e.g. ``launch hello-flood``).
 
-- **`build`**`:name`
+- **`build`**`name`
 
 > This will the malicious mote from the simulation directory named 'name' and upload it to the target hardware.
 
-- **`clean`**`:name`
+- **`clean`**`name`
 
 > This will clean the simulation directory named 'name'.
 
-- **`config`**`[:contiki_folder, experiments_folder`]
+- **`config`**`[contiki_folder, experiments_folder`]
 
 > This will create a configuration file with the given parameters at `~/.rpl-attacks.conf`.
 >
@@ -241,23 +241,23 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 >
 >  `experiments_folder`: path to your experiments [default: Experiments]
 
-- **`cooja`**`:name[, with-malicious-mote]`
+- **`cooja`**`name[, with-malicious-mote]`
 
 > This will open Cooja and load simulation named 'name' in its version with or without the malicious mote.
 >
 >  `with-malicious-mote`: flag for starting the simulation with/without the malicious mote [default: false]
 
-- **`drop`**`:simulation-campaign-json-file`
+- **`drop`**`simulation-campaign-json-file`
 
 > This will remove the campaign file named 'simulation-campaign-json-file'.
 
-- **`list`**`:type-of-item`
+- **`list`**`type-of-item`
 
 > This will list all existing items of the specified type from the experiment folder.
 >
 >  `type-of-item`: `experiments` or `campaigns`
 
-- **`make`**`:name[, n, ...]`
+- **`make`**`name[, n, ...]`
 
 > This will create a simulation named 'name' with specified parameters and also build all firmwares from ``root.c``, ``sensor.c`` and ``malicious.c`` templates with the specified target mote type. This can alternatively make the malicious mote with an external library by providing its path.
 >
@@ -291,23 +291,23 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 >
 >  `ext_lib`: external RPL library for building the malicious mote
 
-- **`make_all`**`:simulation-campaign-json-file`
+- **`make_all`**`simulation-campaign-json-file`
 
 > This will generate a campaign of simulations from a JSON file.
 
-- **`prepare`**`:simulation-campaign-json-file`
+- **`prepare`**`simulation-campaign-json-file`
 
 > This will generate a campaign JSON file from the template located at `./templates/experiments.json`.
 
-- **`remake_all`**`:simulation-campaign-json-file`
+- **`remake_all`**`simulation-campaign-json-file`
 
 > This will re-generate malicious motes for a campaign of simulations from the selected malicious mote template (which can then be modified to refine only the malicious mote without re-generating the entire campaign).
 
-- **`run`**`:name`
+- **`run`**`name`
 
 > This will execute the given simulation, parse log files and generate the results.
 
-- **`run_all`**`:simulation-campaign-json-file`
+- **`run_all`**`simulation-campaign-json-file`
 
 > This will run the entire simulation campaign.
 
