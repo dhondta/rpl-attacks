@@ -53,7 +53,7 @@ It was tested with **Python 2 and 3**.
  git clone https://github.com/dhondta/rpl-attacks.git
  ```
  
- > **Behind a proxy ?
+ > **Behind a proxy ?**
  > 
  > Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
  > Unsetting: `git config --global --unset http.proxy`
@@ -67,7 +67,7 @@ It was tested with **Python 2 and 3**.
  sudo apt-get install imagemagick libcairo2-dev libffi-dev
  ```
 
- > **Behind a proxy ?
+ > **Behind a proxy ?**
  > 
  > Do not forget to configure your Network system settings (or manually edit `/etc/apt/apt.conf`).
  
@@ -91,7 +91,7 @@ It was tested with **Python 2 and 3**.
  sudo pip3 install -r requirements.txt
  ```
 
- > **Behind a proxy ?
+ > **Behind a proxy ?**
  > 
  > Do not forget to add option `--proxy=http://[user]:[pwd]@[host]:[port]` to your pip command.
  
