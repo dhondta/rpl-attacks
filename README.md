@@ -56,7 +56,9 @@ It was tested with **Python 2 and 3**.
  > **Behind a proxy ?**
  > 
  > Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
+ > 
  > Unsetting: `git config --global --unset http.proxy`
+ > 
  > Getting: `git config --global --get http.proxy`
 
 2. Install system requirements
