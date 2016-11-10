@@ -1,5 +1,5 @@
-cairocffi
 cffi
+cairocffi==0.6
 coloredlogs
 dill
 fabric
