@@ -52,6 +52,12 @@ It was tested with **Python 2 and 3**.
  ```
  git clone https://github.com/dhondta/rpl-attacks.git
  ```
+ 
+ > **Behind a proxy ?
+ > 
+ > Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
+ > Unsetting: `git config --global --unset http.proxy`
+ > Getting: `git config --global --get http.proxy`
 
 2. Install system requirements
 
@@ -61,6 +67,10 @@ It was tested with **Python 2 and 3**.
  sudo apt-get install imagemagick libcairo2-dev libffi-dev
  ```
 
+ > **Behind a proxy ?
+ > 
+ > Do not forget to configure your Network system settings (or manually edit `/etc/apt/apt.conf`).
+ 
    If not using InstantContiki appliance, also install :
 
  ```
@@ -70,15 +80,21 @@ It was tested with **Python 2 and 3**.
 3. Install Python requirements
 
  ```
+ sudo apt-get install python-pip
  sudo pip install -r requirements.txt
  ```
 
  or
 
  ```
+ sudo apt-get install python3-pip
  sudo pip3 install -r requirements.txt
  ```
 
+ > **Behind a proxy ?
+ > 
+ > Do not forget to add option `--proxy=http://[user]:[pwd]@[host]:[port]` to your pip command.
+ 
 4. Setup dependencies and test the framework
 
  ```
