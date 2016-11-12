@@ -121,7 +121,7 @@ def command(**params):
                     kwargs[attrs['new_arg']] = expanded if attrs.get('apply') is None else attrs['apply'](expanded)
             # if next commands require sudo, prompt now for privilege elevation
             if getattr(f, 'requires_sudo', False):
-                system('sudo ls')
+                system('sudo ls > /dev/null')
             # check for existence (or not) and ask for a confirmation to continue if required
             for fattr in ['exists', 'not_exists']:
                 if hasattr(f, fattr):

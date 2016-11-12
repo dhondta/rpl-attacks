@@ -22,7 +22,7 @@ class DefaultCommand(object):
         return self.command(*args, **kwargs)
 
 
-class MultiprocessedCommand(object):
+class MultiprocessedCommand(DefaultCommand):
     """
     This class handles command multi-processing and is to be attached to a console through its constructor's
      arguments.
@@ -30,11 +30,8 @@ class MultiprocessedCommand(object):
     is_multiprocessed = True
 
     def __init__(self, console, command, name):
-        super(MultiprocessedCommand, self).__init__()
+        super(MultiprocessedCommand, self).__init__(console, command, name)
         self.pool = console.pool
-        self.tasklist = console.tasklist
-        self.command = command
-        self.name = name
         self.task = None
         self.tasklist[self] = {
             'name': name,

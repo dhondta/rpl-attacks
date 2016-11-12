@@ -153,7 +153,7 @@ class FrameworkConsole(Console):
     def complete_kill(self, text, line, start_index, end_index):
         return sorted([str(t) for t in self.tasklist.keys() if str(t).startswith(text)])
 
-    def complete_loglevel(self):
+    def complete_loglevel(self, *args):
         return ['debug', 'error', 'info', 'warning']
 
     def do_kill(self, task):

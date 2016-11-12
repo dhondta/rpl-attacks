@@ -207,7 +207,7 @@ def get_path(*args, **kwargs):
     :return: path string
     """
     create = kwargs.get('create')
-    path = join(*args)
+    path = expanduser(join(*args))
     if create and not exists(path):
         makedirs(path)
     return path

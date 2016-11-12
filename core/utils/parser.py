@@ -90,6 +90,13 @@ def draw_dodag(path):
 
     :param path: path to the experiment (including [with-|without-malicious])
     """
+    # first, check if the mote relationships were recorded
+    with open(join(data, 'relationships.log')) as f:
+        f.seek(0, 2)
+        print(f.tell())
+        if f.tell() == 0:
+            return
+        relationships = f.read()
     pyplot.clf()
     with_malicious = (basename(normpath(path)) == 'with-malicious')
     data, results = join(path, 'data'), join(path, 'results')
@@ -105,16 +112,15 @@ def draw_dodag(path):
                                               (with_malicious and 0 < n < len(motes) - 1) else 'red'))
     # retrieve edges from relationships.log
     edges = {}
-    with open(join(data, 'relationships.log')) as f:
-        for line in f.readlines():
-            try:
-                d = match(RELATIONSHIP_REGEX, line).groupdict()
-                if int(d['flag']) == 0:
-                    continue
-                mote, parent = int(d['mote_id']), int(d['parent_id'])
-            except AttributeError:
+    for relationship in relationships.split():
+        try:
+            d = match(RELATIONSHIP_REGEX, relationship).groupdict()
+            if int(d['flag']) == 0:
                 continue
-            edges[mote] = parent
+            mote, parent = int(d['mote_id']), int(d['parent_id'])
+    	except AttributeError:
+            continue
+    edges[mote] = parent
     # now, fill in the graph with edges
     dodag.add_edges_from(edges.items())
     # finally, draw the graph

@@ -600,14 +600,3 @@ def setup(silent=False, **kwargs):
     else:
         logger.debug(" > Library msp430-gcc is up-to-date (version 4.7.0)")
 
-
-# **************************************** MAGIC COMMAND ****************************************
-@command(autocomplete=lambda: list_experiments(),
-         expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}),
-         not_exists=('path', {'loglvl': 'error', 'msg': (" > Experiment '{}' does not exist !", 'name')}))
-def rip_my_slip(name, **kwargs):
-    """
-    Run a demonstration.
-    """
-    # TODO: prepare 'rpl-attacks' campaign, make all its experiments then run them
-    parsing_chain(join(kwargs.get('path'), 'with-malicious'))
