@@ -4,14 +4,13 @@
 Table of Contents
 =================
 
-   * [RPL Attacks Framework](#rpl-attacks-framework)
-      * [System Requirements](#system-requirements)
-      * [Installation](#installation)
-      * [Non-Standard Configuration](#non-standard-configuration)
-      * [Quick Start (using the integrated console)](#quick-start-using-the-integrated-console)
-      * [Quick Start (using fabric)](#quick-start-using-fabric)
-      * [Commands](#commands)
-      * [Simulation campaign](#simulation-campaign)
+   * [System Requirements](#system-requirements)
+   * [Installation](#installation)
+   * [Non-Standard Configuration](#non-standard-configuration)
+   * [Quick Start (using the integrated console)](#quick-start-using-the-integrated-console)
+   * [Quick Start (using fabric)](#quick-start-using-fabric)
+   * [Commands](#commands)
+   * [Simulation campaign](#simulation-campaign)
 
 # RPL Attacks Framework
 
