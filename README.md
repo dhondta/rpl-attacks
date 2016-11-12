@@ -1,6 +1,18 @@
 [![Build Status](https://travis-ci.org/dhondta/rpl-attacks.svg?branch=master)](https://travis-ci.org/dhondta/rpl-attacks)
 [![DOI](https://zenodo.org/badge/22624/dhondta/rpl-attacks.svg)](https://zenodo.org/badge/latestdoi/22624/dhondta/rpl-attacks)
 
+Table of Contents
+=================
+
+   * [RPL Attacks Framework](#rpl-attacks-framework)
+      * [System Requirements](#system-requirements)
+      * [Installation](#installation)
+      * [Non-Standard Configuration](#non-standard-configuration)
+      * [Quick Start (using the integrated console)](#quick-start-using-the-integrated-console)
+      * [Quick Start (using fabric)](#quick-start-using-fabric)
+      * [Commands](#commands)
+      * [Simulation campaign](#simulation-campaign)
+
 # RPL Attacks Framework
 
 This project is aimed to provide a simple and convenient way to generate simulations and deploy malicious motes for a Wireless Sensor Network (WSN) that uses Routing Protocol for Low-power and lossy devices (RPL) as its network layer.
