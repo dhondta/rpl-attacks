@@ -1,5 +1,12 @@
 # -*- coding: utf8 -*-
 import logging
+# colorize logging
+try:
+    import coloredlogs
+except ImportError:
+    coloredlogs = None
+    print("(Install 'coloredlogs' for colored logging)")
+
 
 LOG_FORMAT = '%(asctime)s %(name)s[%(process)d] %(levelname)s %(message)s'
 LOG_LEVELS = {
@@ -10,23 +17,20 @@ LOG_LEVELS = {
 }
 
 
-# colorize logging
-try:
-    import coloredlogs
-except ImportError:
-    coloredlogs = None
-    print("(Install 'coloredlogs' for colored logging)")
-
-
 # logging configuration
+logger = None
 def set_logging(lvl='info'):
+    global logger
     try:
-        lvl = LOG_LEVELS[lvl]
+        if not (isinstance(lvl, int) and lvl in LOG_LEVELS.values()):
+            lvl = LOG_LEVELS[lvl]
     except KeyError:
         return False
     logging.basicConfig(format=LOG_FORMAT, level=lvl)
     if coloredlogs is not None:
         coloredlogs.install(lvl, fmt=LOG_FORMAT)
+    if logger is not None:
+        logger.setLevel(lvl)
     return True
 set_logging()
 # this avoids throwing e.g. FutureWarning or DeprecationWarning messages

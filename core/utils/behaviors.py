@@ -71,4 +71,5 @@ class MultiprocessedCommand(DefaultCommand):
             self.__set_info('PENDING', expires=False)
             kwargs.pop('console', None)  # console instance must be removed as it is unpickable and will thus make
             #                               apply_async fail
+            kwargs['loglevel'] = logger.level  # logging level is appended to set it in the subprocess
             self.task = self.pool.apply_async(self.command, args, kwargs, callback=self.callback)

@@ -113,6 +113,7 @@ class FrameworkConsole(Console):
         self.reexec = []
         self.__bind_commands()
         super(FrameworkConsole, self).__init__()
+        self.do_loglevel('info')
         self.do_clear('')
 
     def __bind_commands(self):
@@ -225,7 +226,7 @@ class FrameworkConsole(Console):
                     except TimeoutError:
                         pass
                 self.pool.terminate()
-                self.pool.join()
+                self.pool.join(1)
 
     @staticmethod
     def complete_template(lazy_values):

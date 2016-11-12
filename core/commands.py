@@ -12,7 +12,7 @@ from core.conf.constants import CONTIKI_FOLDER, COOJA_FOLDER, DEFAULTS, EXPERIME
                                 TEMPLATES_FOLDER
 from core.conf.install import check_cooja, modify_cooja, register_new_path_in_profile, \
                               update_cooja_build, update_cooja_user_properties
-from core.conf.logconfig import logger, HIDDEN_ALL
+from core.conf.logconfig import logger, set_logging, HIDDEN_ALL
 from core.utils.behaviors import MultiprocessedCommand
 from core.utils.decorators import CommandMonitor, command, stderr
 from core.utils.helpers import read_config, write_config
@@ -172,6 +172,7 @@ def __make(name, ask=True, **kwargs):
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     global reuse_bin_path
+    set_logging(kwargs.get('loglevel'))
     path = kwargs['path']
     logger.debug(" > Validating parameters...")
     params = validated_parameters(kwargs)
@@ -261,6 +262,7 @@ def __remake(name, build=False, **kwargs):
     :param name: experiment name
     :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
+    set_logging(kwargs.get('loglevel'))
     path = kwargs['path']
     logger.debug(" > Retrieving parameters...")
     params = read_config(path)
@@ -330,6 +332,7 @@ def __run(name, **kwargs):
     :param name: experiment name
     :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
     """
+    set_logging(kwargs.get('loglevel'))
     path = kwargs['path']
     check_structure(path, remove=True)
     with hide(*HIDDEN_ALL):
@@ -337,13 +340,14 @@ def __run(name, **kwargs):
             sim_path = join(path, "{}-malicious".format(sim))
             data, results = join(sim_path, 'data'), join(sim_path, 'results')
             # the Makefile is at experiment's root ('path')
+            logger.debug(" > Running simulation {} the malicious mote...".format(sim))
             with lcd(sim_path):
-                logger.debug(" > Running simulation {} the malicious mote...".format(sim))
                 local("make run", capture=True)
             # simulations are in their respective folders ('sim_path')
             remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
             # once the execution is over, gather the screenshots into a single GIF and keep the first and
             #  the last screenshots ; move these to the results folder
+            logger.debug(" > Gathering screenshots in an animated GIF...")
             with lcd(data):
                 local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
             network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data)
@@ -357,6 +361,7 @@ def __run(name, **kwargs):
             net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
             move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
             remove_files(data, *network_images.values())
+            logger.debug(" > Parsing simulation results...")
             parsing_chain(sim_path)
 _run = CommandMonitor(__run)
 run = command(
@@ -367,6 +372,7 @@ run = command(
     start_msg=("PROCESSING EXPERIMENT '{}'", 'name'),
     behavior=MultiprocessedCommand,
     __base__=_run,
+    logger=logger,
 )(__run)
 
 
