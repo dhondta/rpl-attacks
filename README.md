@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/dhondta/rpl-attacks.svg?branch=master)](https://travis-ci.org/dhondta/rpl-attacks)
 [![DOI](https://zenodo.org/badge/22624/dhondta/rpl-attacks.svg)](https://zenodo.org/badge/latestdoi/22624/dhondta/rpl-attacks)
 
-Table of Contents
-=================
+## Table of Contents
 
+   * [RPL Attacks Framework](#rpl-attacks-framework)
    * [System Requirements](#system-requirements)
    * [Installation](#installation)
    * [Non-Standard Configuration](#non-standard-configuration)
