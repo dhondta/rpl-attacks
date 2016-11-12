@@ -18,7 +18,7 @@ from core.commands import get_commands
 from core.common.ansi import surround_ansi_escapes
 from core.common.termsize import get_terminal_size
 from core.conf.constants import BANNER, COMMAND_DOCSTRING, MIN_TERM_SIZE
-from core.conf.logconfig import logger, set_logging
+from core.conf.logconfig import logger, LOG_LEVELS, set_logging
 from core.utils.decorators import no_arg_command, no_arg_command_except
 
 
@@ -150,11 +150,11 @@ class FrameworkConsole(Console):
         for t in [x for x in self.tasklist.keys() if x.is_expired()]:
             del self.tasklist[t]
 
-    def complete_kill(self, text, line, start_index, end_index):
-        return sorted([str(t) for t in self.tasklist.keys() if str(t).startswith(text)])
+    def complete_kill(self, text, *args):
+        return sorted([str(i) for i in self.tasklist.keys() if str(i).startswith(text)])
 
-    def complete_loglevel(self, *args):
-        return ['debug', 'error', 'info', 'warning']
+    def complete_loglevel(self, text, *args):
+        return sorted([str(i) for i in LOG_LEVELS.keys() if str(i).startswith(text)])
 
     def do_kill(self, task):
         """
@@ -169,12 +169,12 @@ class FrameworkConsole(Console):
             except UnicodeEncodeError:
                 tobj.crashed()
 
-    def do_loglevel(self, line):
+    def do_loglevel(self, level):
         """
     Change the log level (info|warning|error|debug) [default: info].
         """
-        if line != '' and set_logging(line):
-            print(' [I] Verbose level is now set to: {}'.format(line))
+        if level in LOG_LEVELS.keys() and set_logging(level):
+            print(' [I] Verbose level is now set to: {}'.format(level))
 
     @no_arg_command_except('restart')
     def do_status(self, line):

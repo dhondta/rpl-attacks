@@ -2,6 +2,12 @@
 import logging
 
 LOG_FORMAT = '%(asctime)s %(name)s[%(process)d] %(levelname)s %(message)s'
+LOG_LEVELS = {
+    'info': logging.INFO,
+    'warning': logging.WARNING,
+    'error': logging.ERROR,
+    'debug': logging.DEBUG,
+}
 
 
 # colorize logging
@@ -15,12 +21,7 @@ except ImportError:
 # logging configuration
 def set_logging(lvl='info'):
     try:
-        lvl = {
-            'info': logging.INFO,
-            'warning': logging.WARNING,
-            'error': logging.ERROR,
-            'debug': logging.DEBUG,
-        }[lvl]
+        lvl = LOG_LEVELS[lvl]
     except KeyError:
         return False
     logging.basicConfig(format=LOG_FORMAT, level=lvl)

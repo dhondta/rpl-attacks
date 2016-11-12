@@ -45,7 +45,8 @@ class MultiprocessedCommand(DefaultCommand):
         return '{}[{}]'.format(self.name, self.command.__name__.lstrip('_'))
 
     def __set_info(self, status, result=None, expires=True):
-        logger.debug(' > Process {} is over.'.format(self))
+        if status != 'PENDING':
+            logger.debug(' > Process {} is over.'.format(self))
         self.tasklist[self].update({'status': status, 'result': result or self.tasklist[self]['result']})
         if expires:
             self.tasklist[self]['expires'] = datetime.now() + timedelta(seconds=TASK_EXPIRATION)
