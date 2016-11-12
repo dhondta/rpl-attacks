@@ -90,18 +90,17 @@ def draw_dodag(path):
 
     :param path: path to the experiment (including [with-|without-malicious])
     """
-    # first, check if the mote relationships were recorded
-    with open(join(data, 'relationships.log')) as f:
-        f.seek(0, 2)
-        print(f.tell())
-        if f.tell() == 0:
-            return
-        relationships = f.read()
     pyplot.clf()
     with_malicious = (basename(normpath(path)) == 'with-malicious')
     data, results = join(path, 'data'), join(path, 'results')
-    dodag = networkx.DiGraph()
+    # first, check if the mote relationships were recorded
+    with open(join(data, 'relationships.log')) as f:
+        f.seek(0, 2)
+        if f.tell() == 0:
+            return
+        relationships = f.read()
     # retrieve motes and their colors
+    dodag = networkx.DiGraph()
     motes = get_motes_from_simulation(join(path, 'simulation.csc'))
     dodag.add_nodes_from(motes.keys())
     colors = []

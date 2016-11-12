@@ -102,16 +102,19 @@ def move_files(src_path, dst_path, *files):
     :param files: tuples with the following format (source_filename, destination_filename)
     """
     src_path, dst_path = __expand_folders(src_path, dst_path)
-    for file in files:
-        if isinstance(file, tuple):
-            src, dst = file
-        elif isinstance(file, string_types):
-            src, dst = 2 * [file]
+    for f in files:
+        if isinstance(f, tuple):
+            src, dst = f
+        elif isinstance(f, string_types):
+            src, dst = 2 * [f]
         else:
             continue
         src, dst = join(src_path, src), join(dst_path, dst)
-        if src != dst:
-            sh.mv(src, dst)
+        try:
+            if src != dst:
+                sh.mv(src, dst)
+        except sh.ErrorReturnCode_1:
+            pass
 
 
 def move_folder(src_path, dst_path, new_folder_name=None):
