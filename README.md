@@ -182,7 +182,7 @@ experiments_folder = ~/simulations
 
 3. Go to your experiments folder (default: `~/Experiments`) and edit your new `sample-attacks.json` to suit your needs
 
-  See ![How to create a campaign of simulations ?](doc/README.md) for more information.
+  See ![How to create a campaign of simulations ?](doc/create-campaigns.md) for more information.
 
 4. Make the simulations
 
