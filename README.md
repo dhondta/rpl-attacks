@@ -18,6 +18,8 @@ This project is aimed to provide a simple and convenient way to generate simulat
 
 With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants, modifying single lines from the ContikiRPL library or using an own external RPL library. Moreover, experiments in a campaign can be generated either based on a same or a randomized topology for each simulation.
 
+## ![Additional Documentation](doc/README.md)
+
 ### A few test cases made with the framework:
 
 #### Test case 1: flooding attack
