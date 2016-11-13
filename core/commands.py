@@ -10,7 +10,7 @@ from time import sleep
 from core.common.helpers import copy_files, copy_folder, move_files, remove_files, remove_folder, std_input
 from core.conf.constants import CONTIKI_FOLDER, COOJA_FOLDER, DEFAULTS, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, \
                                 TEMPLATES_FOLDER
-from core.conf.install import check_cooja, modify_cooja, register_new_path_in_profile, \
+from core.conf.install import check_cooja, modify_cooja, modify_ipv6_debug, register_new_path_in_profile, \
                               update_cooja_build, update_cooja_user_properties
 from core.conf.logconfig import logger, set_logging, HIDDEN_ALL
 from core.utils.behaviors import MultiprocessedCommand
@@ -552,6 +552,8 @@ def setup(silent=False, **kwargs):
     Setup the framework.
     """
     recompile = False
+    # adapt IPv6 debug mode
+    modify_ipv6_debug(CONTIKI_FOLDER)
     # install Cooja modifications
     if not check_cooja(COOJA_FOLDER):
         logger.debug(" > Installing Cooja add-ons...")

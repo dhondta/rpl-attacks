@@ -33,6 +33,7 @@ def modify_cooja(cooja_dir):
     """
     pattern = 'if (args.length > 0 && args[0].startsWith("-nogui="))'
     cooja_file = join(cooja_dir, 'java', 'org', 'contikios', 'cooja', 'Cooja.java')
+    changed = False
     with open(cooja_file) as f:
         source = f.read()
     buffer = []
@@ -40,10 +41,38 @@ def modify_cooja(cooja_dir):
         if pattern in line:
             with open('src/Cooja.java.snippet') as f:
                 line = line.replace(pattern, '{} else {}'.format(f.read().strip(), pattern))
+            changed = True
         buffer.append(line)
     with open(cooja_file, 'w') as f:
         f.write('\n'.join(buffer))
-    logger.debug(" > Cooja.java modified")
+    logger.debug(" > Cooja.java modified" if changed else " > Cooja.java already up-to-date")
+
+
+def modify_ipv6_debug(contiki_dir):
+    """
+    This function checks and modifies, if necessary, the DEBUG constant in
+     [CONTIKI]/core/net/ipv6/uip-ds6-route.c in order to enable mote relationships logging.
+     This is required for the script.js used in Cooja simulations to catch relationships
+     evolution and to plot the sensor network in an animated GIF.
+
+    :param contiki_dir: Contiki's directory
+    :return: None
+    """
+    pattern = '#define DEBUG DEBUG_NONE'
+    ipv6_route_file = join(contiki_dir, 'core', 'net', 'ipv6', 'uip-ds6-route.c')
+    changed = False
+    with open(ipv6_route_file) as f:
+        source = f.read()
+    buffer = []
+    for line in source.split('\n'):
+        if pattern in line:
+            buffer.append(line.replace(pattern, '#define DEBUG DEBUG_ANNOTATE'))
+            changed = True
+        else:
+            buffer.append(line)
+    with open(ipv6_route_file, 'w') as f:
+        f.write('\n'.join(buffer))
+    logger.debug(" > IPv6 Debug modified" if changed else " > IPv6 Debug already up-to-date")
 
 
 def register_new_path_in_profile():
