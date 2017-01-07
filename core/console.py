@@ -5,7 +5,7 @@ from cmd import Cmd
 from copy import copy
 from funcsigs import signature
 from getpass import getuser
-from multiprocessing import cpu_count, Pool, TimeoutError
+from multiprocessing import cpu_count, Pool
 from signal import signal, SIGINT, SIG_IGN
 from six.moves import zip_longest
 from socket import gethostname
@@ -110,7 +110,7 @@ class FrameworkConsole(Console):
             self.tasklist = {}
             self.pool = Pool(processes, lambda: signal(SIGINT, SIG_IGN))
             atexit.register(self.graceful_exit)
-        self.reexec = []
+        self.reexec = ['status']
         self.__bind_commands()
         super(FrameworkConsole, self).__init__()
         self.do_loglevel('info')
@@ -161,14 +161,11 @@ class FrameworkConsole(Console):
         """
     Kill a task from the pool.
         """
-        if task in [str(t) for t in self.tasklist.keys()]:
-            tobj = [t for t in self.tasklist.keys() if str(t) == task and self.tasklist[t]['status'] == 'PENDING'][0]
-            try:
-                tobj.task.get(1)
-            except TimeoutError:
-                tobj.cancelled()
-            except UnicodeEncodeError:
-                tobj.crashed()
+        matching = [t for t in self.tasklist.keys() if str(t) == task and self.tasklist[t]['status'] == 'PENDING']
+        if len(matching) > 0:
+            matching[0].kill()
+        else:
+            print(' [!] Task {} does not exist'.format(task))
 
     def do_loglevel(self, level):
         """
@@ -176,6 +173,8 @@ class FrameworkConsole(Console):
         """
         if level in LOG_LEVELS.keys() and set_logging(level):
             print(' [I] Verbose level is now set to: {}'.format(level))
+        else:
+            print(' [!] Unknown verbose level: {}'.format(level))
 
     @no_arg_command_except('restart')
     def do_status(self, line):
@@ -186,9 +185,9 @@ class FrameworkConsole(Console):
         # this prevents from re-displaying the same status table once ENTER is pressed
         #  (marker 'restart' is handled in emptyline() hereafter
         if line == 'restart' and self.__last_tasklist is not None and \
-                        hash(frozenset(self.tasklist)) == self.__last_tasklist:
+                        hash(repr(self.tasklist)) == self.__last_tasklist:
             return
-        self.__last_tasklist = hash(frozenset(copy(self.tasklist)))
+        self.__last_tasklist = hash(repr(copy(self.tasklist)))
         if len(self.tasklist) == 0:
             data = [['No task currently running']]
         else:
@@ -205,9 +204,9 @@ class FrameworkConsole(Console):
             lastcmd = self.lastcmd.split()[0]
         except IndexError:
             return
-        if lastcmd == 'status':
-            self.do_status('restart')
-        elif lastcmd in self.reexec:
+        if lastcmd in self.reexec:
+            if lastcmd == 'status':
+                self.lastcmd = 'status restart'
             return self.onecmd(self.lastcmd)
 
     def graceful_exit(self):
@@ -221,10 +220,7 @@ class FrameworkConsole(Console):
             except KeyboardInterrupt:
                 logger.info(" > Terminating opened processes...")
                 for task_obj in self.tasklist.keys():
-                    try:
-                        task_obj.task.get(1)
-                    except TimeoutError:
-                        pass
+                    task_obj.kill()
                 self.pool.terminate()
                 self.pool.join(1)
 
