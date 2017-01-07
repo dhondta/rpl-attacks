@@ -1,6 +1,10 @@
 # -*- coding: utf8 -*-
 import dill
+import os
+import signal
+import time
 from datetime import datetime, timedelta
+from multiprocessing import TimeoutError
 
 from core.conf.constants import TASK_EXPIRATION
 from core.conf.logconfig import logger
@@ -12,11 +16,12 @@ class DefaultCommand(object):
     """
     is_multiprocessed = False
 
-    def __init__(self, console, command, name):
+    def __init__(self, console, command, name, path):
         super(DefaultCommand, self).__init__()
         self.tasklist = console.tasklist
         self.command = command
         self.name = name
+        self.pids = ['{}/with{}-malicious/.{}'.format(path, x, command.__name__.lstrip('_')) for x in ["out", ""]]
 
     def run(self, *args, **kwargs):
         return self.command(*args, **kwargs)
@@ -29,8 +34,8 @@ class MultiprocessedCommand(DefaultCommand):
     """
     is_multiprocessed = True
 
-    def __init__(self, console, command, name):
-        super(MultiprocessedCommand, self).__init__(console, command, name)
+    def __init__(self, console, command, name, path):
+        super(MultiprocessedCommand, self).__init__(console, command, name, path)
         self.pool = console.pool
         self.task = None
         self.tasklist[self] = {
@@ -51,20 +56,33 @@ class MultiprocessedCommand(DefaultCommand):
         if expires:
             self.tasklist[self]['expires'] = datetime.now() + timedelta(seconds=TASK_EXPIRATION)
 
-    def callback(self, result):
-        if isinstance(result, tuple):
-            self.__set_info(*result)
+    def callback(self, state):
+        if isinstance(state, tuple):
+            self.__set_info(*state)
         else:
-            self.__set_info('UNDEFINED')
-
-    def cancelled(self):
-        self.__set_info('CANCELLED')
-
-    def crashed(self):
-        self.__set_info('CRASHED')
+            self.__set_info('UNDEFINED', "None")
 
     def is_expired(self):
         return datetime.now() > (self.tasklist[self]['expires'] or datetime.now())
+
+    def kill(self, retries=3, pause=.1):
+        try:
+            self.task.get(1)
+            self.__set_info('KILLED', "None")
+        except TimeoutError:
+            self.__set_info('CANCELLED', "None")
+        except UnicodeEncodeError:
+            self.__set_info('CRASHED', "None")
+        for pid in self.pids:
+            try:
+                with open(pid) as f:
+                    os.kill(int(f.read().strip()), signal.SIGTERM)
+                os.remove(pid)
+            except IOError:
+                pass
+        if self.command.__name__.lstrip('_') == 'run' and retries > 0:
+            time.sleep(pause)                    # wait 0.1 sec that the next call from the command starts
+            self.kill(retries - 1, 2 * pause)    # then kill it
 
     def run(self, *args, **kwargs):
         if self not in self.tasklist.keys() or self.tasklist[self]['status'] != 'PENDING':

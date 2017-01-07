@@ -145,7 +145,7 @@ def cooja(name, with_malicious=True, **kwargs):
     motes_before = get_motes_from_simulation(join(sim_path, 'simulation.csc'), as_dictionary=True)
     with hide(*HIDDEN_ALL):
         with lcd(sim_path):
-            local("make cooja")
+            local("make cooja TASK={}".format(kwargs['task']))
     motes_after = get_motes_from_simulation(join(sim_path, 'simulation.csc'), as_dictionary=True)
     # if there was a change, update the other simulation in this experiment
     if len(set(motes_before.items()) & set(motes_after.items())) > 0:
@@ -335,21 +335,21 @@ def __run(name, **kwargs):
     set_logging(kwargs.get('loglevel'))
     path = kwargs['path']
     check_structure(path, remove=True)
-    with hide(*HIDDEN_ALL):
+    with settings(hide(*HIDDEN_ALL), warn_only=True):
         for sim in ["without", "with"]:
             sim_path = join(path, "{}-malicious".format(sim))
             data, results = join(sim_path, 'data'), join(sim_path, 'results')
             # the Makefile is at experiment's root ('path')
             logger.debug(" > Running simulation {} the malicious mote...".format(sim))
             with lcd(sim_path):
-                local("make run", capture=True)
+                local("make run TASK={}".format(kwargs['task']), capture=True)
             # simulations are in their respective folders ('sim_path')
-            remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
+            #remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
             # once the execution is over, gather the screenshots into a single GIF and keep the first and
             #  the last screenshots ; move these to the results folder
             logger.debug(" > Gathering screenshots in an animated GIF...")
             with lcd(data):
-                local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim))
+                local('convert -delay 10 -loop 0 network*.png wsn-{}-malicious.gif'.format(sim), capture=True)
             network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data)
                               if fn.startswith('network_')}
             move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))

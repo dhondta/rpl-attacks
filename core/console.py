@@ -152,7 +152,8 @@ class FrameworkConsole(Console):
             del self.tasklist[t]
 
     def complete_kill(self, text, *args):
-        return sorted([str(i) for i in self.tasklist.keys() if str(i).startswith(text)])
+        return sorted([str(i) for i in self.tasklist.keys() if str(i).startswith(text) \
+            and i.tasklist[i]['status'] == "PENDING"])
 
     def complete_loglevel(self, text, *args):
         return sorted([str(i) for i in LOG_LEVELS.keys() if str(i).startswith(text)])
@@ -165,7 +166,7 @@ class FrameworkConsole(Console):
         if len(matching) > 0:
             matching[0].kill()
         else:
-            print(' [!] Task {} does not exist'.format(task))
+            print(' [!] Task {} does not exist or is not a pending task'.format(task))
 
     def do_loglevel(self, level):
         """
@@ -216,7 +217,7 @@ class FrameworkConsole(Console):
             logger.warning("Hit CTRL+C a second time to force process termination.")
             try:
                 self.pool.close()
-                self.pool.join()
+                self.pool.join(5)
             except KeyboardInterrupt:
                 logger.info(" > Terminating opened processes...")
                 for task_obj in self.tasklist.keys():
