@@ -117,7 +117,7 @@ def draw_dodag(path):
             if int(d['flag']) == 0:
                 continue
             mote, parent = int(d['mote_id']), int(d['parent_id'])
-    	except AttributeError:
+        except AttributeError:
             continue
     edges[mote] = parent
     # now, fill in the graph with edges
