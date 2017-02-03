@@ -67,24 +67,27 @@ class MultiprocessedCommand(DefaultCommand):
 
     def kill(self, retries=3, pause=.1):
         try:
-            self.task.get(1)
-            self.__set_info('KILLED', "None")
-        except (AttributeError, TimeoutError):
-            self.__set_info('CANCELLED', "None")
-        except UnicodeEncodeError:
-            self.__set_info('CRASHED', "None")
-        for pid in self.pids:
             try:
-                with open(pid) as f:
-                    os.kill(int(f.read().strip()), signal.SIGTERM)
-                os.remove(pid)
-            except IOError:
-                pass
-        if self.command.__name__.lstrip('_') == 'run' and retries > 0:
-            time.sleep(pause)  # wait ... sec that the next call from the command starts
-                               # this is necessary e.g. with cooja command (when Cooja starts a first time for
-                               #  a simulation without a malicious mote then a second time with)
-            self.kill(retries - 1, 2 * pause)  # then kill it
+                self.task.get(1)
+                self.__set_info('KILLED', "None")
+            except (AttributeError, TimeoutError):
+                self.__set_info('CANCELLED', "None")
+            except UnicodeEncodeError:
+                self.__set_info('CRASHED', "None")
+            for pid in self.pids:
+                try:
+                    with open(pid) as f:
+                        os.kill(int(f.read().strip()), signal.SIGTERM)
+                    os.remove(pid)
+                except (IOError, OSError):
+                    pass  # simply fail silently when no PID or OS cannot kill it as it is already terminated
+            if self.command.__name__.lstrip('_') == 'run' and retries > 0:
+                time.sleep(pause)  # wait ... sec that the next call from the command starts
+                                   # this is necessary e.g. with cooja command (when Cooja starts a first time for
+                                   #  a simulation without a malicious mote then a second time with)
+                self.kill(retries - 1, 2 * pause)  # then kill it
+        except KeyboardInterrupt:
+            self.kill(0, 0)
 
     def run(self, *args, **kwargs):
         if self not in self.tasklist.keys() or self.tasklist[self]['status'] != 'PENDING':
