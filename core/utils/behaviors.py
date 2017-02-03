@@ -69,7 +69,7 @@ class MultiprocessedCommand(DefaultCommand):
         try:
             self.task.get(1)
             self.__set_info('KILLED', "None")
-        except TimeoutError:
+        except (AttributeError, TimeoutError):
             self.__set_info('CANCELLED', "None")
         except UnicodeEncodeError:
             self.__set_info('CRASHED', "None")
@@ -81,8 +81,10 @@ class MultiprocessedCommand(DefaultCommand):
             except IOError:
                 pass
         if self.command.__name__.lstrip('_') == 'run' and retries > 0:
-            time.sleep(pause)                    # wait 0.1 sec that the next call from the command starts
-            self.kill(retries - 1, 2 * pause)    # then kill it
+            time.sleep(pause)  # wait ... sec that the next call from the command starts
+                               # this is necessary e.g. with cooja command (when Cooja starts a first time for
+                               #  a simulation without a malicious mote then a second time with)
+            self.kill(retries - 1, 2 * pause)  # then kill it
 
     def run(self, *args, **kwargs):
         if self not in self.tasklist.keys() or self.tasklist[self]['status'] != 'PENDING':

@@ -216,14 +216,21 @@ class FrameworkConsole(Console):
             logger.info(" > Waiting for opened processes to finish...")
             logger.warning("Hit CTRL+C a second time to force process termination.")
             try:
+                for task_obj in self.tasklist.keys():
+                    # see: http://stackoverflow.com/questions/1408356/keyboard-interrupts-with-pythons-multiprocessing-pool
+                    #  "The KeyboardInterrupt exception won't be delivered until wait() returns, and it never returns,
+                    #   so the interrupt never happens. KeyboardInterrupt should almost certainly interrupt a condition
+                    #   wait. Note that this doesn't happen if a timeout is specified; cond.wait(1) will receive the
+                    #   interrupt immediately. So, a workaround is to specify a timeout."
+                    task_obj.task.get(999999)
                 self.pool.close()
-                self.pool.join(5)
+                #self.pool.join()
             except KeyboardInterrupt:
                 logger.info(" > Terminating opened processes...")
                 for task_obj in self.tasklist.keys():
                     task_obj.kill()
                 self.pool.terminate()
-                self.pool.join(1)
+                self.pool.join()
 
     @staticmethod
     def complete_template(lazy_values):

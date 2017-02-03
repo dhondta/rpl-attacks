@@ -3,7 +3,7 @@ from cmd import Cmd
 from funcsigs import signature
 from functools import update_wrapper, wraps
 from os import system
-from os.path import exists, expanduser, join
+from os.path import dirname, exists, expanduser, join
 from re import match
 
 from core.common.helpers import std_input
@@ -111,14 +111,20 @@ def command(**params):
                 try:
                     expanded = expanduser(join(attrs['into'], args[arg_idx]))
                 except IndexError:  # occurs when arg_idx out of range of args, meaning that the argument to be
-                    #                  expanded was not provided
+                                    #  expanded was not provided
                     return
+                # if an extension was provided and the file path does not end with it, just append it
                 if attrs.get('ext') and not expanded.endswith("." + attrs['ext']):
                     expanded += "." + attrs['ext']
+                # the expanded argument must not be saved to a new argument name, just replace its old value
                 if attrs.get('new_arg') is None:
                     args = tuple([a if i != arg_idx else expanded for i, a in enumerate(args)])
+                # otherwise, create the new argument if the name is not used yet
                 elif attrs['new_arg'] not in list(sig.parameters.keys()):
                     kwargs[attrs['new_arg']] = expanded if attrs.get('apply') is None else attrs['apply'](expanded)
+                # when no 'path' kwarg is set, it must be added based on the direcotory name of the expanded arg
+                if 'path' not in kwargs.keys():
+                    kwargs['path'] = dirname(expanded)
             # if next commands require sudo, prompt now for privilege elevation
             if getattr(f, 'requires_sudo', False):
                 system('sudo ls > /dev/null')
