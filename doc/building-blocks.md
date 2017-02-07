@@ -135,16 +135,21 @@ The building block can for example be the following :
 
 ## 3. Building your own blocks - Methodology
 
-Building blocks nearly always contain a mix of several ways to alter the code. Creating a build block can always be processed according to the following steps :
+Building blocks nearly always contain a mix of several ways to alter the code. Creating a build block can always be processed according to the following process :
 
-### 1. Select/Build an attack
+![Building-block Creation Process](imgs/bb-creation-process.png)
 
-### 2. Decompose the attack according to ContikiRPL
+The tarting point is the **attack** you want to implement. This could be either a new or existent attack.
 
-### 3. Identify constants to be tuned
+1. **Decompose** your attack according to ContikiRPL, that is, identifying where the attack should impact the workflow of the particular implementation of RPL in Contiki.
 
-### 4. Identify the workflow and find lines to be replaced
+2. **Identify** the constants to be tuned (as shown in section *1. Making building blocks -- Altering constants*) and the lines of code to be replaced (as shown in section *1. Making building blocks -- Altering code*).
 
-### 5. Write the building block
+3. **Write** the building block in the JSON format like presented in the examples provided in section *2. Real Examples*.
 
-### 6. Test the building block
+4. **Test** your new building block by running multiple simulations and reviewing the results to determine if it provides what is expected.
+
+The ending point is then the new **building block**, that is, the key-value pair to be added to the `building-blocks.json`.
+
+
+Do not hesitate to submit your new building blocks via a Pull Request for integration in *RPL Attacks Framework* !
