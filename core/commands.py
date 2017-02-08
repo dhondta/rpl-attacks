@@ -2,7 +2,7 @@
 from fabric.api import hide, lcd, local, settings
 from inspect import getmembers, isfunction
 from os import chmod, listdir
-from os.path import basename, exists, expanduser, join, splitext
+from os.path import basename, exists, expanduser, join, split, splitext
 from sys import modules
 from terminaltables import SingleTable
 from time import sleep
@@ -202,7 +202,7 @@ def __make(name, ask=True, **kwargs):
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with_malicious = join(path, 'with-malicious', 'motes')
         without_malicious = join(path, 'without-malicious', 'motes')
-        contiki = join(with_malicious, 'contiki')
+        contiki = join(with_malicious, split(CONTIKI_FOLDER)[-1])
         contiki_rpl = join(contiki, 'core', 'net', 'rpl')
         # copy a reduced version of Contiki where the debug flags can be set for RPL files set in DEBUG_FILES
         copy_folder(CONTIKI_FOLDER, with_malicious,
@@ -285,7 +285,7 @@ def __remake(name, build=False, **kwargs):
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with_malicious = join(path, 'with-malicious', 'motes')
         without_malicious = join(path, 'without-malicious', 'motes')
-        contiki = join(with_malicious, 'contiki')
+        contiki = join(with_malicious, split(CONTIKI_FOLDER)[-1])
         contiki_rpl = join(contiki, 'core', 'net', 'rpl')
         with lcd(with_malicious):
             malicious = 'malicious.{}'.format(params["malicious_target"])
@@ -615,8 +615,17 @@ def setup(silent=False, **kwargs):
                   .format(join(FRAMEWORK_FOLDER, 'src/rpla-icon.svg')))
             local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
         with open(shortcut, 'w') as f:
-            f.write(SHORTCUT)
+            f.write(SHORTCUT.format(path=FRAMEWORK_FOLDER))
         chmod(shortcut, int('775', 8))
         logger.debug(" > Desktop shortcut created")
     else:
         logger.debug(" > Desktop shortcut already exists")
+
+
+@command(start_msg="CHECKING VERSION OF CONTIKI-OS")
+def version(**kwargs):
+    """
+    Check the version of Contiki-OS.
+    """
+    with lcd(CONTIKI_FOLDER):
+        local('git --git-dir .git describe --tags --always')

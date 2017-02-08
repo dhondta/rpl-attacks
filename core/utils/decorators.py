@@ -153,7 +153,7 @@ def command(**params):
                         log_msg('info', f.start_msg)
                     kwargs['task'] = f.__name__.lstrip('_')
                     f.behavior(console, f.__base__ if f.behavior is MultiprocessedCommand else f, args[0],
-                        kwargs['path']).run(*args, **kwargs)
+                        kwargs.get('path')).run(*args, **kwargs)
                 else:
                     logger.warning("A task is still pending on this experiment ({})".format(pending_tasks[args[0]]))
             else:

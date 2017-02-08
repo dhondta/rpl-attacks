@@ -12,12 +12,12 @@ from os.path import abspath, dirname, exists, expanduser, join, pardir
 confparser = configparser.ConfigParser()
 confparser.read(expanduser('~/.rpl-attacks.conf'))
 try:
-    CONTIKI_FOLDER = expanduser(confparser.get("RPL Attacks Framework Configuration", "contiki_folder"))
+    CONTIKI_FOLDER = abspath(expanduser(confparser.get("RPL Attacks Framework Configuration", "contiki_folder")))
 except (configparser.NoOptionError, configparser.NoSectionError):
     CONTIKI_FOLDER = expanduser('~/contiki')
 COOJA_FOLDER = join(CONTIKI_FOLDER, "tools", "cooja")
 try:
-    EXPERIMENT_FOLDER = expanduser(confparser.get("RPL Attacks Framework Configuration", "experiments_folder"))
+    EXPERIMENT_FOLDER = abspath(expanduser(confparser.get("RPL Attacks Framework Configuration", "experiments_folder")))
 except (configparser.NoOptionError, configparser.NoSectionError):
     EXPERIMENT_FOLDER = expanduser('~/Experiments')
 del confparser
@@ -168,7 +168,8 @@ SHORTCUT = """[Desktop Entry]
 Comment=Framework for building attack simulations and motes against the Contiki implementation of RPL
 Terminal=true
 Name=RPL Attacks Framework
-Exec=python /home/user/Projects/rpl-attacks/main.py
+Path={path}
+Exec=python main.py
 Type=Application
 Icon=rpla-icon
 """

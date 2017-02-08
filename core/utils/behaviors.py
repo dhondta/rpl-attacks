@@ -16,12 +16,13 @@ class DefaultCommand(object):
     """
     is_multiprocessed = False
 
-    def __init__(self, console, command, name, path):
+    def __init__(self, console, command, name, path=None):
         super(DefaultCommand, self).__init__()
         self.tasklist = console.tasklist
         self.command = command
         self.name = name
-        self.pids = ['{}/with{}-malicious/.{}'.format(path, x, command.__name__.lstrip('_')) for x in ["out", ""]]
+        self.pids = ['{}/with{}-malicious/.{}'.format(path, x, command.__name__.lstrip('_')) for x in ["out", ""]] \
+                    if path is not None else []
 
     def run(self, *args, **kwargs):
         return self.command(*args, **kwargs)
