@@ -622,6 +622,26 @@ def setup(silent=False, **kwargs):
         logger.debug(" > Desktop shortcut already exists")
 
 
+@command(start_msg="UPDATING CONTIKI-OS AND RPL ATTACKS FRAMEWORK")
+def update(**kwargs):
+    """
+    Update Contiki-OS and RPL Attacks Framework.
+    """
+    for folder, repo in zip([CONTIKI_FOLDER, FRAMEWORK_FOLDER], ["Contiki-OS", "RPL Attacks Framework"]):
+        with hide(*HIDDEN_ALL):
+            with lcd(folder):
+                uptodate = "branch is up-to-date" in local('git checkout master', capture=True).strip().split('\n')[-1]
+                if not uptodate:
+                    logger.warn("You are about to loose any custom change made to {} ;".format(repo))
+                    if std_input("Proceed anyway ? (yes|no) [default: no] ", 'yellow') == 'yes':
+                        local('git fetch --all')
+                        local('git reset --hard origin/master')
+                        local('git pull')
+            logger.debug(" > {} {}".format(repo, ["updated", "already up-to-date"][uptodate]))
+            if repo == "Contiki-OS" and not uptodate:
+                setup(silent=True)
+
+
 @command(start_msg="CHECKING VERSIONS")
 def versions(**kwargs):
     """
