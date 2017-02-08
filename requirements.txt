@@ -1,6 +1,7 @@
 cffi
 cairocffi==0.6
 coloredlogs
+cryptography
 dill
 fabric
 fabric3
