@@ -622,10 +622,15 @@ def setup(silent=False, **kwargs):
         logger.debug(" > Desktop shortcut already exists")
 
 
-@command(start_msg="CHECKING VERSION OF CONTIKI-OS")
-def version(**kwargs):
+@command(start_msg="CHECKING VERSIONS")
+def versions(**kwargs):
     """
-    Check the version of Contiki-OS.
+    Check versions of Contiki-OS and RPL Attacks Framework.
     """
-    with lcd(CONTIKI_FOLDER):
-        local('git --git-dir .git describe --tags --always')
+    with hide(*HIDDEN_ALL):
+        with lcd(CONTIKI_FOLDER):
+            cversion = local('git --git-dir .git describe --tags --always', capture=True)
+        logger.warn("Contiki-OS: {}".format(cversion))
+        with lcd(FRAMEWORK_FOLDER):
+            cversion = local('git --git-dir .git describe --tags --always', capture=True)
+        logger.warn("RPL Attacks Framework: {}".format(cversion))
