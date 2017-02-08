@@ -161,3 +161,13 @@ MIN_TERM_SIZE = (40, len(BANNER.split('\n')[0]) + 10)
 
 # Multi-processing constants
 TASK_EXPIRATION = 60  # seconds
+
+# Desktop shortcut
+SHORTCUT = """[Desktop Entry]
+Comment=Framework for building attack simulations and motes against the Contiki implementation of RPL
+Terminal=true
+Name=RPL Attacks Framework
+Exec=python /home/user/Projects/rpl-attacks/main.py
+Type=Application
+Icon=rpla-icon
+"""

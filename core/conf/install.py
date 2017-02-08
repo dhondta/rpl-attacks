@@ -1,10 +1,10 @@
 # -*- coding: utf8 -*-
+import os
+import stat
 from os.path import exists, expanduser, join
 
+from core.conf.constants import SHORTCUT
 from core.conf.logconfig import logger
-
-
-PATTERN = 'if (args.length > 0 && args[0].startsWith("-hidden="))'
 
 
 def check_cooja(cooja_dir):
@@ -14,10 +14,11 @@ def check_cooja(cooja_dir):
     :param cooja_dir: Cooja's directory
     :return: True if the modification is present else False
     """
+    pattern = 'if (args.length > 0 && args[0].startsWith("-hidden="))'
     with open(join(cooja_dir, 'java', 'org', 'contikios', 'cooja', 'Cooja.java')) as f:
         source = f.read()
     for line in source.split('\n'):
-        if PATTERN in line:
+        if pattern in line:
             return True
     return False
 

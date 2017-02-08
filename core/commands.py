@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from fabric.api import hide, lcd, local, settings
 from inspect import getmembers, isfunction
-from os import listdir
+from os import chmod, listdir
 from os.path import basename, exists, expanduser, join, splitext
 from sys import modules
 from terminaltables import SingleTable
@@ -9,7 +9,7 @@ from time import sleep
 
 from core.common.helpers import copy_files, copy_folder, move_files, remove_files, remove_folder, std_input
 from core.conf.constants import CONTIKI_FOLDER, COOJA_FOLDER, DEFAULTS, EXPERIMENT_FOLDER, FRAMEWORK_FOLDER, \
-                                TEMPLATES_FOLDER
+                                SHORTCUT, TEMPLATES_FOLDER
 from core.conf.install import check_cooja, modify_cooja, modify_ipv6_debug, register_new_path_in_profile, \
                               update_cooja_build, update_cooja_user_properties
 from core.conf.logconfig import logger, set_logging, HIDDEN_ALL
@@ -607,4 +607,16 @@ def setup(silent=False, **kwargs):
             logger.warning("You may experience problems of mote memory size at compilation")
     else:
         logger.debug(" > Library msp430-gcc is up-to-date (version 4.7.0)")
-
+    # create a new desktop shortcut for the framework
+    shortcut = expanduser('~/Desktop/rpl-attacks-framework.desktop')
+    if not exists(shortcut):
+        with hide(*HIDDEN_ALL):
+            local('sudo cp {} /usr/share/icons/hicolor/scalable/apps/'
+                  .format(join(FRAMEWORK_FOLDER, 'src/rpla-icon.svg')))
+            local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
+        with open(shortcut, 'w') as f:
+            f.write(SHORTCUT)
+        chmod(shortcut, int('775', 8))
+        logger.debug(" > Desktop shortcut created")
+    else:
+        logger.debug(" > Desktop shortcut already exists")
