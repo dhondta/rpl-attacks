@@ -17,7 +17,7 @@ from types import MethodType
 from core.commands import get_commands
 from core.common.ansi import surround_ansi_escapes
 from core.common.termsize import get_terminal_size
-from core.conf.constants import BANNER, COMMAND_DOCSTRING, MIN_TERM_SIZE
+from core.conf.constants import BANNER, COMMAND_DOCSTRING, MIN_TERM_SIZE, PIDFILE
 from core.conf.logconfig import logger, LOG_LEVELS, set_logging
 from core.utils.decorators import no_arg_command, no_arg_command_except
 
@@ -33,6 +33,14 @@ class Console(Cmd, object):
     def __init__(self, *args, **kwargs):
         super(Console, self).__init__(*args, **kwargs)
         self.__history = []
+        self.pid = os.getpid()
+        self.already_running = os.path.isfile(PIDFILE)
+        if not self.already_running:
+            try:
+                with open(PIDFILE, 'w') as f:
+                    f.write(str(self.pid))
+            except IOError:
+                pass
 
     def cmdloop(self, intro=None):
         try:
@@ -151,6 +159,15 @@ class FrameworkConsole(Console):
         for t in [x for x in self.tasklist.keys() if x.is_expired()]:
             del self.tasklist[t]
 
+    def cmdloop(self, intro=None):
+        if self.already_running:
+            with open(PIDFILE) as f:
+                pid = f.read().strip()
+            logger.warn('RPL Attacks Framework is already running in another terminal (PID: {})'.format(pid))
+            self.graceful_exit()
+        else:
+            super(FrameworkConsole, self).cmdloop()
+
     def complete_kill(self, text, *args):
         return sorted([str(i) for i in self.tasklist.keys() if str(i).startswith(text) \
             and i.tasklist[i]['status'] == "PENDING"])
@@ -231,6 +248,8 @@ class FrameworkConsole(Console):
                     task_obj.kill()
                 self.pool.terminate()
                 self.pool.join()
+        if not self.already_running:
+            os.remove(PIDFILE)
 
     @staticmethod
     def complete_template(lazy_values):

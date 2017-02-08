@@ -14,7 +14,7 @@ confparser.read(expanduser('~/.rpl-attacks.conf'))
 try:
     CONTIKI_FOLDER = expanduser(confparser.get("RPL Attacks Framework Configuration", "contiki_folder"))
 except (configparser.NoOptionError, configparser.NoSectionError):
-    CONTIKI_FOLDER = abspath(expanduser('~/contiki'))
+    CONTIKI_FOLDER = expanduser('~/contiki')
 COOJA_FOLDER = join(CONTIKI_FOLDER, "tools", "cooja")
 try:
     EXPERIMENT_FOLDER = expanduser(confparser.get("RPL Attacks Framework Configuration", "experiments_folder"))
@@ -25,6 +25,7 @@ if not exists(EXPERIMENT_FOLDER):
     makedirs(EXPERIMENT_FOLDER)
 FRAMEWORK_FOLDER = join(dirname(__file__), pardir, pardir)
 TEMPLATES_FOLDER = join(FRAMEWORK_FOLDER, "templates")
+PIDFILE = '/tmp/rpla.pid'
 
 # Contiki template list of includes for specific mote target compilation (subfolders for 'dev', 'cpu', 'platform'
 #  are determined based on the specified target).
