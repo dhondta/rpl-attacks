@@ -337,6 +337,14 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 > This will test the framework.
 
+- **`update`**
+
+> This will attempt to update Git repositories of Contiki-OS and RPL Attacks Framework.
+
+- **`versions`**
+
+> This will display the versions of Contiki-OS and RPL Attacks Framework.
+
 
 ## Simulation campaign
 
