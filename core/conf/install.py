@@ -1,9 +1,6 @@
 # -*- coding: utf8 -*-
-import os
-import stat
 from os.path import exists, expanduser, join
 
-from core.conf.constants import SHORTCUT
 from core.conf.logconfig import logger
 
 
