@@ -343,8 +343,7 @@ def __run(name, **kwargs):
             logger.debug(" > Running simulation {} the malicious mote...".format(sim))
             with lcd(sim_path):
                 local("make run TASK={}".format(kwargs['task']), capture=True)
-            # simulations are in their respective folders ('sim_path')
-            #remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
+            remove_files(sim_path, '.run')
             # once the execution is over, gather the screenshots into a single GIF and keep the first and
             #  the last screenshots ; move these to the results folder
             logger.debug(" > Gathering screenshots in an animated GIF...")
@@ -361,8 +360,10 @@ def __run(name, **kwargs):
             net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
             move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
             remove_files(data, *network_images.values())
+            # then start the parsing functions to derive more results
             logger.debug(" > Parsing simulation results...")
             parsing_chain(sim_path)
+            move_files(sim_path, results, 'COOJA.log')
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
