@@ -15,8 +15,6 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "bento/ubuntu-16.04"
-#  config.vm.box_url = "https://atlas.hashicorp.com/boxcutter/boxes/ubuntu1404/versions/2.0.10/providers/vmware_desktop.box"
-  config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/latest/ubuntu-14.04-amd64-vmwarefusion.box"
 
   config.vm.network "private_network", type: "dhcp"
 
