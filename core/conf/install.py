@@ -140,7 +140,7 @@ def update_cooja_user_properties():
     # if it does not exist, create it from 'src' folder's template
     if not exists(cooja_user_properties):
         with open('src/cooja-user-properties') as tf:
-            with open(cooja_user_properties) as nf:
+            with open(cooja_user_properties, 'w') as nf:
                 nf.write(tf.read())
         logger.debug(" > Cooja user properties created")
         return
