@@ -1,0 +1,6 @@
+---
+# CIS 3 - Secure Boot Settings
+# 3.1 Set User/Group Owner on bootloader config
+# 3.2 Set Permissions on bootloader config
+# 3.3 Set Boot Loader Password
+# 3.4 Require Authentication for Single-User Mode (not applicable ; all systems are virtualised)

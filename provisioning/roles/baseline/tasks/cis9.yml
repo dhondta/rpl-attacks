@@ -1,0 +1,208 @@
+---
+# CIS 9 - System Access, Authentication and Authorization
+# 9.1 Configure cron
+# 9.1.1 Enable cron Daemon
+  - name: System Access - Ensure the rsyslog Service is activated
+    lineinfile: dest=/etc/init/cron.conf
+                regexp='start on'
+                line='start on runlevel [2345]'
+                state=present
+# 9.1.2 Set User/Group Owner and Permission on /etc/crontab
+  - name: System Access - Set User/Group Owner and Permission on /etc/crontab
+    file: dest=/etc/crontab
+          mode=0600
+          owner=root
+          group=root
+# 9.1.3 Set User/Group Owner and Permission on /etc/cron.hourly
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.hourly
+    file: dest=/etc/cron.hourly
+          mode=0600
+          owner=root
+          group=root
+# 9.1.4 Set User/Group Owner and Permission on /etc/cron.daily
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.daily
+    file: dest=/etc/cron.daily
+          mode=0600
+          owner=root
+          group=root
+# 9.1.5 Set User/Group Owner and Permission on /etc/cron.weekly
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.weekly
+    file: dest=/etc/cron.weekly
+          mode=0600
+          owner=root
+          group=root
+# 9.1.6 Set User/Group Owner and Permission on /etc/cron.monthly
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.monthly
+    file: dest=/etc/cron.monthly
+          mode=0600
+          owner=root
+          group=root
+# 9.1.7 Set User/Group Owner and Permission on /etc/cron.d
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.d
+    file: dest=/etc/cron.d
+          mode=0600
+          owner=root
+          group=root
+# 9.1.8 Restrict at/cron to Authorized Users
+  - name: System Access - Restrict at/cron to Authorized Users - cron.allow
+    file: dest=/etc/cron.allow
+          mode=0600
+          owner=root
+          group=root
+          state=touch
+  - name: System Access - Restrict at/cron to Authorized Users - cron.deny
+    file: dest=/etc/cron.deny
+          mode=0600
+          owner=root
+          group=root
+          state=absent
+  - name: System Access - Restrict at/cron to Authorized Users - at.allow
+    file: dest=/etc/at.allow
+          mode=0600
+          owner=root
+          group=root
+          state=touch
+  - name: System Access - Restrict at/cron to Authorized Users - at.deny
+    file: dest=/etc/at.deny
+          mode=0600
+          owner=root
+          group=root
+          state=absent
+# 9.2 Configure PAM
+# 9.2.1 Set Password Creation Requirement Parameters Using pam_cracklib
+# 9.2.2 Set Lockout for Failed Password Attempts
+# 9.2.3 Limit Password Reuse
+# 9.3 Configure SSH
+  - name: System Access - Configure SSH
+    apt: pkg=openssh-server state=present
+# 9.3.1 Set SSH Protocol to 2
+  - name: System Access - Set SSH Protocol to 2
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='Protocol'
+                line='Protocol 2'
+                state=present
+    notify: Restart ssh
+# 9.3.2 Set LogLevel to INFO
+  - name: System Access - Set LogLevel to INFO
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='LogLevel'
+                line='LogLevel INFO'
+                state=present
+    notify: Restart ssh
+# 9.3.3 Set Permissions on /etc/ssh/sshd_config
+  - name: System Access - Set Permissions on /etc/ssh/sshd_config
+    file: dest=/etc/ssh/sshd_config
+          mode=0600
+          owner=root
+          group=root
+# 9.3.4 Disable SSH X11 Forwarding
+  - name: System Access - Disable SSH X11 Forwarding
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='X11Forwarding'
+                line='X11Forwarding no'
+                state=present
+    notify: Restart ssh
+# 9.3.5 Set SSH MaxAuthTries to 3 or Less
+  - name: System Access - Set SSH MaxAuthTries to 3 or Less
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='MaxAuthTries'
+                line='MaxAuthTries 3'
+                state=present
+    notify: Restart ssh
+# 9.3.6 Set SSH IgnoreRhosts to Yes
+  - name: System Access - Set SSH IgnoreRhosts to Yes
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='IgnoreRhosts'
+                line='IgnoreRhosts yes'
+                state=present
+    notify: Restart ssh
+# 9.3.7 Set SSH HostbasedAuthentication to No
+  - name: System Access - SSH HostbasedAuthentication to No
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='HostbasedAuthentication'
+                line='HostbasedAuthentication no'
+                state=present
+    notify: Restart ssh
+# 9.3.8 Disable SSH Root Login
+  - name: System Access - Disable SSH Root Login
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='PermitRootLogin'
+                line='PermitRootLogin no'
+                state=present
+    notify: Restart ssh
+# 9.3.9 Set SSH PermitEmptyPasswords to No
+  - name: System Access - Set SSH PermitEmptyPasswords to No
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='PermitEmptyPasswords'
+                line='PermitEmptyPasswords no'
+                state=present
+    notify: Restart ssh
+# 9.3.10 Do Not Allow Users to Set Environment Options
+  - name: System Access - Do Not Allow Users to Set Environment Options
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='PermitUserEnvironment'
+                line='PermitUserEnvironment no'
+                state=present
+    notify: Restart ssh
+# 9.3.11.a Use Only Approved Cipher in Counter Mode
+  - name: System Access - Use Only Approved Cipher in Counter Mode
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='^Ciphers'
+                line='Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr'
+                state=present
+    notify: Restart ssh
+# 9.3.11.b User only Apploved Message Authentication Codes
+  - name: System Access - Use Only Selected MACs
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='^MACs'
+                line='MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-ripemd160-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160,umac-128@openssh.com,hmac-sha1'
+                state=present
+    notify: Restart ssh
+# 9.3.11.c Use Only Approved Key Exchange Algorithms
+  - name: System Access - Use Only Approved Key Exchange Algorithms
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='^KexAlgorithms'
+                line='KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1'
+                state=present
+    notify: Restart ssh
+# 9.3.12 Set Idle Timeout Interval for User Login
+  - name: System Access - Set Idle Timeout Interval for User Login
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='ClientAliveInterval'
+                line='ClientAliveInterval 30'
+                state=present
+    notify: Restart ssh
+  - name: System Access - Set Idle Timeout Interval for User Login
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='ClientAliveCountMax'
+                line='ClientAliveCountMax 3'
+                state=present
+    notify: Restart ssh
+# 9.3.13 Limit Access via SSH
+# 9.3.14 Set SSH Banner
+  - name: System Access - Set SSH Banner
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='Banner'
+                line='Banner /etc/issue.net'
+                state=present
+    notify: Restart ssh
+  - name: System Access - Remove Debian SSH banner at login
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='DebianBanner'
+                line='DebianBanner no'
+                state=present
+    notify: Restart ssh
+  - name: Disable SSH DSA Host Key
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='HostKey /etc/ssh/ssh_host_dsa_key'
+                line='HostKey /etc/ssh/ssh_host_dsa_key'
+                state=absent
+    notify: Restart ssh
+  - name: Disable SSH ECDSA Host Key
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='HostKey /etc/ssh/ssh_host_ecdsa_key'
+                line='HostKey /etc/ssh/ssh_host_ecdsa_key'
+                state=absent
+    notify: Restart ssh
+# 9.4 Restrict root Login to System Console
+# 9.5 Restrict Access to the su Command

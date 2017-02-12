@@ -1,0 +1,36 @@
+---
+# CIS 4 - Additional Process Hardening
+# 4.1 Restrict Core Dumps
+  - name: Process Hardening - core dumps - limits
+    lineinfile: dest=/etc/security/limits.conf
+                regexp='hard\tcore'
+                line='*\thard\tcore\t0'
+                state=present
+  - name: Process Hardening - core dumps - dumps
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='fs.suid_dumpable'
+                line='fs.suid_dumpable = 0'
+                state=present
+    notify: Restart sysctl
+  - name: Process Hardening - core dumps - apport absent
+    apt: pkg=apport state=absent
+  - name: Process Hardening - core dumps - whoopsie absent
+    apt: pkg=whoopsie state=absent
+# 4.2 - Enable XD/NX Support on 32-bit x86 Systems
+# 4.3 - Enable Randomized Virtual Memory Region Placement
+  - name: Process Hardening - Randomized VM
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='kernel.randomize_va_space'
+                line='kernel.randomize_va_space = 2'
+                state=present
+    notify: Restart sysctl
+# 4.4 - Disable Prelink
+  - name: Process Hardening - prelink absent
+    apt: pkg=prelink state=absent
+# 4.5 - Activate AppArmor
+  - name: Process Hardening - AppArmor - installed
+    apt: pkg=apparmor state=present
+  - name: Process Hardening - AppArmor utils - installed
+    apt: pkg=apparmor-utils state=present
+  - name: Process Hardening - AppArmor profiles - installed
+    apt: pkg=apparmor-profiles state=present

@@ -1,0 +1,46 @@
+---
+- name: Install base packages
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - build-essential
+    - doxygen
+    - libncurses5-dev
+    - lib32ncurses5
+    - libopenblas-dev
+    - liblapack-dev
+    - gfortran
+    - imagemagick
+
+- name: Install Java
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - openjdk-7-jdk
+    - openjdk-7-jre
+    - ant
+
+- name: Install Python stuffs
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - python-dev
+    - python-pip
+
+- name: Install Git
+  apt:
+    pkg: git
+    state: latest
+
+- name: Install Vagrant
+  apt:
+    pkg: vagrant
+    state: latest
+
+- name: Install OpenSCAP library
+  apt:
+    pkg: libopenscap8
+    state: latest

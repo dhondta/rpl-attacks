@@ -1,0 +1,31 @@
+---
+# CIS 13 - Review User and Group Settings
+# 13.1 Ensure Password Fields are Not Empty
+# 13.2 Verify No Legacy "+" Entries Exist in /etc/passwd File
+# 13.3 Verify No Legacy "+" Entries Exist in /etc/shadow File
+# 13.4 Verify No Legacy "+" Entries Exist in /etc/group File
+# 13.5 Verify No UID 0 Accounts Exist Other Than root
+# 13.6 Ensure root PATH Integrity
+# 13.7 Check Permissions on User Home Directories
+# 13.8 Check User Dot File Permissions
+# 13.9 Check Permissions on User .netrc Files
+# 13.10 Check for Presence of User .rhosts Files
+# 13.11 Check Groups in /etc/passwd
+# 13.12 Check That Users Are Assigned Valid Home Directories
+# 13.13 Check User Home Directory Ownership
+# 13.14 Check for Duplicate UIDs
+# 13.15 Check for Duplicate GIDs
+# 13.16 Check for Duplicate User Names
+# 13.17 Check for Duplicate Group Names
+# 13.18 Check for Presence of User .netrc Files
+# 13.19 Check for Presence of User .forward Files
+# 13.20 Ensure shadow group is empty
+  - name: User/Group Settings - Ensure shadow group is empty
+    lineinfile: dest=/etc/group
+                regexp='shadow'
+                line='shadow:x:42:'
+                state=present
+  - name: User/Group Settings - Ensure no users have shadow as their primary group
+    lineinfile: dest=/etc/passwd
+                regexp=':42:'
+                state=absent

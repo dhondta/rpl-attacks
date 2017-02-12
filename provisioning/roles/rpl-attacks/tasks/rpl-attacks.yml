@@ -1,0 +1,21 @@
+---
+# Clone the git repositories
+- name: Clone repository
+  git:
+    repo: "https://github.com/dhondta/rpl-attacks.git"
+    dest: "{{ rplaf_root }}"
+    force: yes
+    recursive: no
+    accept_hostkey: yes
+
+# Install the requirements
+- name: Install requirements
+  pip:
+    requirements: "{{ rplaf_root }}/requirements.txt"
+
+# Copy configuration file
+- name: Copy configuration file
+  template:
+    src: .rpl-attacks.conf
+    dest: "/home/user/"
+    owner: user

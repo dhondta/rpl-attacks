@@ -1,0 +1,47 @@
+---
+# Install the supervisor IOT to manage the programs
+- name: Install pip
+  apt:
+    pkg: python-pip
+    state: latest
+
+- name: Install Supervisor
+  pip:
+    name: supervisor
+    state: latest
+
+- name: Ensure that Supervisor directories are created
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - /etc/supervisor
+    - /var/log/supervisor
+
+- name: Link default configuration file
+  copy: src=supervisord.conf
+        dest=/etc/supervisord.conf
+        owner=root
+        group=root
+        mode=0755
+
+- name: Copy init script
+  copy: src=supervisord
+        dest=/etc/init.d/supervisord
+        owner=root
+        group=root
+        mode=0755
+
+- name: Create Supervirsor app directory
+  file: path=/etc/supervisor/conf.d
+        state=directory
+
+- name: Ensure Supervisor is running and start at boot
+  service:
+    name: supervisord
+    state: started
+    enabled: yes
+

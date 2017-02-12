@@ -1,0 +1,36 @@
+---
+# CIS 5 - OS Services
+# 5.1 Ensure Legacy Services are Not Enabled
+# 5.1.1 Ensite NIS is not installed
+  - name: OS Services - NIS absent
+    apt: pkg=nis state=absent
+# 5.1.2 Ensure rsh server is not enabled
+  - name: OS Services - RSH server absent
+    apt: pkg=rsh-server state=absent
+  - name: OS Services - RSH redone server absent
+    apt: pkg=rsh-redone-server state=absent
+# 5.1.3 Ensure rsh client is not installed
+  - name: OS Services - RSH redone client absent
+    apt: pkg=rsh-redone-client state=absent
+# 5.1.4 Ensure talk server is not enabled
+  - name: OS Services - talk server absent
+    apt: pkg=talkd state=absent
+# 5.1.5 Ensure talk client is not enabled
+  - name: OS Services - talk client absent
+    apt: pkg=talk state=absent
+# 5.1.6 Ensure telnet server is not enabled
+  - name: OS Services - telnet server absent
+    apt: pkg=telnetd state=absent
+# 5.1.7 Ensure tftp-server is not enabled
+  - name: OS Services - tftp server absent
+    apt: pkg=tftpd state=absent
+  - name: OS Services - atftp server absent
+    apt: pkg=atftpd state=absent
+# 5.1.8 Ensure xinetd is not enabled
+  - name: OS Services - xinetd server absent
+    apt: pkg=xinetd state=absent
+# 5.2 Ensure chargen is not enabled
+# 5.3 Ensure daytime is not enabled
+# 5.4 Ensure echo is not enabled
+# 5.5 Ensure discard is not enabled
+# 5.6 Ensure time is not enabled

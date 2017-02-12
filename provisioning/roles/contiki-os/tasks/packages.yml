@@ -1,0 +1,23 @@
+---
+- name: Install AVR GCC Toolchain
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - gcc-avr
+    - binutils-avr
+    - gdb-avr
+    - avr-libc
+    - avrdude
+
+- name: Install msp430 tools
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - lib32z1
+    - binutils-msp430
+    - gcc-msp430
+    - msp430-libc
+    - msp430mcu
+    - mspdebug

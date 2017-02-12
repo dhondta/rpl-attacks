@@ -1,0 +1,16 @@
+---
+- hosts: rpl-attacks-framework
+  sudo: True
+  roles:
+    - baseline
+    - supervisor
+    - contiki-os
+    - rpl-attacks
+  vars:
+    # Global RPL Attacks Framework configuration
+    sysadmin_password: "$1$SomeSalt$scvwMFYVX0/NNuksR2vvw1"
+
+# TO ACTIVATE WHEN SCAPL APPLICATION EXISTS
+#    supervisor_apps:
+#      - supervisor_app_name: "rplaf_app"
+#        supervisor_app_user: "user"

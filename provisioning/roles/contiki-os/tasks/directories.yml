@@ -1,0 +1,10 @@
+---
+# Create and configure directories
+
+- name: Create Contiki-OS root directory
+  file:
+    path: "{{ contiki_root }}"
+    owner: "user"
+    group: "user"
+    mode: 02770
+    state: directory

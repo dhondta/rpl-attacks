@@ -1,0 +1,9 @@
+---
+# Install basic packages
+- include: packages.yml
+
+# Create and configure directories
+- include: directories.yml
+
+# Install Contiki-OS
+- include: contiki-os.yml

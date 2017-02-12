@@ -1,0 +1,31 @@
+---
+# CIS 12 - Verify System File Permissions
+# 12.1 Verify Permissions on /etc/passwd
+# 12.4 Verify User/Group Ownership on /etc/passwd
+  - name: File Permissions - Verify Permissions on /etc/passwd
+    file: dest=/etc/passwd
+          mode=0644
+          owner=root
+          group=root
+# 12.2 Verify Permissions on /etc/shadow
+# 12.5 Verify User/Group Ownership on /etc/shadow
+  - name: File Permissions - Verify Permissions on /etc/shadow
+    file: dest=/etc/shadow
+          mode=0640
+          owner=root
+          group=root
+# 12.3 Verify Permissions on /etc/group
+# 12.6 Verify User/Group Ownership on /etc/group
+  - name: File Permissions - Verify Permissions on /etc/group
+    file: dest=/etc/group
+          mode=0644
+          owner=root
+          group=root
+# 12.4 Verify User/Group Ownership on /etc/passwd
+# 12.5 Verify User/Group Ownership on /etc/shadow
+# 12.6 Verify User/Group Ownership on /etc/group
+# 12.7 Find World Writable Files
+# 12.8 Find Un-owned Files and Directories
+# 12.9 Find Un-grouped Files and Directories
+# 12.10 Find SUID System Executables
+# 12.11 Find SGID System Executables

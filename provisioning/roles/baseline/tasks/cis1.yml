@@ -1,0 +1,20 @@
+---
+# CIS 1 - Patching and Software Updates
+  - name: Updates - Install unattended-upgrades
+    apt: pkg=unattended-upgrades state=present
+
+  - name: Updates - Enable automatic updates
+    copy: src=20auto-upgrades
+          dest=/etc/apt/apt.conf.d/20auto-upgrades
+  - name: Updates - Enable automatic security updates
+    replace: dest=/etc/apt/apt.conf.d/50unattended-upgrades
+             regexp='^//(\t.*-security.*)$'
+             replace='\1'
+  - name: Updates - Disable automatic proposed updates
+    replace: dest=/etc/apt/apt.conf.d/50unattended-upgrades
+             regexp='^([^/].*-proposed.*)$'
+             replace='//\1'
+  - name: Updates - Disable automatic backports updates
+    replace: dest=/etc/apt/apt.conf.d/50unattended-upgrades
+             regexp='^([^/].*-backports.*)$'
+             replace='//\1'

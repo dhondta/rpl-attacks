@@ -1,0 +1,22 @@
+---
+# Create users
+- name: Add normal group
+  group:
+    name: "user"
+    state: present
+
+- name: Add normal user
+  user:
+    name: "user"
+    groups: "user"
+    state: present
+
+- name: Create sysadmin user
+  user:
+    name: "sysadmin"
+    password: "{{sysadmin_password}}"
+    system: yes
+    append: yes
+    groups: "sudo"
+    createhome: no
+    state: present

@@ -1,0 +1,27 @@
+---
+# CIS 2 - Filesystem Configuration
+# 2.1 Create Separate Partition for /tmp
+# 2.2 Set nodev option for /tmp Partition
+# 2.3 Set nosuid option for /tmp Partition
+# 2.4 Set noexec option for /tmp Partition
+# 2.5 Create Separate Partition for /var
+# 2.6 Bind Mount the /var/tmp directory to /tmp
+# 2.7 Create Separate Partition for /var/log
+# 2.8 Create Separate Partition for /var/log/audit
+# 2.9 Create Separate Partition for /home
+# 2.10 Add nodev Option to /home
+# 2.11 Add nodev Option to Removable Media Partitions
+# 2.12 Add noexec Option to Removable Media Partitions
+# 2.13 Add nosuid Option to Removable Media Partitions
+# 2.14 Add nodev Option to /run/shm Partition
+# 2.15 Add nosuid Option to /run/shm Partition
+# 2.16 Add noexec Option to /run/shm Partition
+# 2.17 Set Sticky Bit on All World-Writable Directories
+# 2.18 Disable Mounting of cramfs Filesystems
+# 2.19 Disable Mounting of freevxfs Filesystems
+# 2.20 Disable Mounting of jffs2 Filesystems
+# 2.21 Disable Mounting of hfs Filesystems
+# 2.22 Disable Mounting of hfsplus Filesystems
+# 2.23 Disable Mounting of squashfs Filesystems
+# 2.24 Disable Mounting of udf Filesystems
+# 2.25 Disable Automounting

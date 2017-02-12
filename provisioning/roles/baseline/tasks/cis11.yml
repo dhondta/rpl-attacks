@@ -1,0 +1,17 @@
+---
+# CIS 11 - Warning Banners
+# 11.1 Set Warning Banner for Standard Login Services
+# 11.2 Remove OS Information from Login Warning Banners
+  - name: Warning Banners - Set Warning Banner for Standard Login Services
+    copy: src=issue.net
+          dest=/etc/issue.net
+          owner=root
+          group=root
+          mode=0644
+  - name: Warning Banners - Set Warning Banner for Standard Login Services
+    copy: src=issue.net
+          dest=/etc/issue
+          owner=root
+          group=root
+          mode=0644
+# 11.3 Set Graphical Warning Banner

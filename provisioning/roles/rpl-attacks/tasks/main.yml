@@ -1,0 +1,20 @@
+---
+# Install basic packages
+- include: packages.yml
+
+# Create and configure directories
+- include: directories.yml
+
+# Install RPLAF
+- include: rpl-attacks.yml
+
+# Create applications in supervisor
+- name: Create apps in Supervisor
+  template:
+    src: supervisor_app
+    dest: /etc/supervisor/conf.d/{{item.supervisor_app_name}}
+    owner: root
+    group: root
+    mode: 0755
+  with_items: supervisor_apps
+  notify: Restart supervisord

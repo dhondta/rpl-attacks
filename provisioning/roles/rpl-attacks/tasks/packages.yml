@@ -1,0 +1,8 @@
+---
+- name: Install Python modules
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - python-numpy
+    - python-scipy

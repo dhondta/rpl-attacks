@@ -1,0 +1,10 @@
+---
+# Create and configure directories
+
+- name: Create RPLAF root directory
+  file:
+    path: "{{ rplaf_root }}"
+    owner: "user"
+    group: "user"
+    mode: 02770
+    state: directory

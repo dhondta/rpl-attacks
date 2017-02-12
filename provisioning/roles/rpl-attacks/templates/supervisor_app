@@ -1,0 +1,12 @@
+[program:{{item.supervisor_app_name}}]
+
+numprocs = 1 
+redirect_stderr = True
+stopwaitsecs = 600 
+killasgroup = True
+stderr_logfile = /var/log/supervisor/{{item.supervisor_app_name}}.log
+stopsignal = INT 
+command = {{item.supervisor_app_command}}
+user = {{item.supervisor_app_user}}
+autostart = True
+stdout_logfile = /var/log/supervisor/{{item.supervisor_app_name}}.log

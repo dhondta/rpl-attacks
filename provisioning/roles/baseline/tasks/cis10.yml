@@ -1,0 +1,10 @@
+---
+# CIS 10 - User Accounts and Environment
+# 10.1 Set Shadow Password Suite Parameters (/etc/login.defs)
+# 10.1.1 Set Password Expiration Days
+# 10.1.2 Set Password Change Minimum Number of Days
+# 10.1.3 Set Password Expiring Warning Days
+# 10.2 Disable System Accounts
+# 10.3 Set Default Group for root Account
+# 10.4 Set Default umask for Users
+# 10.5 Lock Inactive User Accounts
