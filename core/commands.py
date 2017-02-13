@@ -571,11 +571,21 @@ def setup(silent=False, **kwargs):
         recompile = True
     # recompile Cooja for making the changes take effect
     if recompile:
+        with lcd(CONTIKI_FOLDER):
+            local('git submodule update --init')
         with lcd(COOJA_FOLDER):
             logger.debug(" > Recompiling Cooja...")
-            with settings(warn_only=True):
-                local("ant clean")
-                local("ant jar")
+            with hide(*HIDDEN_ALL):
+                for cmd in ["clean", "jar"]:
+                    output = local("ant {}".format(cmd), capture=True)
+                    info, error = False, False
+                    for line in output.split('\n'):
+                        if line.strip() == "":
+                            info, error = False, False
+                        elif line.startswith("BUILD"):
+                            info, error = "SUCCESSFUL" in line, "FAILED" in line
+                        if info or error:
+                            getattr(logger, "info" if info else "error" if error else "warn")(line)
     else:
         logger.debug(" > Cooja is up-to-date")
     # install imagemagick
@@ -631,19 +641,19 @@ def update(silent=False, **kwargs):
     """
     Update Contiki-OS and RPL Attacks Framework.
     """
-    for folder, repo in zip([CONTIKI_FOLDER, FRAMEWORK_FOLDER], ["Contiki-OS", "RPL Attacks Framework"]):
+    for folder, repository in zip([CONTIKI_FOLDER, FRAMEWORK_FOLDER], ["Contiki-OS", "RPL Attacks Framework"]):
         with hide(*HIDDEN_ALL):
             with lcd(folder):
                 uptodate = "branch is up-to-date" in local('git checkout master', capture=True).strip().split('\n')[-1]
                 if not uptodate:
-                    logger.warn("You are about to loose any custom change made to {} ;".format(repo))
+                    logger.warn("You are about to loose any custom change made to {} ;".format(repository))
                     if silent or std_input("Proceed anyway ? (yes|no) [default: no] ", 'yellow') == 'yes':
                         local('git submodule update --init')
                         local('git fetch --all')
                         local('git reset --hard origin/master')
                         local('git pull')
-            logger.debug(" > {} {}".format(repo, ["updated", "already up-to-date"][uptodate]))
-            if repo == "Contiki-OS" and not uptodate:
+            logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
+            if repository == "Contiki-OS" and not uptodate:
                 setup(silent=True)
 
 
