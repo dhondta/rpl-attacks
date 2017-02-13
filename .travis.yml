@@ -41,4 +41,6 @@ install:
   - pip install -r requirements.txt
 
 script:
+  - fab update
+  - fab setup
   - fab test
