@@ -4,7 +4,7 @@ import sh
 import unittest
 from os.path import exists, expanduser, join
 
-from core.commands import config, setup
+from core.commands import config, setup, update
 from core.conf.constants import COOJA_FOLDER
 
 
@@ -40,6 +40,7 @@ class Test2CoojaSetup(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        update(silent=True)
         setup(silent=True)
 
     def test1_modify_cooja(self):

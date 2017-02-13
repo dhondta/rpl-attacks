@@ -343,7 +343,8 @@ def __run(name, **kwargs):
             logger.debug(" > Running simulation {} the malicious mote...".format(sim))
             with lcd(sim_path):
                 local("make run TASK={}".format(kwargs['task']), capture=True)
-            remove_files(sim_path, '.run')
+            # simulations are in their respective folders ('sim_path')
+            #remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
             # once the execution is over, gather the screenshots into a single GIF and keep the first and
             #  the last screenshots ; move these to the results folder
             logger.debug(" > Gathering screenshots in an animated GIF...")
@@ -360,10 +361,8 @@ def __run(name, **kwargs):
             net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
             move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
             remove_files(data, *network_images.values())
-            # then start the parsing functions to derive more results
             logger.debug(" > Parsing simulation results...")
             parsing_chain(sim_path)
-            move_files(sim_path, results, 'COOJA.log')
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
@@ -592,8 +591,7 @@ def setup(silent=False, **kwargs):
     if 'msp430-gcc (GCC) 4.7.0 20120322' not in msp430_version_output:
         txt = "In order to extend msp430x memory support, it is necessary to upgrade msp430-gcc.\n" \
               "Would you like to upgrade it now ? (yes|no) [default: no] "
-        answer = std_input(txt, 'yellow')
-        if answer == "yes":
+        if silent or std_input(txt, 'yellow') == "yes":
             logger.debug(" > Upgrading msp430-gcc from version 4.6.3 to 4.7.0...")
             logger.warning("If you encounter problems with this upgrade, please refer to:\n"
                            "https://github.com/contiki-os/contiki/wiki/MSP430X")
@@ -624,7 +622,7 @@ def setup(silent=False, **kwargs):
 
 
 @command(start_msg="UPDATING CONTIKI-OS AND RPL ATTACKS FRAMEWORK")
-def update(**kwargs):
+def update(silent=False, **kwargs):
     """
     Update Contiki-OS and RPL Attacks Framework.
     """
@@ -634,7 +632,8 @@ def update(**kwargs):
                 uptodate = "branch is up-to-date" in local('git checkout master', capture=True).strip().split('\n')[-1]
                 if not uptodate:
                     logger.warn("You are about to loose any custom change made to {} ;".format(repo))
-                    if std_input("Proceed anyway ? (yes|no) [default: no] ", 'yellow') == 'yes':
+                    if silent or std_input("Proceed anyway ? (yes|no) [default: no] ", 'yellow') == 'yes':
+                        local('git submodule update --init')
                         local('git fetch --all')
                         local('git reset --hard origin/master')
                         local('git pull')
