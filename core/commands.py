@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
 from fabric.api import hide, lcd, local, settings
 from inspect import getmembers, isfunction
-from os import chmod, listdir
-from os.path import basename, exists, expanduser, join, split, splitext
+from os import chmod, listdir, makedirs
+from os.path import basename, dirname, exists, expanduser, join, split, splitext
 from re import match, IGNORECASE
 from sys import modules
 from terminaltables import SingleTable
@@ -585,7 +585,7 @@ def setup(silent=False, **kwargs):
                         elif line.startswith("BUILD"):
                             info, error = "SUCCESSFUL" in line, "FAILED" in line
                         if info or error:
-                            getattr(logger, "info" if info else "error" if error else "warn")(line)
+                            getattr(logger, "debug" if info else "error" if error else "warn")(line)
     else:
         logger.debug(" > Cooja is up-to-date")
     # install imagemagick
@@ -622,7 +622,10 @@ def setup(silent=False, **kwargs):
     else:
         logger.debug(" > Library msp430-gcc is up-to-date (version 4.7.0)")
     # create a new desktop shortcut for the framework
-    shortcut = expanduser('~/Desktop/rpl-attacks-framework.desktop')
+    desktop = expanduser('~/Desktop')
+    shortcut = join(desktop, 'rpl-attacks-framework.desktop')
+    if not exists(desktop):
+        makedirs(desktop)
     if not exists(shortcut):
         with hide(*HIDDEN_ALL):
             local('sudo cp {} /usr/share/icons/hicolor/scalable/apps/'

@@ -49,11 +49,11 @@ wget http://ftpmirror.gnu.org/binutils/binutils-2.22.tar.bz2
 wget http://mirror.ibcp.fr/pub/gnu/gcc/gcc-4.7.0/gcc-4.7.0.tar.bz2
 
 # Unpacking the tars
-tar xvfj binutils-2.22.tar.bz2
-tar xvfj gcc-4.7.0.tar.bz2
-tar xvfj mspgcc-20120911.tar.bz2
-tar xvfj msp430mcu-20120716.tar.bz2
-tar xvfj msp430-libc-20120716.tar.bz2
+tar xvfj binutils-2.22.tar.bz2        > /dev/null
+tar xvfj gcc-4.7.0.tar.bz2            > /dev/null
+tar xvfj mspgcc-20120911.tar.bz2      > /dev/null
+tar xvfj msp430mcu-20120716.tar.bz2   > /dev/null
+tar xvfj msp430-libc-20120716.tar.bz2 > /dev/null
 
 # 1) Incorporating the changes contained in the patch delievered in mspgcc-20120911
 cd binutils-2.22
@@ -73,9 +73,9 @@ mkdir gcc-4.7.0-msp430
 
 # 4) installing binutils in INSTALL_PREFIX
 cd binutils-2.22-msp430/
-../binutils-2.22/configure --target=msp430 --program-prefix="msp430-" --prefix=$INSTALL_PREFIX
-make
-make install
+../binutils-2.22/configure --target=msp430 --program-prefix="msp430-" --prefix=$INSTALL_PREFIX > /dev/null
+make > /dev/null
+make install > /dev/null
 
 # 5) Download the prerequisites
 cd ../gcc-4.7.0
@@ -83,9 +83,9 @@ cd ../gcc-4.7.0
 
 # 6) compiling gcc-4.7.0 in INSTALL_PREFIX
 cd ../gcc-4.7.0-msp430
-../gcc-4.7.0/configure --target=msp430 --enable-languages=c --program-prefix="msp430-" --prefix=$INSTALL_PREFIX
-make
-make install
+../gcc-4.7.0/configure --target=msp430 --enable-languages=c --program-prefix="msp430-" --prefix=$INSTALL_PREFIX > /dev/null
+make > /dev/null
+make install > /dev/null
 
 # 7) compiping msp430mcu in INSTALL_PREFIX
 cd ../msp430mcu-20120716
