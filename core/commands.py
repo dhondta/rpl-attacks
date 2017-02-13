@@ -606,16 +606,15 @@ def setup(silent=False, **kwargs):
             logger.debug(" > Upgrading msp430-gcc from version 4.6.3 to 4.7.0...")
             logger.warning("If you encounter problems with this upgrade, please refer to:\n"
                            "https://github.com/contiki-os/contiki/wiki/MSP430X")
-            with hide(*HIDDEN_ALL):
-                with lcd('src/'):
-                    logger.warning(" > Upgrade now starts, this may take up to 30 minutes...")
-                    upgrade_log = local('sudo ./upgrade-msp430.sh', capture=True)
-                    for line in upgrade_log.split('\n'):
-                        if match(r'error', line, flags=IGNORECASE):
-                            logger.error(line)
-                    local('sudo rm -r tmp/')
-                    local('export PATH=/usr/local/msp430/bin:$PATH')
-                    register_new_path_in_profile()
+            with lcd('src/'):
+                logger.warning(" > Upgrade now starts, this may take up to 30 minutes...")
+                upgrade_log = local('sudo ./upgrade-msp430.sh', capture=True)
+                for line in upgrade_log.split('\n'):
+                    if match(r'error', line, flags=IGNORECASE):
+                        logger.error(line)
+                local('sudo rm -r tmp/')
+                local('export PATH=/usr/local/msp430/bin:$PATH')
+                register_new_path_in_profile()
         else:
             logger.warning("Upgrade of library msp430-gcc aborted")
             logger.warning("You may experience problems of mote memory size at compilation")
