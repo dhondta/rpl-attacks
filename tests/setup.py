@@ -9,6 +9,8 @@ from core.conf.constants import COOJA_FOLDER
 
 
 class Test1Config(unittest.TestCase):
+    """ 1. Config file creation """
+
     config_file = expanduser('~/.rpl-attacks.conf')
     backup = config_file + '.backup'
 
@@ -24,7 +26,7 @@ class Test1Config(unittest.TestCase):
             sh.mv(cls.backup, cls.config_file)
 
     def test1_config_file_is_correctly_formatted(self):
-        """ Is the configuration file correctly formatted ? """
+        """ > Is the configuration file correctly formatted ? """
         contiki_folder, experiments_folder = '', ''
         with open(self.config_file) as f:
             for line in f.readlines():
@@ -37,14 +39,10 @@ class Test1Config(unittest.TestCase):
 
 
 class Test2CoojaSetup(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        update(silent=True)
-        setup(silent=True)
+    """ 2. Cooja setup """
 
     def test1_modify_cooja(self):
-        """ Is Cooja's java source correctly adapted ? """
+        """ > Is Cooja's java source correctly adapted ? """
         with open(join(COOJA_FOLDER, 'java', 'org', 'contikios', 'cooja', 'Cooja.java')) as f:
             for line in f.readlines():
                 if '-hidden' in line:
@@ -52,7 +50,7 @@ class Test2CoojaSetup(unittest.TestCase):
         self.assertIn('-hidden', line)
 
     def test2_update_cooja_build(self):
-        """ Is Cooja's build.xml correctly adapted ? """
+        """ > Is Cooja's build.xml correctly adapted ? """
         assertions, section = {'clean': '', 'jar': ''}, None
         with open(join(COOJA_FOLDER, 'build.xml')) as f:
             for line in f.readlines():
@@ -66,7 +64,7 @@ class Test2CoojaSetup(unittest.TestCase):
             self.assertIn('"apps/visualizer_screenshot"', line)
 
     def test3_update_cooja_user_properties(self):
-        """ Is Cooja's user properties file correctly adapted ? """
+        """ > Is Cooja's user properties file correctly adapted ? """
         with open(join(expanduser('~'), '.cooja.user.properties')) as f:
             for line in f.readlines():
                 if line.startswith('DEFAULT_PROJECTDIRS='):
@@ -74,7 +72,7 @@ class Test2CoojaSetup(unittest.TestCase):
         self.assertIn('[APPS_DIR]/visualizer_screenshot', line)
 
     def test4_visualizer_screenshot_installed(self):
-        """ Is VisualizerScreenshot Cooja plugin installed ? """
+        """ > Is VisualizerScreenshot Cooja plugin installed ? """
         visualizer_folder = join(COOJA_FOLDER, 'apps', 'visualizer_screenshot')
         self.assertTrue(exists(visualizer_folder))
         self.assertTrue(exists(join(visualizer_folder, 'build.xml')))

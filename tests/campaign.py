@@ -19,6 +19,7 @@ class ExperimentTestCase(unittest.TestCase):
 
 
 class Test6Prepare(ExperimentTestCase):
+    """ 6. Prepare a simulation campaign """
 
     @classmethod
     def setUpClass(cls):
@@ -27,7 +28,7 @@ class Test6Prepare(ExperimentTestCase):
         prepare(JSON, ask=False, silent=True)
 
     def test1_campaign_format(self):
-        """ Is the new experiment campaign a correct JSON file ? """
+        """ > Is the new experiment campaign a correct JSON file ? """
         try:
             with open(self.path) as f:
                 loads(jsmin(f.read()))
@@ -38,6 +39,7 @@ class Test6Prepare(ExperimentTestCase):
 
 
 class Test7Drop(ExperimentTestCase):
+    """ 7. Drop the same simulation campaign """
 
     @classmethod
     def setUpClass(cls):
@@ -49,5 +51,5 @@ class Test7Drop(ExperimentTestCase):
             sh.mv(cls.backup, cls.path)
 
     def test1_campaign_dropped(self):
-        """ Is the campaign JSON file removed ? """
+        """ > Is the campaign JSON file removed ? """
         self.assertFalse(exists(self.path))

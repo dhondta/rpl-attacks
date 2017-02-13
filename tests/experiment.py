@@ -18,6 +18,7 @@ class ExperimentTestCase(unittest.TestCase):
 
 
 class Test3Make(ExperimentTestCase):
+    """ 3. Make an example experiment """
 
     @classmethod
     def setUpClass(cls):
@@ -26,11 +27,12 @@ class Test3Make(ExperimentTestCase):
         make(SIM, ask=False, silent=True)
 
     def test1_experiment_structure(self):
-        """ Is the new experiment correctly structured ? """
+        """ > Is the new experiment correctly structured ? """
         self.assertTrue(check_structure(self.path))
 
 
 class Test4Remake(ExperimentTestCase):
+    """ 4. Remake the same example experiment """
 
     @classmethod
     def setUpClass(cls):
@@ -39,15 +41,16 @@ class Test4Remake(ExperimentTestCase):
         cls.t2 = getmtime(join(cls.path, 'with-malicious', 'motes', 'malicious.z1'))
 
     def test1_experiment_structure_unchanged(self):
-        """ Is the new experiment still correctly structured ? """
+        """ > Is the new experiment still correctly structured ? """
         self.assertTrue(check_structure(self.path))
 
     def test2_malicious_mote_recompiled(self):
-        """ Is the malicious mote well recompiled ? """
+        """ > Is the malicious mote well recompiled ? """
         self.assertNotEqual(self.t1, self.t2)
 
 
 class Test5Clean(ExperimentTestCase):
+    """ 5. Clean the same example experiment """
 
     @classmethod
     def setUpClass(cls):
@@ -59,5 +62,5 @@ class Test5Clean(ExperimentTestCase):
             sh.mv(cls.backup, cls.path)
 
     def test1_experiment_cleaned(self):
-        """ Is the experiment folder removed ? """
+        """ > Is the experiment folder removed ? """
         self.assertFalse(exists(self.path))

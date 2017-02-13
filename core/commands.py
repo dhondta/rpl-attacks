@@ -531,7 +531,7 @@ def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silen
     :param experiments_folder: experiments folder
     """
     get_path(experiments_folder, create=True)
-    with open(expanduser('~/.rpl-attacks.conf'), 'w') as f:
+    with open(expanduser('~/.rpl-attacks.conf'), 'w+') as f:
         f.write('[RPL Attacks Framework Configuration]\n')
         f.write('contiki_folder = {}\n'.format(contiki_folder))
         f.write('experiments_folder = {}\n'.format(experiments_folder))
@@ -544,7 +544,7 @@ def test(**kwargs):
     """
     with settings(warn_only=True):
         with lcd(FRAMEWORK_FOLDER):
-            local("python -m unittest tests")
+            local("python -m unittest -v tests")
 
 
 @command(start_msg="SETTING UP OF THE FRAMEWORK", requires_sudo=True)
@@ -618,7 +618,7 @@ def setup(silent=False, **kwargs):
             local('sudo cp {} /usr/share/icons/hicolor/scalable/apps/'
                   .format(join(FRAMEWORK_FOLDER, 'src/rpla-icon.svg')))
             local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
-        with open(shortcut, 'w') as f:
+        with open(shortcut, 'w+') as f:
             f.write(SHORTCUT.format(path=FRAMEWORK_FOLDER))
         chmod(shortcut, int('775', 8))
         logger.debug(" > Desktop shortcut created")

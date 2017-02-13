@@ -42,6 +42,10 @@ class ArgumentsLexer(RegexLexer):
             return 2 * (None, )
         tokens, args, kwargs = self.get_tokens(text), [], {}
         for token, value in tokens:
+            if token is Keyword:
+                token = token in ['true', 'True']
+            elif token is Number:
+                token = int(token)
             if token in (Keyword, Number, String):
                 args.append(value)
             if token is Name:
