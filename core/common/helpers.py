@@ -27,7 +27,7 @@ def __expand_folders(*folders):
 
 
 # ********************* SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y *******************
-def std_input(txt="Are you sure ? (yes|no) [default: no] ", color=None, choices=None):
+def std_input(txt="Are you sure ? (yes|no) [default: no] ", color=None, choices=('yes', 'no', '')):
     """
     This helper function is aimed to simplify user input regarding raw_input() (Python 2.X) and input()
      (Python 3.Y).
@@ -37,6 +37,7 @@ def std_input(txt="Are you sure ? (yes|no) [default: no] ", color=None, choices=
     :return: user input
     """
     txt = txt if color is None else colored(txt, color)
+    choices = None if not type(choices) in [list, tuple, set] or len(choices) == 0 else choices
     try:
         while True:
             try:
