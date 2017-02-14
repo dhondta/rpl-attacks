@@ -1,3 +1,6 @@
+// since OpenJDK 8, Rhino JS Engine is replaced by Nashorn
+// this line provides compatibility so that 'importPackage' can be used
+try { load("nashorn:mozilla_compat.js"); } catch(e) {}
 importPackage(java.io);
 
 // get plugin instances
