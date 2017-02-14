@@ -343,9 +343,22 @@ def __run(name, **kwargs):
             # the Makefile is at experiment's root ('path')
             logger.debug(" > Running simulation {} the malicious mote...".format(sim))
             with lcd(sim_path):
-                local("make run TASK={}".format(kwargs['task']), capture=True)
-            # simulations are in their respective folders ('sim_path')
-            #remove_files(sim_path, 'COOJA.log', 'COOJA.testlog')
+                output = local("make run TASK={}".format(kwargs['task']), capture=True)
+            remove_files(sim_path, '.{}'.format(kwargs['task']))
+            error, interrupt, error_buffer = False, False, []
+            for line in output.split('\n'):
+                if line.strip().startswith("FATAL") or line.strip().startswith("ERROR"):
+                    error, interrupt = True, True
+                elif line.strip().startswith("INFO"):
+                    error = False
+                    if len(error_buffer) > 0:
+                        logger.error('Cooja error:\n' + '\n'.join(error_buffer))
+                        error_buffer = []
+                if error:
+                    error_buffer.append(line)
+            if interrupt:
+                logger.warn("Cooja failed to execute ; 'run' interrupted (no parsing done)")
+                raise Exception("Cooja failed to execute")
             # once the execution is over, gather the screenshots into a single GIF and keep the first and
             #  the last screenshots ; move these to the results folder
             logger.debug(" > Gathering screenshots in an animated GIF...")
@@ -362,8 +375,10 @@ def __run(name, **kwargs):
             net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
             move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
             remove_files(data, *network_images.values())
+            # then start the parsing functions to derive more results
             logger.debug(" > Parsing simulation results...")
             parsing_chain(sim_path)
+            move_files(sim_path, results, 'COOJA.log')
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
