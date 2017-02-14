@@ -617,7 +617,7 @@ def setup(silent=False, **kwargs):
     if 'msp430-gcc (GCC) 4.7.0 20120322' not in msp430_version_output:
         txt = "In order to extend msp430x memory support, it is necessary to upgrade msp430-gcc.\n" \
               "Would you like to upgrade it now ? (yes|no) [default: no] "
-        if silent or std_input(txt, 'yellow') == "yes":
+        if silent or std_input(txt, 'yellow', ['yes', 'no', '']) == "yes":
             logger.debug(" > Upgrading msp430-gcc from version 4.6.3 to 4.7.0...")
             logger.warning("If you encounter problems with this upgrade, please refer to:\n"
                            "https://github.com/contiki-os/contiki/wiki/MSP430X")
@@ -661,7 +661,8 @@ def update(silent=False, **kwargs):
                 uptodate = "branch is up-to-date" in local('git checkout master', capture=True).strip().split('\n')[-1]
                 if not uptodate:
                     logger.warn("You are about to loose any custom change made to {} ;".format(repository))
-                    if silent or std_input("Proceed anyway ? (yes|no) [default: no] ", 'yellow') == 'yes':
+                    if silent or std_input("Proceed anyway ? (yes|no) [default: no] ", 'yellow',
+                                           ['yes', 'no', '']) == 'yes':
                         local('git submodule update --init')
                         local('git fetch --all')
                         local('git reset --hard origin/master')

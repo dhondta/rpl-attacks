@@ -142,7 +142,7 @@ def command(**params):
                         if attrs.get('loglvl') in ('error', 'critical') or \
                                 ((attrs.get('loglvl') in ('warning', 'info') or fattr == 'exists') and
                                  get_ask() and attrs.get('confirm') is not None and
-                                 not std_input(attrs['confirm'], 'yellow') == 'yes'):
+                                 not std_input(attrs['confirm'], 'yellow', ['yes', 'no', '']) == 'yes'):
                             return
             # run the command and catch exception if any
             if console is not None and len(args) > 0:
