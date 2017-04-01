@@ -114,6 +114,7 @@ It was tested with **Python 2 and 3**.
 4. Setup dependencies and test the framework
 
  ```
+ ../rpl-attacks$ fab setup
  ../rpl-attacks$ fab test
  ```
 
