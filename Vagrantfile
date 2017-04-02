@@ -15,18 +15,29 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "bento/ubuntu-16.04"
-
-  config.vm.network "private_network", type: "dhcp"
+  config.vm.network :private_network, ip: "192.168.27.100"
 
   # customize VM
-  server.vm.hostname = "rpl-attacks-framework"
-  config.vm.provider :vmware_workstation do |vmware|
-    vmware.gui = true
-    vmware.vmx["name"] = "rpl-attacks-framework"
-    vmware.vmx["displayName"] = "RPL Attacks Framework"
-    vmware.vmx["memsize"] = 2048
-    vmware.vmx["numvcpus"] = 2
-    vmware.vmx["usb.vbluetooth.startConnected"] = false # disable BlueTooth
+  #  when --provider virtualbox
+  config.vm.provider "virtualbox" do |v|
+    config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/ubuntu-16.04/versions/2.3.4/providers/virtualbox.box"
+    v.gui = true
+    v.name = "RPL Attacks Framework"
+    v.hostname = "rpl-attacks-framework"
+    v.memory = 2048
+    v.cpus = 2
+    v.usb = 'off'
+    v.usbehci = 'off'
+  end
+  #  when --provider vmware_workstation
+  config.vm.provider "vmware_workstation" do |v|
+    config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/ubuntu-16.04/versions/2.3.4/providers/vmware_desktop.box"
+    v.gui = true
+    v.vmx["displayName"] = "RPL Attacks Framework"
+    v.vmx["name"] = "rpl-attacks-framework"
+    v.vmx["memsize"] = 2048
+    v.vmx["numvcpus"] = 2
+    v.vmx["usb.vbluetooth.startConnected"] = false # disable BlueTooth
   end
 
   # baseline provisioning
@@ -35,5 +46,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     ansible.host_key_checking = false
     ansible.verbose = "v"
   end
+
+  config.vm.synced_folder '.', '/vagrant', disabled: true
 end
 

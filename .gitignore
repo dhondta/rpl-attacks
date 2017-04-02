@@ -60,6 +60,6 @@ docs/_build/
 target/
 
 # RPL-Attacks
-makesense
 .idea
+.vagrant
 tmp
