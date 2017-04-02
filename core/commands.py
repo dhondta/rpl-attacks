@@ -197,6 +197,9 @@ def __make(name, ask=True, **kwargs):
     replacements = render_templates(path, **params)
     # then clean the temporary folder with templates
     remove_folder(templates)
+    # move the report.md file (rendered in each simulation folder) to the experiment folder
+    move_files(join(path, 'with_malicious'), path, 'report.md')
+    remove_files(join(path, 'without_malicious'), 'report.md')
     # now, write the config file without the list of motes
     del params['motes']
     write_config(path, params)
@@ -206,9 +209,6 @@ def __make(name, ask=True, **kwargs):
         without_malicious = join(path, 'without-malicious', 'motes')
         contiki = join(with_malicious, split(CONTIKI_FOLDER)[-1])
         contiki_rpl = join(contiki, 'core', 'net', 'rpl')
-        # move the report.md file (rendered in each simulation folder) to the experiment folder
-        move_files(with_malicious, path, 'report.md')
-        remove_files(without_malicious, 'report.md')
         # copy a reduced version of Contiki where the debug flags can be set for RPL files set in DEBUG_FILES
         copy_folder(CONTIKI_FOLDER, with_malicious,
                     includes=get_contiki_includes(params["target"], params["malicious_target"]))
@@ -286,15 +286,15 @@ def __remake(name, build=False, **kwargs):
     replacements = render_templates(path, only_malicious=True, **params)
     # then clean the temporary folder with templates
     remove_folder(templates)
+    # move the report.md file (rendered in each simulation folder) to the experiment folder
+    move_files(join(path, 'with_malicious'), path, 'report.md')
+    remove_files(join(path, 'without_malicious'), 'report.md')
     # now recompile
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with_malicious = join(path, 'with-malicious', 'motes')
         without_malicious = join(path, 'without-malicious', 'motes')
         contiki = join(with_malicious, split(CONTIKI_FOLDER)[-1])
         contiki_rpl = join(contiki, 'core', 'net', 'rpl')
-        # move the report.md file (rendered in each simulation folder) to the experiment folder
-        move_files(with_malicious, path, 'report.md')
-        remove_files(without_malicious, 'report.md')
         with lcd(with_malicious):
             malicious = 'malicious.{}'.format(params["malicious_target"])
             croot, csensor = 'root.{}'.format(params["target"]), 'sensor.{}'.format(params["target"])
