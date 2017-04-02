@@ -115,7 +115,7 @@ TEMPLATES = OrderedDict([
 # Note: booleans stand for cleaning the structure item when recreating an experiment above an existing one
 EXPERIMENT_STRUCTURE = {
     "simulation.conf": False,
-    "report.md": True,
+    "report.md": False,
     "with-malicious": {
         "Makefile": False,
         "simulation.csc": False,
