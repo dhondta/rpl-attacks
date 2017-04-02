@@ -348,6 +348,7 @@ def render_templates(path, only_malicious=False, **params):
     # important note: sampling period is relative to the measured time in the simulation, which is in microseconds ;
     #                  the '10 * ' thus means that we take 100 measures regardless the duration of the simulation
     templates["script.js"]["sampling_period"] = templates["script.js"]["timeout"] * 10
+    templates["report.md"] = params
     templates["simulation.csc"]["title"] = params["title"] + ' (with the malicious mote)'
     templates["simulation.csc"]["goal"] = params["goal"]
     templates["simulation.csc"]["notes"] = params["notes"]
