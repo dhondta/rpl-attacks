@@ -192,7 +192,7 @@ def __make(name, ask=True, **kwargs):
                ('motes/{}.c'.format(params["mtype_root"]), 'motes/root.c'),
                ('motes/{}.c'.format(params["mtype_sensor"]), 'motes/sensor.c'),
                ('motes/{}.c'.format(params["mtype_malicious"]), 'motes/malicious.c'),
-               'motes/Makefile', 'Makefile', 'simulation.csc', 'script.js')
+               'motes/Makefile', 'Makefile', 'simulation.csc', 'script.js', 'report.md')
     # create experiment's files from templates then clean the templates folder
     replacements = render_templates(path, **params)
     remove_folder(templates)

@@ -342,13 +342,13 @@ def render_templates(path, only_malicious=False, **params):
     # generate the list of motes (first one is the root, last one is the malicious mote)
     motes = params['motes'] or generate_motes(defaults=DEFAULTS, **params)
     # fill in simulation file templates
+    templates["report.md"] = deepcopy(params)
     templates["motes/Makefile"]["target"] = params["target"]
     # important note: timeout is milliseconds in the simulation script
     templates["script.js"]["timeout"] = 1000 * params["duration"]
     # important note: sampling period is relative to the measured time in the simulation, which is in microseconds ;
     #                  the '10 * ' thus means that we take 100 measures regardless the duration of the simulation
     templates["script.js"]["sampling_period"] = templates["script.js"]["timeout"] * 10
-    templates["report.md"] = deepcopy(params)
     templates["simulation.csc"]["title"] = params["title"] + ' (with the malicious mote)'
     templates["simulation.csc"]["goal"] = params["goal"]
     templates["simulation.csc"]["notes"] = params["notes"]

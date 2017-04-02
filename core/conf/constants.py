@@ -93,13 +93,13 @@ DEFAULTS = {
 
 # Note: Cooja simulation file must be the last key in the following ordered dictionary
 TEMPLATES = OrderedDict([
+    ("report.md", {}),
     ("motes/Makefile", {"contiki": CONTIKI_FOLDER}),
     ("motes/root.c", {}),
     ("motes/sensor.c", {}),
     ("motes/malicious.c", {}),
     ("Makefile", {"contiki": CONTIKI_FOLDER}),
     ("script.js", {}),
-    ("report.md", {}),
     ("simulation.csc", {
         "random_seed": "generate",
         "success_ratio_tx": 1.0,
@@ -112,7 +112,6 @@ TEMPLATES = OrderedDict([
     }),
 ])
 
-# Note: booleans stand for cleaning the structure item when recreating an experiment above an existing one
 EXPERIMENT_STRUCTURE = {
     "simulation.conf": False,
     "report.md": False,
