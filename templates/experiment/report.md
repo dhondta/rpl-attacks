@@ -19,7 +19,7 @@ The WSN contains:
 - {{ n }} sensors of type {{ mtype_sensor }} built upon a {{ target }}
 - 1 malicious mote of type {{ mtype_malicious }} built upon a {{ malicious_target }}
 
-The sensors are spread across an area of {{ area_side }} meters side and centered around the root node at a minimum distance of {{ min_range }} and a maximum distance of {{ max_range }}. They have a maximum transmission range of {{ tx_range }} meters and a maximum interference range of {{ int_range }} meters. The WSN configuration is depicted in the following figure:
+The sensors are spread across an area of {{ area_side }} meters side and centered around the root node at a minimum distance of {{ min_range }} meters and a maximum distance of {{ max_range }} meters. They have a maximum transmission range of {{ tx_range }} meters and a maximum interference range of {{ int_range }} meters. The WSN configuration is depicted in the following figure:
 
 ![](without-malicious/results/wsn-without-malicious_start.png "WSN configuration without the malicious mote before starting the simulation")
 
