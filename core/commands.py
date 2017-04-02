@@ -198,8 +198,8 @@ def __make(name, ask=True, **kwargs):
     # then clean the temporary folder with templates
     remove_folder(templates)
     # move the report.md file (rendered in each simulation folder) to the experiment folder
-    move_files(join(path, 'with_malicious'), path, 'report.md')
-    remove_files(join(path, 'without_malicious'), 'report.md')
+    move_files(join(path, 'with-malicious'), path, 'report.md')
+    remove_files(join(path, 'without-malicious'), 'report.md')
     # now, write the config file without the list of motes
     del params['motes']
     write_config(path, params)
@@ -287,8 +287,8 @@ def __remake(name, build=False, **kwargs):
     # then clean the temporary folder with templates
     remove_folder(templates)
     # move the report.md file (rendered in each simulation folder) to the experiment folder
-    move_files(join(path, 'with_malicious'), path, 'report.md')
-    remove_files(join(path, 'without_malicious'), 'report.md')
+    move_files(join(path, 'with-malicious'), path, 'report.md')
+    remove_files(join(path, 'without-malicious'), 'report.md')
     # now recompile
     with settings(hide(*HIDDEN_ALL), warn_only=True):
         with_malicious = join(path, 'with-malicious', 'motes')
