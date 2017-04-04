@@ -11,6 +11,7 @@
    * [Quick Start (using fabric)](#quick-start-using-fabric)
    * [Commands](#commands)
    * [Simulation campaign](#simulation-campaign)
+   * [Issues management](#issues-management)
 
 # RPL Attacks Framework
 
@@ -356,3 +357,11 @@ Example JSON for a campaign with a BASE simulation as a template for the other s
 Example JSON for a campaign of heterogeneous simulations (with randomized topologies) :
 
  ![RPL Attacks Framework console](doc/imgs/json-randomized-simulations.png)
+ 
+ ## Issues management
+ 
+ Please [open an Issue](https://github.com/dhondta/rpl-attacks/issues/new) if you want to contribute or submit suggestions. Please also use the *labels* as follows :
+ - General question: use *question*
+ - Suggestion: use *help wanted*
+ - Bug/exception/problem: use *bug*
+ - Improvement/contribution: use *enhancement* (please precise if you are motivated and able to contribute)
