@@ -21,6 +21,7 @@ __all__ = [
     'FRAMEWORK_FOLDER',
     'MIN_TERM_SIZE',
     'PIDFILE',
+    'REPORT_THEME',
     'SHORTCUT',
     'TASK_EXPIRATION',
     'TEMPLATES',
@@ -195,3 +196,6 @@ Exec=python main.py
 Type=Application
 Icon=rpla-icon
 """
+
+# PDF report CSS theme
+REPORT_THEME = join(TEMPLATES_FOLDER, "report", "github.css")

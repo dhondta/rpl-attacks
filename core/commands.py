@@ -373,8 +373,8 @@ def __run(name, **kwargs):
             logger.debug(" > Parsing simulation results...")
             parsing_chain(sim_path)
             move_files(sim_path, results, 'COOJA.log')
-            # finally, generate the report in PDF format
-            
+        # finally, generate the PDF report
+        generate_report(path, REPORT_THEME)
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
