@@ -8,6 +8,26 @@ from os import makedirs
 from os.path import abspath, dirname, exists, expanduser, join, pardir
 
 
+__all__ = [
+    'BANNER',
+    'COMMAND_DOCSTRING',
+    'CONTIKI_FILES',
+    'CONTIKI_FOLDER',
+    'COOJA_FOLDER',
+    'DEBUG_FILES',
+    'DEFAULTS',
+    'EXPERIMENT_FOLDER',
+    'EXPERIMENT_STRUCTURE',
+    'FRAMEWORK_FOLDER',
+    'MIN_TERM_SIZE',
+    'PIDFILE',
+    'SHORTCUT',
+    'TASK_EXPIRATION',
+    'TEMPLATES',
+    'TEMPLATES_FOLDER',
+]
+
+
 # configuration parsing and main constants setting
 confparser = configparser.ConfigParser()
 confparser.read(expanduser('~/.rpl-attacks.conf'))

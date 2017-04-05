@@ -9,6 +9,19 @@ from six import string_types
 from termcolor import colored
 
 
+__all__ = [
+    'copy_files',
+    'copy_folder',
+    'is_valid_commented_json',
+    'move_files',
+    'move_folder',
+    'remove_files',
+    'remove_folder',
+    'replace_in_file',
+    'std_input'
+]
+
+
 def __expand_folders(*folders):
     """
     This private function expands folder paths if these are in the form of a tuple.

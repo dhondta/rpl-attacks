@@ -14,12 +14,8 @@ from termcolor import colored, cprint
 from terminaltables import SingleTable
 from types import MethodType
 
+from core import *
 from core.commands import get_commands
-from core.common.ansi import surround_ansi_escapes
-from core.common.termsize import get_terminal_size
-from core.conf.constants import BANNER, COMMAND_DOCSTRING, MIN_TERM_SIZE, PIDFILE
-from core.conf.logconfig import logger, LOG_LEVELS, set_logging
-from core.utils.decorators import no_arg_command, no_arg_command_except
 
 
 class Console(Cmd, object):

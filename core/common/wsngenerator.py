@@ -5,6 +5,11 @@ from random import randint, shuffle
 WSN_DENSITY_FACTOR = 3
 
 
+__all__ = [
+    'generate_motes',
+]
+
+
 # ************************************** NETWORK GENERATION FUNCTION ****************************************
 def generate_motes(**kwargs):
     """

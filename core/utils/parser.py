@@ -11,6 +11,11 @@ from subprocess import Popen, PIPE
 from core.utils.rpla import get_available_platforms, get_motes_from_simulation
 
 
+__all__ = [
+    'parsing_chain',
+]
+
+
 # *************************************** MAIN PARSING FUNCTION ****************************************
 def parsing_chain(path):
     convert_pcap_to_csv(path)

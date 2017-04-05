@@ -8,6 +8,15 @@ except ImportError:
     print("(Install 'coloredlogs' for colored logging)")
 
 
+__all__ = [
+    'logger',
+    'set_logging',
+    'LOG_LEVELS',
+    'HIDDEN_ALL',
+    'HIDDEN_KEEP_STDERR',
+]
+
+
 LOG_FORMAT = '%(asctime)s %(name)s[%(process)d] %(levelname)s %(message)s'
 LOG_LEVELS = {
     'info': logging.INFO,

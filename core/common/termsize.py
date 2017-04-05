@@ -10,6 +10,11 @@ Source: https://gist.githubusercontent.com/jtriley/1108174/raw/6ec4c846427120aa3
 """
 
 
+__all__ = [
+    'get_terminal_size',
+]
+
+
 def get_terminal_size():
     """ getTerminalSize()
      - get width and height of console

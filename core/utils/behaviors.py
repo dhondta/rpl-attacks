@@ -10,6 +10,12 @@ from core.conf.constants import TASK_EXPIRATION
 from core.conf.logconfig import logger
 
 
+__all__ = [
+    'DefaultCommand',
+    'MultiprocessedCommand',
+]
+
+
 class DefaultCommand(object):
     """
     This is the default class for indicating that a command is sequentially executed

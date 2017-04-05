@@ -4,6 +4,16 @@ from os.path import exists, expanduser, join
 from core.conf.logconfig import logger
 
 
+__all__ = [
+    'check_cooja',
+    'modify_cooja',
+    'modify_ipv6_debug',
+    'register_new_path_in_profile',
+    'update_cooja_build',
+    'update_cooja_user_properties',
+]
+
+
 def check_cooja(cooja_dir):
     """
     This function checks if Cooja.java already contains the required modification.
