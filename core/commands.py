@@ -654,14 +654,21 @@ def update(silent=False, **kwargs):
     for folder, repository in zip([CONTIKI_FOLDER, FRAMEWORK_FOLDER], ["Contiki-OS", "RPL Attacks Framework"]):
         with hide(*HIDDEN_ALL):
             with lcd(folder):
+                if "Could not resolve proxy" in local('git fetch --all', capture=True):
+                    logger.error("Update failed ; please check your proxy settings")
+                    break
                 uptodate = "branch is up-to-date" in local('git checkout master', capture=True).strip().split('\n')[-1]
                 if not uptodate:
+                    requirements_md5 = local('md5sum requirements.txt', capture=True).strip()
                     logger.warn("You are about to loose any custom change made to {} ;".format(repository))
                     if silent or std_input("Proceed anyway ? (yes|no) [default: no] ", 'yellow') == 'yes':
                         local('git submodule update --init')
                         local('git fetch --all')
                         local('git reset --hard origin/master')
                         local('git pull')
+                        if local('md5sum requirements.txt', capture=True).strip() != requirements_md5:
+                            logger.warn("Python requirements have changed ; please run 'pip -r requirements.txt'"
+                                        " again and restart the framework.")
             logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
             if repository == "Contiki-OS" and not uptodate:
                 setup(silent=True)

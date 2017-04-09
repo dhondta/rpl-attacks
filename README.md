@@ -79,8 +79,9 @@ It was tested with **Python 2 and 3**.
 
  ```
  sudo apt-get install gfortran libopenblas-dev liblapack-dev
- sudo apt-get install python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
+ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
  sudo apt-get install python-numpy python-scipy
+ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
  sudo apt-get install imagemagick libcairo2-dev libffi-dev
  ```
 
