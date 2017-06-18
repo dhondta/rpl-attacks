@@ -363,10 +363,4 @@ Example JSON for a campaign of heterogeneous simulations (with randomized topolo
  
 Please [open an Issue](https://github.com/dhondta/rpl-attacks/issues/new) if you want to contribute or submit suggestions. 
 
-Please also use the *labels* as follows :
- - General question: use *question*
- - Suggestion: use *help wanted*
- - Bug/exception/problem: use *bug*
- - Improvement/contribution: use *enhancement* (please precise if you are motivated and able to contribute)
-
 If you want to build new RPL attacks, please refer to the [*How to make new building blocks ?*](https://github.com/dhondta/rpl-attacks/blob/master/doc/building-blocks.md) section. In this case, please submit your new attack through a Pull Request.
