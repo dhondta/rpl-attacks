@@ -659,7 +659,7 @@ def update(silent=False, **kwargs):
                     break
                 uptodate = "branch is up-to-date" in local('git checkout master', capture=True).strip().split('\n')[-1]
                 if not uptodate:
-                    req_exists = os.path.exists('requirements.txt')
+                    req_exists = exists('requirements.txt')
                     if req_exists:
                         req_md5 = local('md5sum requirements.txt', capture=True).strip()
                     logger.warn("You are about to loose any custom change made to {} ;".format(repository))
