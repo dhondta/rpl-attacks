@@ -54,6 +54,3 @@
   pip:
     name: pip
     extra_args: --upgrade
-
-# Hardening according to CIS Security Benchmark for Ubuntu
-- include: hardening.yml color=mauve

@@ -1,0 +1,26 @@
+---
+# Handlers file
+
+  - name: Restart system
+    command: shutdown -r now
+  - name: Restart sysctl
+    command: sysctl --system
+  - name: Restart auditd
+    service: name=auditd state=restarted
+  - name: Restart rsyslog
+    service: name=rsyslog state=restarted
+  - name: Restart postfix
+    service: name=postfix state=restarted
+  - name: Restart ufw
+    command: ufw reload
+  - name: Restart ssh
+    service: name=ssh state=restarted
+  - name: Update grub
+    command: update-grub
+  - name: Update timezone
+    command: dpkg-reconfigure --frontend noninteractive tzdata
+  - name: Mount all
+    command: mount -a
+  - name: Set time
+    command: /etc/cron.hourly/ntpdate 
+

@@ -6,6 +6,7 @@
     - baseline
     - contiki-os
     - rpl-attacks
+    - hardening
   vars:
     current_jdk: openjdk-8
     private_network: 192.168.27.0/24
