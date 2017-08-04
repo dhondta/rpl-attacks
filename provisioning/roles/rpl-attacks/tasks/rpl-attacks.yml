@@ -18,13 +18,10 @@
     recurse: yes
 
 # Change files mode
-- name: Change mode to executable for relevant files
+- name: Change main Python script's mode to executable
   file:
-    dest: "{{ rplaf_root }}/{{ item }}"
+    dest: "{{ rplaf_root }}/main.py"
     mode: 0744
-  with_items:
-    - main.py
-    - src/upgrade-msp430.sh
 
 # Install the requirements
 - name: Install Python requirements

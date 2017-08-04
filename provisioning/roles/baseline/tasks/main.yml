@@ -49,6 +49,12 @@
 # Install basic packages
 - include: packages.yml
 
+# Upgrade Python Pip
+- name: Upgrade Pip
+  pip:
+    name: pip
+    extra_args: --upgrade
+
 # CIS Security Benchmarks for Ubuntu - Settings
 #  source: http://cis-ubuntu-ansible.readthedocs.org/en/latest/CIS_Ubuntu/#cis-security-bencmarks-for-ubuntu
 # CIS 1 - Patching and Software Updates

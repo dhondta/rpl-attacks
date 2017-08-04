@@ -20,4 +20,3 @@ sh
 scipy
 termcolor
 terminaltables
-tkinter

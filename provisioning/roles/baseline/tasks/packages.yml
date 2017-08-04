@@ -22,3 +22,12 @@
   apt:
     pkg: git
     state: latest
+
+- name: Install Open VM Tools
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - open-vm-tools
+    - open-vm-tools-dev      
+    - open-vm-tools-desktop
