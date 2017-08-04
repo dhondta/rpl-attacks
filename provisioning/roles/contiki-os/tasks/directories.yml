@@ -5,5 +5,5 @@
     path: "{{ contiki_root }}"
     owner: "vagrant"
     group: "vagrant"
-    mode: 02770
+    mode: 0644
     state: directory

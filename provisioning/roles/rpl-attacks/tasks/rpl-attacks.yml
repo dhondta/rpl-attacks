@@ -8,15 +8,6 @@
     recursive: no
     accept_hostkey: yes
 
-# Change directory owner
-- name: Change Contiki OS directory ownership
-  file:
-    dest: "{{ rplaf_root }}"
-    owner: vagrant
-    group: vagrant
-    mode: 0644
-    recurse: yes
-
 # Change files mode
 - name: Change main Python script's mode to executable
   file:
@@ -38,12 +29,6 @@
     - /home/vagrant/
     - /root/
 
-# Upgrade MSP430
-- name: Install MSP430 GCC upgrade
-  shell:
-    chdir: "{{ rplaf_root }}/src"
-    command: upgrade-msp430.sh
-
 # Run project setup
 - name: Setup RPL Attacks Framework
   expect:
@@ -51,3 +36,9 @@
     command: fab setup
     responses:
       "Would you like to upgrade it now ? (yes|no) [default: no] ": "no"
+
+# Test project
+- name: Test RPL Attacks Framework
+  expect:
+    chdir: "{{ rplaf_root }}"
+    command: fab test
