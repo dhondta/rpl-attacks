@@ -607,27 +607,6 @@ def setup(silent=False, **kwargs):
             local('sudo apt-get install imagemagick -y &')
         else:
             logger.debug(" > Imagemagick is installed")
-    # install msp430 (GCC) upgrade
-    with hide(*HIDDEN_ALL):
-        msp430_version_output = local('msp430-gcc --version', capture=True)
-    if 'msp430-gcc (GCC) 4.7.0 20120322' not in msp430_version_output:
-        txt = "In order to extend msp430x memory support, it is necessary to upgrade msp430-gcc.\n" \
-              "Would you like to upgrade it now ? (yes|no) [default: no] "
-        if silent or std_input(txt, 'yellow') == "yes":
-            logger.debug(" > Upgrading msp430-gcc from version 4.6.3 to 4.7.0...")
-            logger.warning("If you encounter problems with this upgrade, please refer to:\n"
-                           "https://github.com/contiki-os/contiki/wiki/MSP430X")
-            with lcd('src/'):
-                logger.warning(" > Upgrade now starts, this may take up to 30 minutes...")
-                local('sudo ./upgrade-msp430.sh')
-                local('sudo rm -r tmp/')
-                local('export PATH=/usr/local/msp430/bin:$PATH')
-                register_new_path_in_profile()
-        else:
-            logger.warning("Upgrade of library msp430-gcc aborted")
-            logger.warning("You may experience problems of mote memory size at compilation")
-    else:
-        logger.debug(" > Library msp430-gcc is up-to-date (version 4.7.0)")
     # create a new desktop shortcut for the framework
     desktop = expanduser('~/Desktop')
     shortcut = join(desktop, 'rpl-attacks-framework.desktop')
