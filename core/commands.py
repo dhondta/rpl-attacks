@@ -648,7 +648,7 @@ def update(silent=False, **kwargs):
                         local('git reset --hard origin/master')
                         local('git pull')
                         if req_exists and local('md5sum requirements.txt', capture=True).strip() != req_md5:
-                            local('pip -r requirements')
+                            local('pip install -r requirements.txt')
                             python = [] if glob['__file__'].startswith("./") else ["python"]
                             if os.geteuid() == 0:
                                 os.execvp("sudo", ["sudo"] + python + sys.argv)
