@@ -5,6 +5,7 @@
 
    * [RPL Attacks Framework](#rpl-attacks-framework)
    * [System Requirements](#system-requirements)
+   * [VM Deployment](#vm-deployment)
    * [Installation](#installation)
    * [Non-Standard Configuration](#non-standard-configuration)
    * [Quick Start (using the integrated console)](#quick-start-using-the-integrated-console)
@@ -57,6 +58,14 @@ Legitimate DODAG                                               |  Blackhole atta
 This framework was tested on an **InstantContiki** appliance (that is, an Ubuntu 14.04).
 
 It was tested with **Python 2 and 3**.
+
+
+## VM Deployment
+
+> **Troubleshooting**:
+> 
+> - Ensure the latest version of Vagrant is installed
+> - If using `virtualbox` provider, ensure Oracle Extension Pack is installed (see [Oracle website](https://www.google.be/#q=virtualbox+oracle+extension+pack+install))
 
 
 ## Installation

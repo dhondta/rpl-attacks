@@ -16,6 +16,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "bento/ubuntu-16.04"
   config.vm.network :private_network, ip: "192.168.27.100"
+  config.vm.host_name = "rpl-attacks-framework"
 
   # customize VM
   #  when --provider virtualbox
@@ -23,11 +24,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/ubuntu-16.04/versions/2.3.4/providers/virtualbox.box"
     v.gui = true
     v.name = "RPL Attacks Framework"
-    v.hostname = "rpl-attacks-framework"
     v.memory = 2048
     v.cpus = 2
-    v.usb = 'off'
-    v.usbehci = 'off'
+    v.customize ["modifyvm", :id, "--usb", "on"]
+    v.customize ["modifyvm", :id, "--usbehci", "on"]
   end
   #  when --provider vmware_workstation
   config.vm.provider "vmware_workstation" do |v|
@@ -43,6 +43,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # baseline provisioning
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "provisioning/rpl-attacks.yml"
+    ansible.inventory_path = "provisioning/ansible_hosts"
+    ansible.limit = "all"
     ansible.host_key_checking = false
     ansible.verbose = "v"
   end

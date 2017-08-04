@@ -4,7 +4,7 @@
 - name: Create RPLAF root directory
   file:
     path: "{{ rplaf_root }}"
-    owner: "user"
-    group: "user"
+    owner: "vagrant"
+    group: "vagrant"
     mode: 02770
     state: directory

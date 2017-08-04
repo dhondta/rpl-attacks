@@ -6,3 +6,5 @@
   with_items:
     - python-numpy
     - python-scipy
+    - python-tk
+    - python-pexpect

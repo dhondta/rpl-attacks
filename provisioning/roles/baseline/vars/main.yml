@@ -1,14 +1,3 @@
 ---
 # Variables associated with this role
-ubuntu_release: trusty
-
-baseline_packages:
- - { package: "biosdevname" }
- - { package: "vim" }
- - { package: "htop" }
- - { package: "screen" }
- - { package: "iotop" }
- - { package: "iptables" }
- - { package: "ipset" }
- - { package: "tcpdump" }
 

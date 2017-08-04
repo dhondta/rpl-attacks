@@ -1,4 +1,35 @@
 ---
+- name: Install required libraries
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - build-essential
+    - ant
+    - libncurses5-dev
+    - lib32ncurses5
+    - libopenblas-dev
+    - liblapack-dev
+    - gfortran
+    - imagemagick
+
+- name: Install required Python libraries
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - python-numpy
+    - python-scipy
+
+- name: Install Java
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - "{{ current_jdk }}-jdk"
+    - "{{ current_jdk }}-jre"
+    - ant
+
 - name: Install AVR GCC Toolchain
   apt:
     pkg: "{{ item }}"

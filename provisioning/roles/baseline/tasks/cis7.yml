@@ -171,7 +171,7 @@
     apt: pkg=tcpd state=present
 # 7.4.2 Create /etc/hosts.allow
   - name: Network - hosts.allow exists and is strict
-    lineinfile: "dest=/etc/hosts.allow regexp='ALL:' line='ALL: {{ physical_host }}' state=present create=yes"
+    lineinfile: "dest=/etc/hosts.allow regexp='ALL:' line='ALL: {{ private_network }}' state=present create=yes"
 # 7.4.3 Verify Permissions on /etc/hosts.allow
   - name: Network - hosts.allow has correct permissions
     file: dest=/etc/hosts.allow

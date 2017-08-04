@@ -7,3 +7,12 @@
     force: yes
     recursive: yes
     accept_hostkey: yes
+
+# Change directory owner
+- name: Change Contiki OS directory ownership
+  file:
+    dest: "{{ contiki_root }}"
+    owner: vagrant
+    group: vagrant
+    mode: 0644
+    recurse: yes
