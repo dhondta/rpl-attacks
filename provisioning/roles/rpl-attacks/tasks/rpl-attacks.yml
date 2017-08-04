@@ -39,6 +39,6 @@
 
 # Test project
 - name: Test RPL Attacks Framework
-  expect:
+  command: fab test
+  args:
     chdir: "{{ rplaf_root }}"
-    command: fab test

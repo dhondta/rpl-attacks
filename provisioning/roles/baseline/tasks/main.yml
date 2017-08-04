@@ -55,38 +55,5 @@
     name: pip
     extra_args: --upgrade
 
-# CIS Security Benchmarks for Ubuntu - Settings
-#  source: http://cis-ubuntu-ansible.readthedocs.org/en/latest/CIS_Ubuntu/#cis-security-bencmarks-for-ubuntu
-# CIS 1 - Patching and Software Updates
-- include: cis1.yml color=mauve
-# CIS 2 - Filesystem Configuration
-- include: cis2.yml color=mauve
-# CIS 3 - Secure Boot Settings
-- include: cis3.yml color=mauve
-# CIS 4 - Additional Process Hardening
-- include: cis4.yml color=mauve
-# CIS 5 - OS Services
-- include: cis5.yml color=mauve
-# CIS 6 - Special Purpose Services
-- include: cis6.yml color=mauve
-# CIS 7 - Network Configuration and Firewalls
-- include: cis7.yml color=mauve
-# CIS 8 - Logging and Auditing
-- include: cis8.yml color=mauve
-# 9 System Access, Authentication and Authorization
-- include: cis9.yml color=mauve
-# 10 User Accounts and Environment
-- include: cis10.yml color=mauve
-# 11 Warning Banners
-- include: cis11.yml color=mauve
-# 12 Verify System File Permissions
-- include: cis12.yml color=mauve
-# 13 Review User and Group Settings
-- include: cis13.yml color=mauve
-
-# Other hardening
-- name: Authentication - sudo - forbid sudo su
-  lineinfile: dest=/etc/sudoers
-              regexp='Cmnd_Alias SUI=/bin/su'
-              line='Cmnd_Alias SUI=/bin/su'
-              state=present
+# Hardening according to CIS Security Benchmark for Ubuntu
+- include: hardening.yml color=mauve

@@ -1,0 +1,716 @@
+---
+# CIS Security Benchmarks for Ubuntu - Settings
+#  source: http://cis-ubuntu-ansible.readthedocs.org/en/latest/CIS_Ubuntu/#cis-security-bencmarks-for-ubuntu
+
+# CIS 1 - Patching and Software Updates
+  - name: Updates - Install unattended-upgrades
+    apt: pkg=unattended-upgrades state=present
+
+  - name: Updates - Enable automatic updates
+    copy: src=20auto-upgrades
+          dest=/etc/apt/apt.conf.d/20auto-upgrades
+  - name: Updates - Enable automatic security updates
+    replace: dest=/etc/apt/apt.conf.d/50unattended-upgrades
+             regexp='^//(\t.*-security.*)$'
+             replace='\1'
+  - name: Updates - Disable automatic proposed updates
+    replace: dest=/etc/apt/apt.conf.d/50unattended-upgrades
+             regexp='^([^/].*-proposed.*)$'
+             replace='//\1'
+  - name: Updates - Disable automatic backports updates
+    replace: dest=/etc/apt/apt.conf.d/50unattended-upgrades
+             regexp='^([^/].*-backports.*)$'
+             replace='//\1'
+
+# CIS 4 - Additional Process Hardening
+# 4.1 Restrict Core Dumps
+  - name: Process Hardening - core dumps - limits
+    lineinfile: dest=/etc/security/limits.conf
+                regexp='hard\tcore'
+                line='*\thard\tcore\t0'
+                state=present
+  - name: Process Hardening - core dumps - dumps
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='fs.suid_dumpable'
+                line='fs.suid_dumpable = 0'
+                state=present
+    notify: Restart sysctl
+  - name: Process Hardening - core dumps
+    apt:
+      pkg: "{{ item }}"
+      state: absent
+    with_items:
+      - apport
+      - whoopsie
+# 4.3 - Enable Randomized Virtual Memory Region Placement
+  - name: Process Hardening - Randomized VM
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='kernel.randomize_va_space'
+                line='kernel.randomize_va_space = 2'
+                state=present
+    notify: Restart sysctl
+# 4.4 - Disable Prelink
+  - name: Process Hardening - prelink absent
+    apt:
+      pkg: prelink
+      state: absent
+# 4.5 - Activate AppArmor
+  - name: Process Hardening - AppArmor - installed
+    apt:
+      pkg: "{{ item }}"
+      state: present
+    with_items:
+      - apparmor
+      - apparmor-utils
+      - apparmor-profiles
+
+# CIS 5 - OS Services
+# 5.1 Ensure Legacy Services are Not Enabled
+  - name: OS Services
+    apt:
+      pkg: "{{ item }}"
+      state: absent
+    with_items:
+      - nis
+      - rsh-server
+      - rsh-redone-server
+      - rsh-redone-client
+      - talkd
+      - talk
+      - telnetd
+      - tftpd
+      - atftpd
+      - xinetd
+
+# CIS 6 - Special Purpose Services
+# 6.1 Ensure the X Window system is not installed
+  - name: Special Services - xserver absent
+    apt: pkg=xserver-xorg-* state=absent
+    when: "'users' not in group_names"
+# 6.2 Ensure Avahi Server is not enabled
+  - name: Special Services - avahi absent
+    apt: pkg=avahi-daemon state=absent
+# 6.3 Ensure print server is not enabled
+  - name: Special Services - cups absent
+    apt: pkg=cups-* state=absent
+    when: "'users' not in group_names"
+# 6.4 Ensure DHCP Server is not enabled
+  - name: Special Services - DHCP server absent
+    apt: pkg=isc-dhcp-server state=absent
+# 6.5 Configure Network Time Protocol (NTP)
+# 6.6 Ensure LDAP is not enabled
+  - name: Special Services - LDAP absent
+    apt: pkg=slapd state=absent
+# 6.7 Ensure NFS and RPC are not enabled
+  - name: Special Services - NFS server absent
+    apt: pkg=nfs-kernel-server state=absent
+  - name: Special Services - RPC server absent
+    apt: pkg=rpcbind state=absent
+# 6.8 Ensure DNS Server is not enabled
+  - name: Special Services - DNS server absent
+    apt: pkg=bind9 state=absent
+# 6.9 Ensure FTP Server is not enabled
+# 6.10 Ensure HTTP Server is not enabled
+# 6.11 Ensure IMAP and POP server is not enabled
+  - name: Special Services - IMAP server absent dovecot
+    apt: pkg=dovecot-* state=absent
+  - name: Special Services - IMAP server absent courier
+    apt: pkg=courier-* state=absent
+# 6.12 Ensure Samba is not enabled
+  - name: Special Services - Samba server absent
+    apt: pkg=samba state=absent
+# 6.13 Ensure HTTP Proxy Server is not enabled
+# 6.14 Ensure SNMP Server is not enabled
+  - name: Special Services - SNMP server absent
+    apt: pkg=snmpd state=absent
+# 6.15 Configure Mail Transfer Agent for Local-Only Mode
+  - name: Special Services - SMTP email to mailrelay
+    apt: pkg=postfix state=present
+  - name: Special Services - SMTP hardening - banner
+    lineinfile: dest=/etc/postfix/main.cf
+                regexp='^smtpd_banner'
+                line='smtpd_banner = $myhostname ESMTP'
+                state=present
+    notify: Restart postfix
+  - name: Special Services - SMTP hardening - local only
+    lineinfile: dest=/etc/postfix/main.cf
+                regexp='inet_interfaces'
+                line='inet_interfaces = localhost'
+                state=present
+    notify: Restart postfix
+  - name: Special Services - SMTP hardening - mynetwork
+    lineinfile: dest=/etc/postfix/main.cf
+                regexp='^mynetworks'
+                line='mynetworks = 127.0.0.0/8'
+                state=present
+# 6.17 Ensure Biosdevname is enabled
+  - name: Special Services - Biosdevname is enabled
+    apt: pkg=biosdevname state=latest
+
+# CIS 7 - Network Configuration and Firewalls
+# 7.1.1 Disable IP Forwarding
+  - name: Network - Disable IP Forwarding v4
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.ip_forward'
+                line='net.ipv4.ip_forward = 0'
+                state=present
+    notify: Restart sysctl
+    when: is_a_router == "no"
+  - name: Network - Disable IP Forwarding v6
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv6.conf.all.forwarding'
+                line='net.ipv6.conf.all.forwarding = 0'
+                state=present
+    notify: Restart sysctl
+# 7.1.2 Disable Send Packet Redirects
+  - name: Network - Disable Send Packet Redirects (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.all.send_redirects'
+                line='net.ipv4.conf.all.send_redirects = 0'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable Send Packet Redirects (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.default.send_redirects'
+                line='net.ipv4.conf.default.send_redirects = 0'
+                state=present
+    notify: Restart sysctl
+# 7.2 Modify Network Parameters (Host and Router)
+# 7.2.1 Disable Source Routed Packet Acceptance
+  - name: Network - Disable Source Routed Packet Acceptance (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.all.accept_source_route'
+                line='net.ipv4.conf.all.accept_source_route = 0'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable Source Routed Packet Acceptance (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.default.accept_source_route'
+                line='net.ipv4.conf.default.accept_source_route = 0'
+                state=present
+    notify: Restart sysctl
+# 7.2.2 Disable ICMP Redirect Acceptance
+  - name: Network - Disable ICMP Redirect Acceptance (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.all.accept_redirects'
+                line='net.ipv4.conf.all.accept_redirects = 0'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable ICMP Redirect Acceptance (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.default.accept_redirects'
+                line='net.ipv4.conf.default.accept_redirects = 0'
+                state=present
+    notify: Restart sysctl
+# 7.2.3 Disable Secure ICMP Redirect Acceptance
+  - name: Network - Disable Secure ICMP Redirect Acceptance (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.all.secure_redirects'
+                line='net.ipv4.conf.all.secure_redirects = 0'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable Secure ICMP Redirect Acceptance (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.default.secure_redirects'
+                line='net.ipv4.conf.default.secure_redirects = 0'
+                state=present
+    notify: Restart sysctl
+# 7.2.4 Log Suspicious Packets
+  - name: Network - Log Suspicious Packets (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.all.log_martians'
+                line='net.ipv4.conf.all.log_martians = 1'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Log Suspicious Packets (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.default.log_martians'
+                line='net.ipv4.conf.default.log_martians = 1'
+                state=present
+    notify: Restart sysctl
+# 7.2.5 Enable Ignore Broadcast Requests
+  - name: Network - Enable Ignore Broadcast Requests
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.icmp_echo_ignore_broadcasts'
+                line='net.ipv4.icmp_echo_ignore_broadcasts = 1'
+                state=present
+    notify: Restart sysctl
+# 7.2.6 Enable Bad Error Message Protection
+  - name: Network - Enable Bad Error Message Protection
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.icmp_ignore_bogus_error_responses'
+                line='net.ipv4.icmp_ignore_bogus_error_responses = 1'
+                state=present
+    notify: Restart sysctl
+# 7.2.7 Enable RFC-recommended Source Route Validation
+  - name: Network - Enable RFC-recommended Source Route Validation (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.all.rp_filter'
+                line='net.ipv4.conf.all.rp_filter = 1'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Enable RFC-recommended Source Route Validation (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.conf.default.rp_filter'
+                line='net.ipv4.conf.default.rp_filter = 1'
+                state=present
+    notify: Restart sysctl
+# 7.2.8 Enable TCP SYN Cookies
+  - name: Network - Enable TCP SYN Cookies
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv4.tcp_syncookies'
+                line='net.ipv4.tcp_syncookies = 1'
+                state=present
+    notify: Restart sysctl
+# 7.3 Configure IPv6
+# 7.3.1 Disable IPv6 Router Advertisements
+  - name: Network - Disable IPv6 Router Advertisements (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv6.conf.all.accept_ra'
+                line='net.ipv6.conf.all.accept_ra = 0'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable IPv6 Router Advertisements (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv6.conf.default.accept_ra'
+                line='net.ipv6.conf.default.accept_ra = 0'
+                state=present
+    notify: Restart sysctl
+# 7.3.2 Disable IPv6 Redirect Acceptance
+  - name: Network - Disable IPv6 Redirect Acceptance (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv6.conf.all.accept_redirects'
+                line='net.ipv6.conf.all.accept_redirects = 0'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable IPv6 Redirect Acceptance (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv6.conf.default.accept_redirects'
+                line='net.ipv6.conf.default.accept_redirects = 0'
+                state=present
+    notify: Restart sysctl
+# 7.3.3 Disable IPv6
+  - name: Network - Disable IPv6 (all)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv6.conf.all.disable_ipv6'
+                line='net.ipv6.conf.all.disable_ipv6 = 1'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable IPv6 (default)
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv6.conf.default.disable_ipv6'
+                line='net.ipv6.conf.default.disable_ipv6 = 1'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable IPv6
+    lineinfile: dest=/etc/sysctl.conf
+                regexp='net.ipv6.conf.lo.disable_ipv6'
+                line='net.ipv6.conf.lo.disable_ipv6 = 1'
+                state=present
+    notify: Restart sysctl
+  - name: Network - Disable IPv6 - remove refs in /etc/hosts
+    lineinfile: dest=/etc/hosts
+                regexp='::'
+                state=absent
+# 7.4 Install TCP Wrappers
+# 7.4.1 Install TCP Wrappers
+  - name: Network - tcpwrapper installed
+    apt: pkg=tcpd state=present
+# 7.4.2 Create /etc/hosts.allow
+  - name: Network - hosts.allow exists and is strict
+    lineinfile: "dest=/etc/hosts.allow regexp='ALL:' line='ALL: {{ private_network }}' state=present create=yes"
+# 7.4.3 Verify Permissions on /etc/hosts.allow
+  - name: Network - hosts.allow has correct permissions
+    file: dest=/etc/hosts.allow
+          mode=0644
+          owner=root
+          group=root
+# 7.4.4 Create /etc/hosts.deny
+  - name: Network - hosts.deny exists and is strict
+    lineinfile: "dest=/etc/hosts.deny regexp='ALL:' line='ALL: ALL' state=present create=yes"
+# 7.4.5 Verify Permissions on /etc/hosts.deny
+  - name: Network - hosts.deny has correct permissions
+    file: dest=/etc/hosts.deny
+          mode=0644
+          owner=root
+          group=root
+# 7.5 Uncommon Network Protocols
+# 7.5.1 Disable DCCP
+  - name: DCCP kernel module blacklist
+    lineinfile: dest=/etc/modprobe.d/blacklist-baseline.conf
+                regexp='dccp$'
+                line='blacklist dccp'
+                state=present
+                create=yes
+  - name: DCCP_CCID2 kernel module blacklist
+    lineinfile: dest=/etc/modprobe.d/blacklist-baseline.conf
+                regexp='dccp_ccid2'
+                line='blacklist dccp_ccid2'
+                state=present
+  - name: DCCP_CCID3 kernel module blacklist
+    lineinfile: dest=/etc/modprobe.d/blacklist-baseline.conf
+                regexp='dccp_ccid3'
+                line='blacklist dccp_ccid3'
+                state=present
+# 7.7 Ensure Firewall is active
+  - name: Network - Firewall is installed
+    apt: pkg=ufw state=present
+  - name: Network - Firewall DEFAULT_INPUT_POLICY
+    lineinfile: dest=/etc/default/ufw
+                regexp='^DEFAULT_INPUT_POLICY'
+                line='DEFAULT_INPUT_POLICY="DROP"'
+                state=present
+  - name: Network - Firewall DEFAULT_OUTPUT_POLICY
+    lineinfile: dest=/etc/default/ufw
+                regexp='^DEFAULT_OUTPUT_POLICY'
+                line='DEFAULT_OUTPUT_POLICY="ACCEPT"'
+                state=present
+  - name: Network - Firewall DEFAULT_FORWARD_POLICY
+    lineinfile: dest=/etc/default/ufw
+                regexp='^DEFAULT_FORWARD_POLICY'
+                line='DEFAULT_FORWARD_POLICY="DROP"'
+                state=present
+  - name: Network - Firewall DEFAULT_APPLICATION_POLICY
+    lineinfile: dest=/etc/default/ufw
+                regexp='^DEFAULT_APPLICATION_POLICY'
+                line='DEFAULT_APPLICATION_POLICY="SKIP"'
+                state=present
+  - name: Network - Firewall allow SSH
+    shell: ufw allow {{ item }}
+    with_items:
+      - OpenSSH
+      - ssh
+  - name: Network - Firewall is enabled at boot (ufw.conf)
+    lineinfile: dest=/etc/ufw/ufw.conf
+                regexp='^ENABLED'
+                line='ENABLED=yes'
+                state=present
+    notify: Restart ufw
+
+# CIS 8 - Logging and Auditing
+# 8.1 Configure System Accounting (auditd)
+  - name: Log/Audit - auditd is installed
+    apt: pkg=auditd state=present
+  - name: Log/Audit - auditd starts at boot
+    service: name=auditd enabled=yes
+# 8.1.1 Configure Data Retention
+# 8.1.1.1 Configure Audit Log Storage Size
+  - name: Log/Audit - Configure Audit Log Storage Size
+    lineinfile: dest=/etc/audit/auditd.conf
+                regexp='^max_log_file ='
+                line='max_log_file = 50'
+                state=present
+    notify: Restart auditd
+# 8.1.1.2 Disable System on Audit Log Full
+  - name: Log/Audit - Disable System on Audit Log Full - notify
+    lineinfile: dest=/etc/audit/auditd.conf
+                regexp='^space_left_action ='
+                line='space_left_action = email'
+                state=present
+    notify: Restart auditd
+  - name: Log/Audit - Disable System on Audit Log Full - halt
+    lineinfile: dest=/etc/audit/auditd.conf
+                regexp='^admin_space_left_action ='
+                line='admin_space_left_action = halt'
+                state=present
+    notify: Restart auditd
+# 8.1.1.3 Keep All Auditing Information
+  - name: Log/Audit - Keep All Auditing Information
+    lineinfile: dest=/etc/audit/auditd.conf
+                regexp='^max_log_file_action ='
+                line='max_log_file_action = keep_logs'
+                state=present
+    notify: Restart auditd
+# 8.1.3 Enable Auditing for Processes That Start Prior to auditd
+  - name: Log/Audit - Enable Auditing for Processes That Start Prior to auditd
+    lineinfile: dest=/etc/default/grub
+                regexp='GRUB_CMDLINE_LINUX'
+                line='GRUB_CMDLINE_LINUX="audit=1"'
+                state=present
+    notify: Update grub
+# 8.1.18 Make the Audit Configuration Immutable
+  - name: Log/Audit - Record Events
+    template: dest=/etc/audit/audit.rules
+              src=audit.rules
+              mode=0640
+    notify: Restart auditd
+# Send audit logs to syslog
+  - name: Log/Audit - Send Audit logs to syslog
+    lineinfile: dest=/etc/audisp/plugins.d/syslog.conf
+                regexp='^active'
+                line='active = yes'
+                state=present
+    notify: Restart auditd
+# 8.2 Configure rsyslog
+# 8.2.1 Install the rsyslog package
+  - name: Log/Audit - rsyslog is installed
+    apt: pkg=rsyslog state=present
+# 8.2.2 Ensure the rsyslog Service is activated
+  - name: Log/Audit - Ensure the rsyslog Service is activated
+    lineinfile: dest=/etc/init/rsyslog.conf
+                regexp='start on'
+                line='start on filesystem'
+                state=present
+    notify: Restart rsyslog
+  - name: Log/Audit - rsyslog-relp is installed
+    apt: pkg=rsyslog-relp state=present
+    notify: Restart rsyslog
+    ignore_errors: True
+# 8.3 Advanced Intrusion Detection Environment (AIDE)
+  - name: Log/Audit - logrotate is installed
+    apt: pkg=logrotate state=present
+
+# CIS 9 - System Access, Authentication and Authorization
+# 9.1 Configure cron
+# 9.1.1 Enable cron Daemon
+  - name: System Access - Ensure the rsyslog Service is activated
+    lineinfile: dest=/etc/init/cron.conf
+                regexp='start on'
+                line='start on runlevel [2345]'
+                state=present
+# 9.1.2 Set User/Group Owner and Permission on /etc/crontab
+  - name: System Access - Set User/Group Owner and Permission on /etc/crontab
+    file: dest=/etc/crontab
+          mode=0600
+          owner=root
+          group=root
+# 9.1.3 Set User/Group Owner and Permission on /etc/cron.hourly
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.hourly
+    file: dest=/etc/cron.hourly
+          mode=0600
+          owner=root
+          group=root
+# 9.1.4 Set User/Group Owner and Permission on /etc/cron.daily
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.daily
+    file: dest=/etc/cron.daily
+          mode=0600
+          owner=root
+          group=root
+# 9.1.5 Set User/Group Owner and Permission on /etc/cron.weekly
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.weekly
+    file: dest=/etc/cron.weekly
+          mode=0600
+          owner=root
+          group=root
+# 9.1.6 Set User/Group Owner and Permission on /etc/cron.monthly
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.monthly
+    file: dest=/etc/cron.monthly
+          mode=0600
+          owner=root
+          group=root
+# 9.1.7 Set User/Group Owner and Permission on /etc/cron.d
+  - name: System Access - Set User/Group Owner and Permission on /etc/cron.d
+    file: dest=/etc/cron.d
+          mode=0600
+          owner=root
+          group=root
+# 9.1.8 Restrict at/cron to Authorized Users
+  - name: System Access - Restrict at/cron to Authorized Users - cron.allow
+    file: dest=/etc/cron.allow
+          mode=0600
+          owner=root
+          group=root
+          state=touch
+  - name: System Access - Restrict at/cron to Authorized Users - cron.deny
+    file: dest=/etc/cron.deny
+          mode=0600
+          owner=root
+          group=root
+          state=absent
+  - name: System Access - Restrict at/cron to Authorized Users - at.allow
+    file: dest=/etc/at.allow
+          mode=0600
+          owner=root
+          group=root
+          state=touch
+  - name: System Access - Restrict at/cron to Authorized Users - at.deny
+    file: dest=/etc/at.deny
+          mode=0600
+          owner=root
+          group=root
+          state=absent
+# 9.3 Configure SSH
+  - name: System Access - Configure SSH
+    apt: pkg=openssh-server state=present
+# 9.3.1 Set SSH Protocol to 2
+  - name: System Access - Set SSH Protocol to 2
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='Protocol'
+                line='Protocol 2'
+                state=present
+    notify: Restart ssh
+# 9.3.2 Set LogLevel to INFO
+  - name: System Access - Set LogLevel to INFO
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='LogLevel'
+                line='LogLevel INFO'
+                state=present
+    notify: Restart ssh
+# 9.3.3 Set Permissions on /etc/ssh/sshd_config
+  - name: System Access - Set Permissions on /etc/ssh/sshd_config
+    file: dest=/etc/ssh/sshd_config
+          mode=0600
+          owner=root
+          group=root
+# 9.3.4 Disable SSH X11 Forwarding
+  - name: System Access - Disable SSH X11 Forwarding
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='X11Forwarding'
+                line='X11Forwarding no'
+                state=present
+    notify: Restart ssh
+# 9.3.5 Set SSH MaxAuthTries to 3 or Less
+  - name: System Access - Set SSH MaxAuthTries to 3 or Less
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='MaxAuthTries'
+                line='MaxAuthTries 3'
+                state=present
+    notify: Restart ssh
+# 9.3.6 Set SSH IgnoreRhosts to Yes
+  - name: System Access - Set SSH IgnoreRhosts to Yes
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='IgnoreRhosts'
+                line='IgnoreRhosts yes'
+                state=present
+    notify: Restart ssh
+# 9.3.7 Set SSH HostbasedAuthentication to No
+  - name: System Access - SSH HostbasedAuthentication to No
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='HostbasedAuthentication'
+                line='HostbasedAuthentication no'
+                state=present
+    notify: Restart ssh
+# 9.3.8 Disable SSH Root Login
+  - name: System Access - Disable SSH Root Login
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='PermitRootLogin'
+                line='PermitRootLogin no'
+                state=present
+    notify: Restart ssh
+# 9.3.9 Set SSH PermitEmptyPasswords to No
+  - name: System Access - Set SSH PermitEmptyPasswords to No
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='PermitEmptyPasswords'
+                line='PermitEmptyPasswords no'
+                state=present
+    notify: Restart ssh
+# 9.3.10 Do Not Allow Users to Set Environment Options
+  - name: System Access - Do Not Allow Users to Set Environment Options
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='PermitUserEnvironment'
+                line='PermitUserEnvironment no'
+                state=present
+    notify: Restart ssh
+# 9.3.11.a Use Only Approved Cipher in Counter Mode
+  - name: System Access - Use Only Approved Cipher in Counter Mode
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='^Ciphers'
+                line='Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr'
+                state=present
+    notify: Restart ssh
+# 9.3.11.b User only Apploved Message Authentication Codes
+  - name: System Access - Use Only Selected MACs
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='^MACs'
+                line='MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-ripemd160-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160,umac-128@openssh.com,hmac-sha1'
+                state=present
+    notify: Restart ssh
+# 9.3.11.c Use Only Approved Key Exchange Algorithms
+  - name: System Access - Use Only Approved Key Exchange Algorithms
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='^KexAlgorithms'
+                line='KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1'
+                state=present
+    notify: Restart ssh
+# 9.3.12 Set Idle Timeout Interval for User Login
+  - name: System Access - Set Idle Timeout Interval for User Login
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='ClientAliveInterval'
+                line='ClientAliveInterval 30'
+                state=present
+    notify: Restart ssh
+  - name: System Access - Set Idle Timeout Interval for User Login
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='ClientAliveCountMax'
+                line='ClientAliveCountMax 3'
+                state=present
+    notify: Restart ssh
+# 9.3.14 Set SSH Banner
+  - name: System Access - Set SSH Banner
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='Banner'
+                line='Banner /etc/issue.net'
+                state=present
+    notify: Restart ssh
+  - name: System Access - Remove Debian SSH banner at login
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='DebianBanner'
+                line='DebianBanner no'
+                state=present
+    notify: Restart ssh
+  - name: Disable SSH DSA Host Key
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='HostKey /etc/ssh/ssh_host_dsa_key'
+                line='HostKey /etc/ssh/ssh_host_dsa_key'
+                state=absent
+    notify: Restart ssh
+  - name: Disable SSH ECDSA Host Key
+    lineinfile: dest=/etc/ssh/sshd_config
+                regexp='HostKey /etc/ssh/ssh_host_ecdsa_key'
+                line='HostKey /etc/ssh/ssh_host_ecdsa_key'
+                state=absent
+    notify: Restart ssh
+
+# CIS 11 - Warning Banners
+# 11.2 Remove OS Information from Login Warning Banners
+  - name: Warning Banners - Set Warning Banner for Standard Login Services
+    copy: src=issue.net
+          dest=/etc/issue.net
+          owner=root
+          group=root
+          mode=0644
+  - name: Warning Banners - Set Warning Banner for Standard Login Services
+    copy: src=issue.net
+          dest=/etc/issue
+          owner=root
+          group=root
+          mode=0644
+
+# CIS 12 - Verify System File Permissions
+# 12.4 Verify User/Group Ownership on /etc/passwd
+  - name: File Permissions - Verify Permissions on /etc/passwd
+    file: dest=/etc/passwd
+          mode=0644
+          owner=root
+          group=root
+# 12.5 Verify User/Group Ownership on /etc/shadow
+  - name: File Permissions - Verify Permissions on /etc/shadow
+    file: dest=/etc/shadow
+          mode=0640
+          owner=root
+          group=root
+# 12.6 Verify User/Group Ownership on /etc/group
+  - name: File Permissions - Verify Permissions on /etc/group
+    file: dest=/etc/group
+          mode=0644
+          owner=root
+          group=root
+
+# CIS 13 - Review User and Group Settings
+# 13.20 Ensure shadow group is empty
+  - name: User/Group Settings - Ensure shadow group is empty
+    lineinfile: dest=/etc/group
+                regexp='shadow'
+                line='shadow:x:42:'
+                state=present
+  - name: User/Group Settings - Ensure no users have shadow as their primary group
+    lineinfile: dest=/etc/passwd
+                regexp=':42:'
+                state=absent
+
+# Other hardening
+  - name: Authentication - sudo - forbid sudo su
+    lineinfile: dest=/etc/sudoers
+                regexp='Cmnd_Alias SUI=/bin/su'
+                line='Cmnd_Alias SUI=/bin/su'
+                state=present
