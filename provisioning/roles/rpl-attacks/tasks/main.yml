@@ -66,5 +66,9 @@
       export DBUS_SESSION_BUS_ADDRESS=$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/$PID/environ|cut -d= -f2-)
       gsettings set com.canonical.Unity.Launcher favorites "{{ sidebar_launchers }}"
 
+  - name: Add a shortcut to Experiments on the desktop
+    command: 
+    args: ln -s ~/Experiments ~/Desktop/Experiments
+
   become: yes
   become_user: vagrant
