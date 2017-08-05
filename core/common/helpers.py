@@ -6,7 +6,7 @@ import sys
 import traceback
 from jsmin import jsmin
 from json import loads
-from os import execv, execvp, geteuid, makedirs
+from os import execv, execvp, geteuid, makedirs, remove
 from os.path import exists, expanduser, join, split
 from six import string_types
 from termcolor import colored
@@ -46,10 +46,20 @@ def __expand_folders(*folders):
 
 
 # *************************************** GENERAL-PURPOSE HELPERS **************************************
-def restart():
+def restart(to_be_removed=None):
     """
     This simple helper function allows to restart the current script, either privileged or not.
+
+    :param to_be_removed: list of temporary files to be removed before restarting (e.g. lock or PID file)
     """
+    if isinstance(to_be_removed, str):
+        to_be_removed = [to_be_removed]
+    if to_be_removed is not None and isinstance(to_be_removed, list):
+        for f in to_be_removed:
+            try:
+                remove(f)
+            except:
+                continue
     python = [] if sys.argv[0].startswith("./") else ["python"]
     if geteuid() == 0:
         execvp("sudo", ["sudo"] + python + sys.argv)

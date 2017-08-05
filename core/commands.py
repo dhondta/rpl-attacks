@@ -650,7 +650,7 @@ def update(silent=False, **kwargs):
                         if req_exists and local('md5sum requirements.txt', capture=True).strip() != req_md5:
                             local('pip install -r requirements.txt')
                         logger.warn("Restarting the framework...")
-                        restart()
+                        restart(PIDFILE)
             logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
             if repository == "Contiki-OS" and not uptodate:
                 setup(silent=True)
