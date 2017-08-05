@@ -269,28 +269,24 @@ def is_valid_commented_json(path, return_json=False, logger=None):
 
 
 # **************************************** DEBUG-PURPOSE HELPER ****************************************
-def make_crash_report(exception, info=None, title=None, dest=".", filename="crash-report"):
+def make_crash_report(info=None, title=None, dest=".", filename="crash-report"):
     """
     This function creates a txt file and formats a simple crash report in order to facilitate debugging.
 
     :param info: a dictionary with additional information about the error
-    :param exception: Python exception instance
     :param title: title of the crash report
     :param dest: destionation folder
     :param filename: name of the crash report (MD5(current time) will be appended)
     """
-    assert isinstance(exception, Exception)
     assert info is None or isinstance(info, dict)
-    try:
-        raise exception
-    except:
-        trace = traceback.format_exc()
+    trace = traceback.format_exc()
     h = hashlib.new('MD5')
     h.update(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
     dest = expanduser(dest)
     if not exists(dest):
         makedirs(dest)
-    with open(join(dest, "{}-{}.txt".format(filename, h.hexdigest())), 'w') as f:
+    path = join(dest, "{}-{}.txt".format(filename, h.hexdigest()))
+    with open(path, 'w') as f:
         newlines = False
         if title is not None:
             f.write("{0}\n{1}\n\n".format(title, len(title) * "="))
