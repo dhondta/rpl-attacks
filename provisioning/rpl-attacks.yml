@@ -1,15 +1,16 @@
 ---
 - name: Create the RPL Attacks Framework appliance
   hosts: rpl-attacks-framework
+  user: vagrant
   sudo: yes
   roles:
-    - baseline
-    - contiki-os
+#    - baseline
+#    - contiki-os
     - rpl-attacks
-    - hardening
+#    - hardening
   vars:
     current_jdk: openjdk-8
     private_network: 192.168.27.0/24
-    contiki_root: /opt/contiki
-    rplaf_root: /opt/rpl-attacks
+    contiki_root: ~/contiki
+    rplaf_root: ~/rpl-attacks
     keyboard_layout: be

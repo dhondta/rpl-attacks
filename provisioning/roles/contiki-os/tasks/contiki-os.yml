@@ -1,9 +1,0 @@
----
-# Clone the git repositories
-- name: Clone repository
-  git:
-    repo: "https://github.com/contiki-os/contiki.git"
-    dest: "{{ contiki_root }}"
-    force: yes
-    recursive: yes
-    accept_hostkey: yes

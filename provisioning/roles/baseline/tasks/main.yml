@@ -4,8 +4,6 @@
   file: dest=/etc/apt/sources.list.d/puppetlabs.list
         state=absent
 
-# Template task file, can include smaller files if warranted
-
 # Locale
 - name: Configure Locale
   locale_gen:

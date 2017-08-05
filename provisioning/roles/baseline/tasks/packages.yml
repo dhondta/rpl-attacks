@@ -1,5 +1,6 @@
 ---
 - name: Install common libraries
+  sudo: yes
   apt:
     pkg: "{{ item }}"
     state: latest
