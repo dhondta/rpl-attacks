@@ -26,6 +26,10 @@
       requirements: "{{ rplaf_root }}/requirements.txt"
     sudo: yes
 
+  - name: Install Grip for the documentation
+    pip:
+      name: grip
+
   - name: Change main Python script's mode to executable
     file:
       dest: "{{ rplaf_root }}/main.py"
@@ -36,10 +40,31 @@
       src: .rpl-attacks.conf
       dest: "~/"
 
+  - name: Copy wallpaper
+    copy:
+      src: wallpaper.png
+      dest: "~/Pictures/"
+
+  - name: Set wallpaper
+    shell: |
+      PID=$(pgrep gnome-session)
+      export DBUS_SESSION_BUS_ADDRESS=$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/$PID/environ|cut -d= -f2-)
+      gsettings set org.gnome.desktop.background picture-uri file:///home/$USER/Pictures/wallpaper.png
+
   - name: Test RPL Attacks Framework
     command: fab test
     args:
       chdir: "{{ rplaf_root }}"
+
+  - name: Move shortcut to system shortcuts folder
+    command: mv ~/Desktop/rpl-attacks-framework.desktop ~/.local/share/applications/
+    ignore_errors: True
+
+  - name: Reconfigure Unity launchers
+    shell: |
+      PID=$(pgrep gnome-session)
+      export DBUS_SESSION_BUS_ADDRESS=$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/$PID/environ|cut -d= -f2-)
+      gsettings set com.canonical.Unity.Launcher favorites "{{ sidebar_launchers }}"
 
   become: yes
   become_user: vagrant

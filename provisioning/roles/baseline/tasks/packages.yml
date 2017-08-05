@@ -10,6 +10,7 @@
     - doxygen
     - gfortran
     - imagemagick
+    - terminator
 
 - name: Install Python stuffs
   apt:
