@@ -290,12 +290,12 @@ def make_crash_report(info=None, title=None, dest=".", filename="crash-report"):
     with open(path, 'w') as f:
         newlines = False
         if title is not None:
-            f.write("{0}\n{1}\n\n".format(title, len(title) * "="))
+            f.write("{0}\n{1}\n".format(title, len(title) * "="))
             newlines = True
         if info is not None and len(info) > 0:
             hlen = max(len(x) for x in info.keys())
             for k, v in info.items():
-                f.write("- {0}: {1}".format(k.ljust(hlen + 1), v))
+                f.write("\n- {0}: {1}".format(k.ljust(hlen + 1), v))
             newlines = True
         f.write(["", "\n\n"][newlines])
         f.write(trace)
