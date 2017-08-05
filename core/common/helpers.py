@@ -6,7 +6,7 @@ import sys
 import traceback
 from jsmin import jsmin
 from json import loads
-from os import execv, execvp, makedirs
+from os import execv, execvp, geteuid, makedirs
 from os.path import exists, expanduser, join, split
 from six import string_types
 from termcolor import colored
@@ -51,7 +51,7 @@ def restart():
     This simple helper function allows to restart the current script, either privileged or not.
     """
     python = [] if sys.argv[0].startswith("./") else ["python"]
-    if os.geteuid() == 0:
+    if geteuid() == 0:
         execvp("sudo", ["sudo"] + python + sys.argv)
     else:
         execv(sys.executable, ['python'] + sys.argv)
