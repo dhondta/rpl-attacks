@@ -195,10 +195,8 @@ class CommandMonitor(object):
             return 'SUCCESS', self.f(*args, **kwargs) or 'No result'
         except Exception as e:
             i = {"Class": e.__class__.__name__,
-                 "Args": args,
-                 "Kwargs": kwargs,
                  "At time": strftime("%Y-%m-%d %H:%M:%S", gmtime()),
-                 "For task": kwargs.get('task')}
+                 "For task": "{}[{}]".format(args[0], kwargs.get('task'))}
             make_crash_report(i, *self.rpt_data)
             return 'FAIL', '{}: {}'.format(e.__class__.__name__, str(e))
 
