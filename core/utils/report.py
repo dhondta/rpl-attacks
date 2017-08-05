@@ -14,7 +14,4 @@ def generate_report(path, theme=None):
 
     :param path: path to the experiment
     """
-    #markdown2pdf.convert_md_2_pdf(filename, output=None, theme=None)
-    markdown2pdf.convert_md_2_pdf(join(path, 'report.md'),
-                                  join(path, 'report.pdf'),
-                                  theme)
+    markdown2pdf.convert_md_2_pdf(join(path, 'report.md'), join(path, 'report.pdf'), theme)

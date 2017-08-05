@@ -20,20 +20,35 @@ The WSN contains:
 - {{ n }} sensors of type {{ mtype_sensor }} built upon a {{ target }}
 - 1 malicious mote of type {{ mtype_malicious }} built upon a {{ malicious_target }}
 
-The sensors are spread across an area of {{ area_side }} meters side and centered around the root node at a minimum distance of {{ min_range }} meters and a maximum distance of {{ max_range }} meters. They have a maximum transmission range of {{ tx_range }} meters and a maximum interference range of {{ int_range }} meters. The WSN configuration is depicted in the following figure:
+The sensors are spread across an area of {{ area_side }} meters side and centered around the root node at a minimum distance of {{ min_range }} meters and a maximum distance of {{ max_range }} meters. They have a maximum transmission range of {{ tx_range }} meters and a maximum interference range of {{ int_range }} meters.
 
-![](without-malicious/results/wsn-without-malicious_start.png "WSN configuration without the malicious mote before starting the simulation")
+The WSN configuration is depicted in Figures 1 and 2:
 
-#### Attack Description
+<table border="0">
+<tr>
+<td>
+   <figure>
+    <img src="without-malicious/results/wsn-without-malicious_start.png" alt="Final DODAG">
+    <figcaption>Fig 1 - WSN configuration without the malicious mote before starting the simulation.</figcaption>
+  </figure> 
+</td>
+<td>
+   <figure>
+    <img src="with-malicious/results/wsn-with-malicious_start.png" alt="Final DODAG">
+    <figcaption>Fig 2 - WSN configuration with the malicious mote before starting the simulation.</figcaption>
+  </figure> 
+</td>
+</tr>
+</table>
+
+#### Attack
 
 The attack is composed of the following building blocks:
-{% for block in blocks %}- {{ block}}{% endfor %}
+{% for block in blocks %}
+- {{ block}}{% endfor %}
 {% if ext_lib %}
 The malicious mote is built with a custom RPL library located at {{ ext_lib }}.
 {% endif %}
-The WSN configuration including the malicious mote is depicted in the following figure:
-
-![](with-malicious/results/wsn-with-malicious_start.png "WSN configuration with the malicious mote before starting the simulation")
 
 ### 3. Results
 
@@ -47,14 +62,14 @@ The resulting Destination Oriented Directed Acyclic Graph (DODAG) is depicted in
 <tr>
 <td>
    <figure>
-    <img src="without-malicious/results/dodag.png" alt="Final DODAG" width="40%">
-    <figcaption>Fig 1 - Final DODAG for the simulation without the malicious mote.</figcaption>
+    <img src="without-malicious/results/dodag.png" alt="Final DODAG">
+    <figcaption>Fig 3 - Final DODAG for the simulation without the malicious mote.</figcaption>
   </figure> 
 </td>
 <td>
    <figure>
-    <img src="with-malicious/results/dodag.png" alt="Final DODAG" width="40%">
-    <figcaption>Fig 2 - Final DODAG for the simulation with the malicious mote.</figcaption>
+    <img src="with-malicious/results/dodag.png" alt="Final DODAG">
+    <figcaption>Fig 4 - Final DODAG for the simulation with the malicious mote.</figcaption>
   </figure> 
 </td>
 </tr>
@@ -70,14 +85,14 @@ The power tracking is depicted in the following pictures:
 <tr>
 <td>
    <figure>
-    <img src="without-malicious/results/powertracking.png" alt="Power tracking histogram" width="40%">
-    <figcaption>Fig 3 - Power tracking histogram for the simulation without the malicious mote.</figcaption>
+    <img src="without-malicious/results/powertracking.png" alt="Power tracking histogram">
+    <figcaption>Fig 5 - Power tracking histogram for the simulation without the malicious mote.</figcaption>
   </figure> 
 </td>
 <td>
    <figure>
-    <img src="with-malicious/results/powertracking.png" alt="Power tracking histogram" width="40%">
-    <figcaption>Fig 4 - Power tracking histogram for the simulation with the malicious mote.</figcaption>
+    <img src="with-malicious/results/powertracking.png" alt="Power tracking histogram">
+    <figcaption>Fig 6 - Power tracking histogram for the simulation with the malicious mote.</figcaption>
   </figure> 
 </td>
 </tr>
