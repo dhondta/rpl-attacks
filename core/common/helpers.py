@@ -2,10 +2,11 @@
 import hashlib
 import re
 import sh
+import sys
 import traceback
 from jsmin import jsmin
 from json import loads
-from os import makedirs
+from os import execv, execvp, makedirs
 from os.path import exists, expanduser, join, split
 from six import string_types
 from termcolor import colored
@@ -51,9 +52,9 @@ def restart():
     """
     python = [] if sys.argv[0].startswith("./") else ["python"]
     if os.geteuid() == 0:
-        os.execvp("sudo", ["sudo"] + python + sys.argv)
+        execvp("sudo", ["sudo"] + python + sys.argv)
     else:
-        os.execv(sys.executable, ['python'] + sys.argv)
+        execv(sys.executable, ['python'] + sys.argv)
 
 
 # ******************** SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y) *******************
