@@ -5,8 +5,9 @@ from functools import update_wrapper, wraps
 from os import system
 from os.path import dirname, exists, expanduser, join
 from re import match
+from time import gmtime, strftime
 
-from core.common.helpers import std_input
+from core.common.helpers import convert_to_crash_report, std_input
 from core.common.lexer import ArgumentsLexer
 from core.conf.logconfig import logger
 from core.utils.behaviors import DefaultCommand, MultiprocessedCommand
@@ -191,6 +192,10 @@ class CommandMonitor(object):
         try:
             return 'SUCCESS', self.f(*args, **kwargs) or 'No result'
         except Exception as e:
+            i = {"Class": e.__class__.__name__,
+                 "At time": strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+                 "For task": kwargs.get('task')}
+            convert_to_crash_report(i, e, "RPL ATTACKS FRAMEWORK - CRASH REPORT")
             return 'FAIL', '{}: {}'.format(e.__class__.__name__, str(e))
 
 

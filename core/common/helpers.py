@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 import re
 import sh
+import traceback
 from jsmin import jsmin
 from json import loads
 from os import makedirs
@@ -10,6 +11,7 @@ from termcolor import colored
 
 
 __all__ = [
+    'convert_to_crash_report',
     'copy_files',
     'copy_folder',
     'is_valid_commented_json',
@@ -39,7 +41,7 @@ def __expand_folders(*folders):
     return paths[0] if len(paths) == 1 else paths
 
 
-# ********************* SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y *******************
+# ******************** SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y) *******************
 def std_input(txt="Are you sure ? (yes|no) [default: no] ", color=None, choices=('yes', 'no', '')):
     """
     This helper function is aimed to simplify user input regarding raw_input() (Python 2.X) and input()
@@ -249,3 +251,25 @@ def is_valid_commented_json(path, return_json=False, logger=None):
         if logger is not None:
             logger.error("JSON file '{}' cannot be read ! (check that the syntax is correct)".format(path))
         return False
+
+
+# **************************************** DEBUG-PURPOSE HELPER ****************************************
+def convert_to_crash_report(exception, info, title=None):
+    """
+    This function creates a txt file and formats a simple crash report in order to facilitate debugging.
+
+    :param info: a dictionary with additional information about the error
+    :param exception: Python exception instance
+    """
+    assert isinstance(exception, Exception)
+    try:
+        raise exception
+    except:
+        trace = traceback.format_exc()
+    with open("crash_report.txt", 'w') as f:
+        if title is not None:
+            f.write("{0}\n{1}\n\n".format(title, len(title) * "="))
+        hlen = max(len(x) for x in info.keys())
+        for k, v in info.items():
+            f.write(" {0}: {1}".format(k.ljust(hlen + 1), v))
+        f.write(trace)
