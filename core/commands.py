@@ -2,7 +2,7 @@
 from fabric.api import hide, lcd, local, settings
 from inspect import getmembers, isfunction
 from os import chmod, listdir, makedirs
-from os.path import basename, dirname, exists, expanduser, join, split, splitext
+from os.path import abspath, basename, dirname, exists, expanduser, join, split, splitext
 from re import match, IGNORECASE
 from sys import modules
 from terminaltables import SingleTable
@@ -618,7 +618,7 @@ def setup(silent=False, **kwargs):
                   .format(join(FRAMEWORK_FOLDER, 'src/rpla-icon.svg')))
             local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
         with open(shortcut, 'w+') as f:
-            f.write(SHORTCUT.format(path=FRAMEWORK_FOLDER))
+            f.write(SHORTCUT.format(path=abspath(FRAMEWORK_FOLDER)))
         chmod(shortcut, int('775', 8))
         logger.debug(" > Desktop shortcut created")
     else:
