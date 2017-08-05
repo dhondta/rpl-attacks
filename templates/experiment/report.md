@@ -15,6 +15,7 @@
 The simulation lasts {{ duration }} seconds and is {% if repeat == 1 %}not repeated{% else %}is repeated {{ n - 1 }} times{% endif %}.
 
 The WSN contains:
+
 - 1 root node of type {{ mtype_root }} built upon a {{ target }}
 - {{ n }} sensors of type {{ mtype_sensor }} built upon a {{ target }}
 - 1 malicious mote of type {{ mtype_malicious }} built upon a {{ malicious_target }}
@@ -44,8 +45,18 @@ The resulting Destination Oriented Directed Acyclic Graph (DODAG) is depicted in
 
 <table border="0">
 <tr>
-<td>![](without-malicious/results/dodag.png "Final DODAG for the simulation without the malicious mote")</td>
-<td>![](with-malicious/results/dodag.png "Final DODAG for the simulation with the malicious mote")</td>
+<td>
+   <figure>
+    <img src="without-malicious/results/dodag.png" alt="Final DODAG" width="40%">
+    <figcaption>Fig 1 - Final DODAG for the simulation without the malicious mote.</figcaption>
+  </figure> 
+</td>
+<td>
+   <figure>
+    <img src="with-malicious/results/dodag.png" alt="Final DODAG" width="40%">
+    <figcaption>Fig 2 - Final DODAG for the simulation with the malicious mote.</figcaption>
+  </figure> 
+</td>
 </tr>
 </table>
 
@@ -57,7 +68,17 @@ The power tracking is depicted in the following pictures:
 
 <table border="0">
 <tr>
-<td>![](without-malicious/results/powertracking.png "Power tracking histogram for the simulation without the malicious mote")</td>
-<td>![](with-malicious/results/powertracking.png "Power tracking histogram for the simulation with the malicious mote")</td>
+<td>
+   <figure>
+    <img src="without-malicious/results/powertracking.png" alt="Power tracking histogram" width="40%">
+    <figcaption>Fig 3 - Power tracking histogram for the simulation without the malicious mote.</figcaption>
+  </figure> 
+</td>
+<td>
+   <figure>
+    <img src="with-malicious/results/powertracking.png" alt="Power tracking histogram" width="40%">
+    <figcaption>Fig 4 - Power tracking histogram for the simulation with the malicious mote.</figcaption>
+  </figure> 
+</td>
 </tr>
 </table>
