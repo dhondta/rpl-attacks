@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+import hashlib
 import re
 import sh
 import traceback
@@ -265,11 +266,7 @@ def make_crash_report(exception, info, title=None, dest=".", filename="crash-rep
     :param dest: destionation folder
     :param filename: name of the crash report (MD5(current time) will be appended)
     """
-    with open("/tmp/rplaf-debugging.txt", 'a') as f:
-        f.write("Entered crash report function")
     assert isinstance(exception, Exception)
-    with open("/tmp/rplaf-debugging.txt", 'a') as f:
-        f.write("Passed assertion")
     try:
         raise exception
     except:
@@ -279,15 +276,15 @@ def make_crash_report(exception, info, title=None, dest=".", filename="crash-rep
     dest = expanduser(dest)
     if not exists(dest):
         makedirs(dest)
-    with open("/tmp/rplaf-debugging.txt", 'a') as f:
-        f.write("Crash report folder created")
     with open(join(dest, "{}-{}.txt".format(filename, h.hexdigest())), 'w') as f:
+        newlines = False
         if title is not None:
             f.write("{0}\n{1}\n\n".format(title, len(title) * "="))
-        hlen = max(len(x) for x in info.keys())
-        for k, v in info.items():
-            f.write(" {0}: {1}".format(k.ljust(hlen + 1), v))
-        f.write("\n\nError traceback:\n\n")
+            newlines = True
+        if len(info) > 0:
+            hlen = max(len(x) for x in info.keys())
+            for k, v in info.items():
+                f.write("- {0}: {1}".format(k.ljust(hlen + 1), v))
+            newlines = True
+        f.write(["", "\n\n"][newlines])
         f.write(trace)
-    with open("/tmp/rplaf-debugging.txt", 'a') as f:
-        f.write("Report generated")
