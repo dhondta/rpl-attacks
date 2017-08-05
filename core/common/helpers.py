@@ -256,7 +256,7 @@ def is_valid_commented_json(path, return_json=False, logger=None):
 
 
 # **************************************** DEBUG-PURPOSE HELPER ****************************************
-def make_crash_report(exception, info, title=None, dest=".", filename="crash-report"):
+def make_crash_report(exception, info=None, title=None, dest=".", filename="crash-report"):
     """
     This function creates a txt file and formats a simple crash report in order to facilitate debugging.
 
@@ -267,6 +267,7 @@ def make_crash_report(exception, info, title=None, dest=".", filename="crash-rep
     :param filename: name of the crash report (MD5(current time) will be appended)
     """
     assert isinstance(exception, Exception)
+    assert info is None or isinstance(info, dict)
     try:
         raise exception
     except:
@@ -281,7 +282,7 @@ def make_crash_report(exception, info, title=None, dest=".", filename="crash-rep
         if title is not None:
             f.write("{0}\n{1}\n\n".format(title, len(title) * "="))
             newlines = True
-        if len(info) > 0:
+        if info is not None and len(info) > 0:
             hlen = max(len(x) for x in info.keys())
             for k, v in info.items():
                 f.write("- {0}: {1}".format(k.ljust(hlen + 1), v))

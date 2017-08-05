@@ -9,6 +9,7 @@ from time import gmtime, strftime
 
 from core.common.helpers import make_crash_report, std_input
 from core.common.lexer import ArgumentsLexer
+from core.conf.constants import CRASH_REPORT_DATA
 from core.conf.logconfig import logger
 from core.utils.behaviors import DefaultCommand, MultiprocessedCommand
 
@@ -181,10 +182,9 @@ class CommandMonitor(object):
 
     :param f: the decorated function
     """
-    def __init__(self, f, report_dest=".", report_name="crash-report"):
+    def __init__(self, f, rpt_data=CRASH_REPORT_DATA):
         self.f = f
-        self.report_dest = report_dest
-        self.report_name = report_name
+        self.rpt_data = rpt_data
         try:
             update_wrapper(self, f)
         except:
@@ -197,8 +197,7 @@ class CommandMonitor(object):
             i = {"Class": e.__class__.__name__,
                  "At time": strftime("%Y-%m-%d %H:%M:%S", gmtime()),
                  "For task": kwargs.get('task')}
-            make_crash_report(e, i, "RPL ATTACKS FRAMEWORK - CRASH REPORT",
-                              self.report_dest, self.report_name)
+            make_crash_report(e, i, *self.rpt_data)
             return 'FAIL', '{}: {}'.format(e.__class__.__name__, str(e))
 
 

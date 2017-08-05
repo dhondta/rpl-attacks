@@ -201,5 +201,8 @@ Icon=rpla-icon
 REPORT_THEME = join(TEMPLATES_FOLDER, "report", "github.css")
 
 # Crash report parameters
-REPORT_FOLDER = join(EXPERIMENT_FOLDER, ".logs")
-REPORT_NAME = "crash-report"
+CRASH_REPORT_DATA = (
+    "RPL ATTACKS FRAMEWORK - CRASH REPORT",
+    EXPERIMENT_FOLDER,
+    "crash-report",
+)
