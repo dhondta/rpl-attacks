@@ -651,9 +651,10 @@ def update(silent=False, **kwargs):
                             local('pip install -r requirements.txt')
                         logger.warn("Restarting the framework...")
                         restart(PIDFILE)
+            if repository == "RPL Attacks Framework":
+                remove_files(folder, "Vagrantfile")
+                remove_folder(join(folder, "provisioning"))
             logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
-            if repository == "Contiki-OS" and not uptodate:
-                setup(silent=True)
 
 
 @command(start_msg="CHECKING VERSIONS")
