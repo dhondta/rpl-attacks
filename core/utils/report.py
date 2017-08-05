@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 import markdown2pdf
+from os.path import join
 
 
 __all__ = [
