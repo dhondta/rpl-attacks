@@ -8,6 +8,7 @@ from os import makedirs
 from os.path import exists, expanduser, join, split
 from six import string_types
 from termcolor import colored
+from time import gmtime, strftime
 
 
 __all__ = [
@@ -254,19 +255,24 @@ def is_valid_commented_json(path, return_json=False, logger=None):
 
 
 # **************************************** DEBUG-PURPOSE HELPER ****************************************
-def make_crash_report(exception, info, title=None):
+def make_crash_report(exception, info, title=None, dest=".", filename="crash-report"):
     """
     This function creates a txt file and formats a simple crash report in order to facilitate debugging.
 
     :param info: a dictionary with additional information about the error
     :param exception: Python exception instance
+    :param title: title of the crash report
+    :param dest: destionation folder
+    :param filename: name of the crash report (MD5(current time) will be appended)
     """
     assert isinstance(exception, Exception)
     try:
         raise exception
     except:
         trace = traceback.format_exc()
-    with open("crash_report.txt", 'w') as f:
+    h = hashlib.new('MD5')
+    h.update(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    with open(join(expanduser(dest), "{}-{}.txt".format(filename, h.hexdigest())), 'w') as f:
         if title is not None:
             f.write("{0}\n{1}\n\n".format(title, len(title) * "="))
         hlen = max(len(x) for x in info.keys())

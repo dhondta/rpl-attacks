@@ -233,7 +233,7 @@ def __make(name, ask=True, **kwargs):
             # finally, remove compilation sources
             remove_files(with_malicious, 'malicious.c')
             remove_folder(contiki)
-_make = CommandMonitor(__make)
+_make = CommandMonitor(__make, REPORT_FOLDER, REPORT_NAME)
 make = command(
     autocomplete=lambda: list_experiments(),
     examples=["my-simulation", "my-simulation target=z1 debug=true"],
@@ -308,7 +308,7 @@ def __remake(name, build=False, **kwargs):
             move_files(without_malicious, with_malicious, malicious)
             copy_files(without_malicious, with_malicious, croot, csensor)
             remove_folder(contiki)
-_remake = CommandMonitor(__remake)
+_remake = CommandMonitor(__remake, REPORT_FOLDER, REPORT_NAME)
 remake = command(
     autocomplete=lambda: list_experiments(),
     examples=["my-simulation"],
@@ -375,7 +375,7 @@ def __run(name, **kwargs):
             move_files(sim_path, results, 'COOJA.log')
         # finally, generate the PDF report
         generate_report(path, REPORT_THEME)
-_run = CommandMonitor(__run)
+_run = CommandMonitor(__run, REPORT_FOLDER, REPORT_NAME)
 run = command(
     autocomplete=lambda: list_experiments(),
     examples=["my-simulation"],
