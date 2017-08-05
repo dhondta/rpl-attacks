@@ -22,7 +22,8 @@ __all__ = [
     'remove_files',
     'remove_folder',
     'replace_in_file',
-    'std_input'
+    'restart',
+    'std_input',
 ]
 
 
@@ -41,6 +42,18 @@ def __expand_folders(*folders):
             path = folder
         paths.append(expanduser(path))
     return paths[0] if len(paths) == 1 else paths
+
+
+# *************************************** GENERAL-PURPOSE HELPERS **************************************
+def restart():
+    """
+    This simple helper function allows to restart the current script, either privileged or not.
+    """
+    python = [] if sys.argv[0].startswith("./") else ["python"]
+    if os.geteuid() == 0:
+        os.execvp("sudo", ["sudo"] + python + sys.argv)
+    else:
+        os.execv(sys.executable, ['python'] + sys.argv)
 
 
 # ******************** SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y) *******************

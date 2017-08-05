@@ -649,11 +649,8 @@ def update(silent=False, **kwargs):
                         local('git pull')
                         if req_exists and local('md5sum requirements.txt', capture=True).strip() != req_md5:
                             local('pip install -r requirements.txt')
-                            python = [] if glob['__file__'].startswith("./") else ["python"]
-                            if os.geteuid() == 0:
-                                os.execvp("sudo", ["sudo"] + python + sys.argv)
-                            else:
-                                os.execv(sys.executable, ['python'] + sys.argv)
+                        logger.warn("Restarting the framework...")
+                        restart()
             logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
             if repository == "Contiki-OS" and not uptodate:
                 setup(silent=True)
