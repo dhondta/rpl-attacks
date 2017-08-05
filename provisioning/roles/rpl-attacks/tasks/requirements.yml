@@ -1,4 +1,11 @@
 ---
+- name: Install Tshark
+  apt:
+    pkg: tshark
+    state: latest
+    install_recommends: yes
+    force: yes
+
 - name: Install Python modules
   apt:
     pkg: "{{ item }}"

@@ -33,7 +33,7 @@ def convert_pcap_to_csv(path):
     :param path: path to the experiment (including [with-|without-malicious])
     """
     data, results = join(path, 'data'), join(path, 'results')
-    with open(join(results, 'pcap.csv'), 'wb') as f:
+    try:
         p = Popen(['tshark',
                    '-T', 'fields',
                    '-E', 'header=y',
@@ -49,6 +49,9 @@ def convert_pcap_to_csv(path):
                    '-e', 'data.data',
                    '-r', join(data, 'output.pcap')], stdout=PIPE)
         out, _ = p.communicate()
+    except OSError:
+        out = "[ERROR] Tshark is not installed !"
+    with open(join(results, 'pcap.csv'), 'wb') as f:
         f.write(out)
 
 
