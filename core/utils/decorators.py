@@ -197,7 +197,7 @@ class CommandMonitor(object):
             i = {"Class": e.__class__.__name__,
                  "At time": strftime("%Y-%m-%d %H:%M:%S", gmtime()),
                  "For task": kwargs.get('task')}
-            make_crash_report(e, i, *self.rpt_data)
+            make_crash_report(i, *self.rpt_data)
             return 'FAIL', '{}: {}'.format(e.__class__.__name__, str(e))
 
 
