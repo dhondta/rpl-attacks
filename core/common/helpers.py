@@ -11,10 +11,10 @@ from termcolor import colored
 
 
 __all__ = [
-    'convert_to_crash_report',
     'copy_files',
     'copy_folder',
     'is_valid_commented_json',
+    'make_crash_report',
     'move_files',
     'move_folder',
     'remove_files',
@@ -254,7 +254,7 @@ def is_valid_commented_json(path, return_json=False, logger=None):
 
 
 # **************************************** DEBUG-PURPOSE HELPER ****************************************
-def convert_to_crash_report(exception, info, title=None):
+def make_crash_report(exception, info, title=None):
     """
     This function creates a txt file and formats a simple crash report in order to facilitate debugging.
 
@@ -272,4 +272,5 @@ def convert_to_crash_report(exception, info, title=None):
         hlen = max(len(x) for x in info.keys())
         for k, v in info.items():
             f.write(" {0}: {1}".format(k.ljust(hlen + 1), v))
+        f.write("\n\nError traceback:\n\n")
         f.write(trace)
