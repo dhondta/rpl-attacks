@@ -272,7 +272,10 @@ def make_crash_report(exception, info, title=None, dest=".", filename="crash-rep
         trace = traceback.format_exc()
     h = hashlib.new('MD5')
     h.update(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-    with open(join(expanduser(dest), "{}-{}.txt".format(filename, h.hexdigest())), 'w') as f:
+    dest = expanduser(dest)
+    if not exists(dest):
+        makedirs(dest)
+    with open(join(dest, "{}-{}.txt".format(filename, h.hexdigest())), 'w') as f:
         if title is not None:
             f.write("{0}\n{1}\n\n".format(title, len(title) * "="))
         hlen = max(len(x) for x in info.keys())
