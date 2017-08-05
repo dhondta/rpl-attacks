@@ -649,12 +649,12 @@ def update(silent=False, **kwargs):
                         local('git pull')
                         if req_exists and local('md5sum requirements.txt', capture=True).strip() != req_md5:
                             local('pip install -r requirements.txt')
-                        logger.warn("Restarting the framework...")
-                        restart(PIDFILE)
             if repository == "RPL Attacks Framework":
                 remove_files(folder, "Vagrantfile")
                 remove_folder(join(folder, "provisioning"))
             logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
+    logger.warn("Restarting the framework...")
+    restart(PIDFILE)
 
 
 @command(start_msg="CHECKING VERSIONS")
