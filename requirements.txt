@@ -8,7 +8,7 @@ fabric3
 funcsigs
 jinja2
 jsmin
-markdown2pdf
+markdown2
 matplotlib
 networkx
 numpy
@@ -20,3 +20,4 @@ sh
 scipy
 termcolor
 terminaltables
+weasyprint

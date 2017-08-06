@@ -76,7 +76,8 @@ def build(name, ask=True, **kwargs):
 
     :param name: experiment name (or absolute path to experiment)
     :param ask: ask confirmation
-    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand')
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     def is_device_present():
         with settings(hide(*HIDDEN_ALL), warn_only=True):
@@ -93,6 +94,7 @@ def build(name, ask=True, **kwargs):
             logger.error("Something failed with the mote ; check that it mounts to /dev/ttyUSB0")
             return
     remake(name, build=True, **kwargs) if console is None else console.do_remake(name, build=True, **kwargs)
+    return "Mote built on /dev/ttyUSB0"
 
 
 @command(autocomplete=lambda: list_experiments(check=False),
@@ -107,12 +109,15 @@ def clean(name, ask=True, **kwargs):
 
     :param name: experiment name (or absolute path to experiment)
     :param ask: ask confirmation
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
+    path = kwargs.get('path')
     console = kwargs.get('console')
     if console is None or not any([i['name'] == name and i['status'] == 'PENDING' for i in console.tasklist.values()]):
         logger.debug(" > Cleaning folder...")
         with hide(*HIDDEN_ALL):
-            local("rm -rf {}".format(kwargs['path']))
+            local("rm -rf {}".format(path))
+    return "Cleaned"
 
 
 @command(autocomplete=lambda: list_experiments(),
@@ -127,7 +132,8 @@ def cooja(name, with_malicious=True, **kwargs):
 
     :param name: experiment name
     :param with_malicious: use the simulation WITH the malicious mote or not
-    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand')
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     sim_path = join(kwargs['path'], 'with{}-malicious'.format(['out', ''][with_malicious is True]))
     motes_before = get_motes_from_simulation(join(sim_path, 'simulation.csc'), as_dictionary=True)
@@ -156,7 +162,7 @@ def __make(name, ask=True, **kwargs):
 
     :param name: experiment name (or path to the experiment, if expanded in the 'command' decorator)
     :param ask: ask confirmation
-    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand')
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     global reuse_bin_path
@@ -233,6 +239,7 @@ def __make(name, ask=True, **kwargs):
             # finally, remove compilation sources
             remove_files(with_malicious, 'malicious.c')
             remove_folder(contiki)
+    return "Experiment folder made"
 _make = CommandMonitor(__make)
 make = command(
     autocomplete=lambda: list_experiments(),
@@ -252,7 +259,8 @@ def __remake(name, build=False, **kwargs):
      (meaning that it lets all simulation's files unchanged except ./motes/malicious.[target])
 
     :param name: experiment name
-    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand')
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     set_logging(kwargs.get('loglevel'))
     path = kwargs['path']
@@ -308,6 +316,7 @@ def __remake(name, build=False, **kwargs):
             move_files(without_malicious, with_malicious, malicious)
             copy_files(without_malicious, with_malicious, croot, csensor)
             remove_folder(contiki)
+    return "Experiment folder remade"
 _remake = CommandMonitor(__remake)
 remake = command(
     autocomplete=lambda: list_experiments(),
@@ -320,12 +329,38 @@ remake = command(
 )(__remake)
 
 
+@command(autocomplete=lambda: list_experiments(),
+         examples=["my-simulation"],
+         expand=('name', {'new_arg': 'path', 'into': EXPERIMENT_FOLDER}),
+         not_exists=('path', {'loglvl': 'error', 'msg': (" > Experiment '{}' does not exist !", 'name')}),
+         start_msg=("MAKING PDF REPORT OF EXPERIMENT '{}'", 'name'))
+def report(name, theme=REPORT_THEME, silent=False, **kwargs):
+    """
+    Make the PDF report of an experiment using a given CSS theme.
+
+    :param name: experiment name
+    :param theme: path to a CSS theme
+    :param silent: run command silently
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand')
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
+    """
+    path = kwargs['path']
+    if split(theme)[0] == '':
+        theme = join(dirname(REPORT_THEME), theme)
+    if not exists(theme):
+        logger.warning("The given CSS theme does not exist ; using default.")
+        theme = REPORT_THEME
+    generate_report(path, theme)
+    return "Report created in experiment folder"
+
+
 def __run(name, **kwargs):
     """
     Run an experiment.
 
     :param name: experiment name
-    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand'
+    :param path: expanded path of the experiment (dynamically filled in through 'command' decorator with 'expand')
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     set_logging(kwargs.get('loglevel'))
     path = kwargs['path']
@@ -374,8 +409,9 @@ def __run(name, **kwargs):
             parsing_chain(sim_path)
             move_files(sim_path, results, 'COOJA.log')
         # finally, generate the PDF report
-        generate_report(path, REPORT_THEME)
-        return "{} has been created".format(join(path, "report.pdf"))
+        console = kwargs.get('console')
+        report(name, silent=True, **kwargs) if console is None else console.do_report(name, silent=True, **kwargs)
+    return "Both Cooja executions succeeded"
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
@@ -401,12 +437,14 @@ def clean_all(exp_file, **kwargs):
 
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     console = kwargs.get('console')
     silent = kwargs.get('silent', False)
     experiments = {k: v for k, v in get_experiments(exp_file).items() if k != 'BASE'}
     for name, params in experiments.items():
         clean(name, ask=False, silent=silent) if console is None else console.do_clean(name, ask=False, silent=silent)
+    return "All cleaned"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -420,8 +458,11 @@ def drop(exp_file, ask=True, **kwargs):
 
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
+    :param ask: ask confirmation
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     remove_files(EXPERIMENT_FOLDER, exp_file)
+    return "JSON campaign file removed"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -435,6 +476,7 @@ def make_all(exp_file, **kwargs):
 
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     global reuse_bin_path
     console = kwargs.get('console')
@@ -456,6 +498,7 @@ def make_all(exp_file, **kwargs):
                     params['simulation'][k] = v
             params['motes'] = motes
         make(name, ask=False, **params) if console is None else console.do_make(name, ask=False, **params)
+    return "All made"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -470,8 +513,11 @@ def prepare(exp_file, ask=True, **kwargs):
 
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
+    :param ask: ask confirmation
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     render_campaign(exp_file)
+    return "JSON campaign file created"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -485,11 +531,13 @@ def remake_all(exp_file, **kwargs):
 
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     console = kwargs.get('console')
     experiments = {k: v for k, v in get_experiments(exp_file).items() if k != 'BASE'}
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
         remake(name, **params) if console is None else console.do_remake(name, **params)
+    return "All remade"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -503,11 +551,13 @@ def run_all(exp_file, **kwargs):
 
     :param exp_file: experiments JSON filename or basename (absolute or relative path ; if no path provided,
                      the JSON file is searched in the experiments folder)
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     console = kwargs.get('console')
     for name in get_experiments(exp_file).keys():
         if name != 'BASE':
             run(name) if console is None else console.do_run(name)
+    return "All Cooja executions succeeded"
 
 
 # ************************************** INFORMATION COMMANDS *************************************
@@ -519,6 +569,7 @@ def list(item_type, **kwargs):
     List all available items of a specified type.
 
     :param item_type: experiment/campaign
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     data, title = [['Name']], None
     if item_type == 'experiments':
@@ -541,6 +592,8 @@ def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silen
 
     :param contiki_folder: Contiki folder
     :param experiments_folder: experiments folder
+    :param silent: run command silently
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     get_path(experiments_folder, create=True)
     with open(expanduser('~/.rpl-attacks.conf'), 'w+') as f:
@@ -553,6 +606,8 @@ def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silen
 def test(**kwargs):
     """
     Run framework's tests.
+
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     with settings(warn_only=True):
         with lcd(FRAMEWORK_FOLDER):
@@ -563,6 +618,9 @@ def test(**kwargs):
 def setup(silent=False, **kwargs):
     """
     Setup the framework.
+
+    :param silent: run command silently
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     recompile = False
     # adapt IPv6 debug mode
@@ -630,6 +688,9 @@ def setup(silent=False, **kwargs):
 def update(silent=False, **kwargs):
     """
     Update Contiki-OS and RPL Attacks Framework.
+
+    :param silent: run command silently
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     for folder, repository in zip([CONTIKI_FOLDER, FRAMEWORK_FOLDER], ["Contiki-OS", "RPL Attacks Framework"]):
         with hide(*HIDDEN_ALL):
@@ -662,6 +723,8 @@ def update(silent=False, **kwargs):
 def versions(**kwargs):
     """
     Check versions of Contiki-OS and RPL Attacks Framework.
+
+    :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     with hide(*HIDDEN_ALL):
         with lcd(CONTIKI_FOLDER):

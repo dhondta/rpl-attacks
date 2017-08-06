@@ -329,9 +329,15 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 
 > This will re-generate malicious motes for a campaign of simulations from the selected malicious mote template (which can then be modified to refine only the malicious mote without re-generating the entire campaign).
 
+- **`report`**`name[, theme]`
+
+> This will make a PDF report from the `report.md` template contained in an experiment.
+>
+>  `theme`: CSS file for generating the PDF report (with Weasyprint) ; this can be an absolute path or one of the CSS files available in the templates folder in the `report` subfolder.
+
 - **`run`**`name`
 
-> This will execute the given simulation, parse log files and generate the results.
+> This will execute the given simulation, parse log files, generate the results and finally generate a PDF report based on the default CSS theme (GitHub).
 
 - **`run_all`**`simulation-campaign-json-file`
 

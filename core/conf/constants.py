@@ -14,6 +14,7 @@ __all__ = [
     'CONTIKI_FILES',
     'CONTIKI_FOLDER',
     'COOJA_FOLDER',
+    'CRASH_REPORT_DATA',
     'DEBUG_FILES',
     'DEFAULTS',
     'EXPERIMENT_FOLDER',
