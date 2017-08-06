@@ -17,6 +17,7 @@ __all__ = [
     'CRASH_REPORT_DATA',
     'DEBUG_FILES',
     'DEFAULTS',
+    'DOCSERVER_PORT',
     'EXPERIMENT_FOLDER',
     'EXPERIMENT_STRUCTURE',
     'FRAMEWORK_FOLDER',
@@ -207,3 +208,6 @@ CRASH_REPORT_DATA = (
     EXPERIMENT_FOLDER,
     "crash-report",
 )
+
+# Documentation server parameters
+DOCSERVER_PORT = 8123

@@ -6,6 +6,7 @@ dill
 fabric
 fabric3
 funcsigs
+grip
 jinja2
 jsmin
 markdown2

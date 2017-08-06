@@ -17,6 +17,8 @@ reuse_bin_path = None
 def get_commands(include=None, exclude=None):
     commands = []
     for n, f in getmembers(modules[__name__], isfunction):
+        if n in [c for c, _ in commands]:
+            continue
         if hasattr(f, 'behavior'):
             if f.__name__.startswith('_'):
                 shortname = f.__name__.lstrip('_')

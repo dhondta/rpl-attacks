@@ -26,10 +26,6 @@
       requirements: "{{ rplaf_root }}/requirements.txt"
     sudo: yes
 
-  - name: Install Grip for the documentation
-    pip:
-      name: grip
-
   - name: Change main Python script's mode to executable
     file:
       dest: "{{ rplaf_root }}/main.py"

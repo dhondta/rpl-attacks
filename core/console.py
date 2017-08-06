@@ -6,9 +6,10 @@ from copy import copy
 from funcsigs import signature
 from getpass import getuser
 from multiprocessing import cpu_count, Pool
-from signal import signal, SIGINT, SIG_IGN
+from signal import signal, SIGINT, SIG_IGN, SIGTERM
 from six.moves import zip_longest
 from socket import gethostname
+from subprocess import check_output, Popen, PIPE
 from sys import stdout
 from termcolor import colored, cprint
 from terminaltables import SingleTable
@@ -24,7 +25,6 @@ class Console(Cmd, object):
     ruler = None
     badcmd_msg = " [!] {} command: {}"
     max_history_entries = 10
-    welcome = "\nType help or ? to list commands.\nNB: Spaces are separators ; DO NOT use spaces in arguments !\n"
 
     def __init__(self, *args, **kwargs):
         super(Console, self).__init__(*args, **kwargs)
@@ -100,6 +100,8 @@ class FrameworkConsole(Console):
         colored('rpl-attacks', 'red'),
         colored('>>', 'cyan'),
     ))
+    welcome = "\nType help or ? to list commands.\n" + \
+              colored("NB: Spaces are separators ; DO NOT use spaces in arguments !\n", 'white')
 
     def __init__(self, parallel):
         self.continuation_prompt = self.prompt
@@ -118,6 +120,7 @@ class FrameworkConsole(Console):
         self.__bind_commands()
         super(FrameworkConsole, self).__init__()
         self.do_loglevel('info')
+        self.__start_docserver()
         self.do_clear('')
 
     def __bind_commands(self):
@@ -137,7 +140,7 @@ class FrameworkConsole(Console):
             docstring = COMMAND_DOCSTRING["description"].format(description)
             if len(arguments) > 0:
                 arg_descrs = [' - {}:\t{}'.format(n, d or "[no description]") \
-                              for n, d in list(zip_longest(signature(func).parameters.keys(), arguments or []))]
+                              for n, d in list(zip_longest(signature(func).parameters.keys(), arguments or [])) if n is not None]
                 docstring += COMMAND_DOCSTRING["arguments"].format('\n'.join(arg_descrs))
             if hasattr(func, 'examples') and isinstance(func.examples, list):
                 args_examples = [' >>> {} {}'.format(name, e) for e in func.examples]
@@ -149,6 +152,16 @@ class FrameworkConsole(Console):
                         MethodType(FrameworkConsole.complete_template(func.autocomplete), self))
             if hasattr(func, 'reexec_on_emptyline') and func.reexec_on_emptyline:
                 self.reexec.append(name)
+
+    def __start_docserver(self, title="RPL Attacks Framework - Documentation"):
+        try:
+            out, _ = Popen(['grip', '-V'], stdout=PIPE, stderr=PIPE).communicate()
+        except:
+            return
+        cmd = "grip {} --wide --norefresh --title=\"{}\"".format(DOCSERVER_PORT, title)
+        self.__docserver = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        self.__docserver.cmd = "grip {} --wide --norefresh".format(DOCSERVER_PORT)
+        self.welcome += colored("Documentation is available at: http://localhost:{}\n".format(DOCSERVER_PORT), 'yellow')
 
     def clean_tasks(self):
         """ Method for cleaning the list of tasks. """
@@ -225,6 +238,17 @@ class FrameworkConsole(Console):
 
     def graceful_exit(self):
         """ Exit handler for terminating the process pool gracefully. """
+        try:
+            os.remove(PIDFILE)
+        except:
+            pass
+        try:
+            self.__docserver.terminate()
+            for line in check_output('ps aux | grep grip', shell=True).split('\n'):
+                if self.__docserver.cmd in line:
+                    os.kill(int(line.split()[1]), SIGTERM)
+        except:
+            pass
         if 'PENDING' in [x['status'] for x in self.tasklist.values()]:
             logger.info(" > Waiting for opened processes to finish...")
             logger.warning("Hit CTRL+C a second time to force process termination.")
@@ -244,8 +268,6 @@ class FrameworkConsole(Console):
                     task_obj.kill()
                 self.pool.terminate()
                 self.pool.join()
-        if not self.already_running:
-            os.remove(PIDFILE)
 
     @staticmethod
     def complete_template(lazy_values):
