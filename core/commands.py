@@ -488,7 +488,8 @@ def make_all(exp_file, **kwargs):
     if 'BASE' in experiments.keys():
         experiments['BASE']['silent'] = True
         sim_json = dict(experiments['BASE']['simulation'])
-        motes = generate_motes(defaults=DEFAULTS, **validated_parameters(experiments['BASE']))
+        wsn_gen = eval(experiments['BASE'].get('wsn-generation-algorithm', DEFAULTS['wsn-generation-algorithm']))
+        motes = wsn_gen(defaults=DEFAULTS, **validated_parameters(experiments['BASE']))
         del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
         params['campaign'] = splitext(basename(exp_file))[0]
