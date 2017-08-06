@@ -14,17 +14,23 @@ __all__ = [
 logging.getLogger('weasyprint').setLevel(100)
 
 
-def generate_report(path, theme=None):
+def generate_report(path, theme=None, intype='md'):
     """
-    This function generates a "report.pdf" from a "report.md" template using markdown2 and weasyprint.
+    This function generates a "report.pdf" from a "report.[md|html]" template using weasyprint.
 
-    :param path: path of report.md
+    :param path: path of report.[md|html]
     :param theme: full or relative (to "[path]/themes/") path to the CSS theme
+    :param intype: input format
     """
-    html = HTML(string=markdown_path(join(path, 'report.md')), base_url='file://{}'.format(abspath(path)))
+    assert intype in ['html', 'md']
+    if intype == 'md':
+        html = markdown_path(join(path, 'report.md'))
+    else:
+        html = open(join(path, 'report.html')).read()
+    html = HTML(string=html, base_url='file://{}/'.format(abspath(path)))
     output = join(path, 'report.pdf')
     theme = join(path, "themes", theme)
     kwargs = {}
     if theme is not None and exists(theme):
-        kwargs['stylesheets'] = theme
+        kwargs['stylesheets'] = [theme]
     html.write_pdf(output, **kwargs)

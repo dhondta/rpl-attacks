@@ -1,0 +1,123 @@
+@page {
+  size: a4 portrait;
+  margin: 15mm 15mm 20mm 15mm;
+  font-family: "Open Sans", arial, sans-serif;
+  font-size: 10px;
+  counter-increment: page;
+  @top-right {
+      content: 'This report was made with RPL Attacks Framework';
+      white-space: pre;
+      color: grey;
+  }
+  @bottom-center {
+      content: counter(page) '/' counter(pages);
+      white-space: pre;
+      color: grey;
+  }
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: #fefefe;
+  color: #424242;
+  font-family: "Open Sans", arial, sans-serif;
+  font-size: 12px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 30px;
+  text-transform: none;
+}
+
+h1 {
+  font-size: 32px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+h4 {
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+
+h5 {
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+h6 {
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+p {
+  line-height: 1.2;
+  margin: 0 0 30px;
+}
+
+a {
+  color: #f03838;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style-position: inside;
+  line-height: 1.2;
+  margin: -20px 0 12px;
+  padding: 0;
+}
+
+ul li, ol li {
+  margin: 0 20px 5px;
+}
+
+div.left {
+  display: inline-block;
+  max-width: 50%;
+  float: left;
+}
+
+div.right {
+  display: inline-block;
+  max-width: 50%;
+  float: right;
+}
+
+img {
+  display: block;
+  margin: 20px 0;
+  width: auto;
+  max-width: 100%;
+}
+
+pre {
+  background: #F1F0EA;
+  border: 1px solid #DDDBCC;
+  border-radius: 3px;
+  margin: 0 0 40px;
+  padding: 15px 20px;
+}
+
+blockquote {
+  border-left: 1px #AEADAD;
+  margin: 40px 0;
+  padding: 5px 30px;
+}
+
+blockquote p {
+  color: #AEADAD;
+  display: block;
+  font-style: italic;
+  margin: 0;
+  width: 100%;
+}

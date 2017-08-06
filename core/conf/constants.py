@@ -200,7 +200,7 @@ Icon=rpla-icon
 """
 
 # PDF report CSS theme
-REPORT_THEME = join(TEMPLATES_FOLDER, "report", "github.css")
+REPORT_THEME = join(TEMPLATES_FOLDER, "report", "default.css")
 
 # Crash report parameters
 CRASH_REPORT_DATA = (

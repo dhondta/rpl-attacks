@@ -1,10 +1,10 @@
-# Simulation Report
+<center> <h1>Simulation Report</h1> </center>
 
 ## {{ title }}
 
 ### 1. Introduction
 
-**Goal**: {{ goal }}
+**Goal**: {{ goal if goal != None else '<font color="red">Not mentioned</font>' }}
 {% if notes %}
 {{ notes }}
 {% endif %}
@@ -24,28 +24,28 @@ The sensors are spread across an area of {{ area_side }} meters side and centere
 
 The WSN configuration is depicted in Figures 1 and 2:
 
-<table border="0">
-<tr>
-<td>
-   <figure>
-    <img src="without-malicious/results/wsn-without-malicious_start.png" alt="Final DODAG">
+<div class="left">
+  <figure>
+    <img src="without-malicious/results/wsn-without-malicious_start.png" alt="ERROR">
     <figcaption>Fig 1 - WSN configuration without the malicious mote before starting the simulation.</figcaption>
   </figure> 
-</td>
-<td>
-   <figure>
-    <img src="with-malicious/results/wsn-with-malicious_start.png" alt="Final DODAG">
+</div>
+<div class="right">
+  <figure>
+    <img src="with-malicious/results/wsn-with-malicious_start.png" alt="ERROR">
     <figcaption>Fig 2 - WSN configuration with the malicious mote before starting the simulation.</figcaption>
   </figure> 
-</td>
-</tr>
-</table>
+</div>
 
 #### Attack
 
 The attack is composed of the following building blocks:
+{% if blocks|length > 0 %}
 {% for block in blocks %}
 - {{ block}}{% endfor %}
+{% else %}
+<font color="red">No building block specified.</font>
+{% endif %}
 {% if ext_lib %}
 The malicious mote is built with a custom RPL library located at {{ ext_lib }}.
 {% endif %}
@@ -58,22 +58,17 @@ In this section, the pictures on the left side corresponds to the results for th
 
 The resulting Destination Oriented Directed Acyclic Graph (DODAG) is depicted in the following pictures:
 
-<table border="0">
-<tr>
-<td>
-   <figure>
-    <img src="without-malicious/results/dodag.png" alt="Final DODAG">
+<div class="left">
+  <figure>
+    <img src="without-malicious/results/dodag.png" alt="ERROR">
     <figcaption>Fig 3 - Final DODAG for the simulation without the malicious mote.</figcaption>
   </figure> 
-</td>
-<td>
-   <figure>
-    <img src="with-malicious/results/dodag.png" alt="Final DODAG">
+</div><div class="right">
+  <figure>
+    <img src="with-malicious/results/dodag.png" alt="ERROR">
     <figcaption>Fig 4 - Final DODAG for the simulation with the malicious mote.</figcaption>
   </figure> 
-</td>
-</tr>
-</table>
+</div>
 
 > **Important note**: The resulting DODAG's could be not representative if the duration is not long enough. Ensure that it is set appropriately.
 
@@ -81,19 +76,15 @@ The resulting Destination Oriented Directed Acyclic Graph (DODAG) is depicted in
 
 The power tracking is depicted in the following pictures:
 
-<table border="0">
-<tr>
-<td>
-   <figure>
-    <img src="without-malicious/results/powertracking.png" alt="Power tracking histogram">
+<div class="left">
+  <figure>
+    <img src="without-malicious/results/powertracking.png" alt="ERROR">
     <figcaption>Fig 5 - Power tracking histogram for the simulation without the malicious mote.</figcaption>
   </figure> 
-</td>
-<td>
-   <figure>
-    <img src="with-malicious/results/powertracking.png" alt="Power tracking histogram">
+</div>
+<div class="right">
+  <figure>
+    <img src="with-malicious/results/powertracking.png" alt="ERROR">
     <figcaption>Fig 6 - Power tracking histogram for the simulation with the malicious mote.</figcaption>
   </figure> 
-</td>
-</tr>
-</table>
+</div>
