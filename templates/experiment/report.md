@@ -70,6 +70,10 @@ The resulting Destination Oriented Directed Acyclic Graph (DODAG) is depicted in
   </figure> 
 </div>
 
+<textarea>
+Insert your comments here.
+</textarea>
+
 > **Important note**: The resulting DODAG's could be not representative if the duration is not long enough. Ensure that it is set appropriately.
 
 #### Power Tracking Analysis
@@ -88,3 +92,8 @@ The power tracking is depicted in the following pictures:
     <figcaption>Fig 6 - Power tracking histogram for the simulation with the malicious mote.</figcaption>
   </figure> 
 </div>
+
+<textarea>
+Insert your comments here.
+</textarea>
+
