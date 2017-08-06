@@ -411,7 +411,7 @@ def __run(name, **kwargs):
             parsing_chain(sim_path)
             move_files(sim_path, results, 'COOJA.log')
         # finally, generate the PDF report
-        generate_report(path)
+        generate_report(path, REPORT_THEME)
     return "Both Cooja executions succeeded"
 _run = CommandMonitor(__run)
 run = command(
