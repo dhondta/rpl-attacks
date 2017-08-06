@@ -411,8 +411,7 @@ def __run(name, **kwargs):
             parsing_chain(sim_path)
             move_files(sim_path, results, 'COOJA.log')
         # finally, generate the PDF report
-        console = kwargs.get('console')
-        report(name, silent=True, **kwargs) if console is None else console.do_report(name, silent=True, **kwargs)
+        generate_report(path)
     return "Both Cooja executions succeeded"
 _run = CommandMonitor(__run)
 run = command(

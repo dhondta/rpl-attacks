@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 import logging
 from markdown2 import markdown_path
-from os.path import exists, join
+from os.path import abspath, exists, join
 from weasyprint import HTML
 
 
@@ -24,6 +24,7 @@ def generate_report(path, theme=None):
     html = HTML(string=markdown_path(join(path, 'report.md')))
     output = join(path, 'report.pdf')
     theme = join(path, "themes", theme)
-    if not exists(theme):
-        theme = None
-    html.write_pdf(output) if theme is None else html.write_pdf(output, stylesheets=[theme])    
+    kwargs = {'base_url': 'file://{}'.format(abspath(path))}
+    if theme is not None and exists(theme):
+        kwargs['stylesheets'] = theme
+    html.write_pdf(output, **kwargs)
