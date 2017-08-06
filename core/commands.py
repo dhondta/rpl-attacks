@@ -375,6 +375,7 @@ def __run(name, **kwargs):
             move_files(sim_path, results, 'COOJA.log')
         # finally, generate the PDF report
         generate_report(path, REPORT_THEME)
+        return "{} has been created".format(join(path, "report.pdf"))
 _run = CommandMonitor(__run)
 run = command(
     autocomplete=lambda: list_experiments(),
