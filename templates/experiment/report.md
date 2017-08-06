@@ -4,7 +4,7 @@
 
 ### 1. Introduction
 
-**Goal**: {{ goal if goal != None else '<span class="red">Not mentioned</span>' }}
+**Goal**: {{ goal if goal|trim != '' else '<span class="red">Not mentioned</span>' }}
 {% if notes %}
 {{ notes }}
 {% endif %}

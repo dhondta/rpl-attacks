@@ -1,11 +1,11 @@
 @page {
   size: a4 portrait;
-  margin: 15mm 15mm 20mm 15mm;
+  margin: 10mm 15mm 20mm 15mm;
   font-family: "Open Sans", arial, sans-serif;
   font-size: 10px;
   counter-increment: page;
   @top-right {
-      content: 'This report was made with RPL Attacks Framework';
+      content: 'This report was generated with RPL Attacks Framework';
       white-space: pre;
       color: grey;
   }
@@ -33,7 +33,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
+  text-transform: uppercase !important;
+  margin-top: -15px;
   font-size: 32px;
+  line-height: 2;
+}
+
+h1:after {
+    content:' ';
+    display:block;
+    border:2px solid #d0d0d0;
+    border-radius:4px;
+    -webkit-border-radius:4px;
+    -moz-border-radius:4px;
+    box-shadow:inset 0 1px 1px rgba(0, 0, 0, .05);
+    -webkit-box-shadow:inset 0 1px 1px rgba(0, 0, 0, .05);
+    -moz-box-shadow:inset 0 1px 1px rgba(0, 0, 0, .05);
 }
 
 h2 {
