@@ -21,10 +21,10 @@ def generate_report(path, theme=None):
     :param path: path of report.md
     :param theme: full or relative (to "[path]/themes/") path to the CSS theme
     """
-    html = HTML(string=markdown_path(join(path, 'report.md')))
+    html = HTML(string=markdown_path(join(path, 'report.md')), base_url='file://{}'.format(abspath(path)))
     output = join(path, 'report.pdf')
     theme = join(path, "themes", theme)
-    kwargs = {'base_url': 'file://{}'.format(abspath(path))}
+    kwargs = {}
     if theme is not None and exists(theme):
         kwargs['stylesheets'] = theme
     html.write_pdf(output, **kwargs)
