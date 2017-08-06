@@ -6,6 +6,13 @@
     install_recommends: yes
     force: yes
 
+- name: Install additional libraries
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+  with_items:
+    - libffi-dev
+
 - name: Install Python modules
   apt:
     pkg: "{{ item }}"
