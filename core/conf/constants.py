@@ -112,6 +112,7 @@ DEFAULTS = {
     "sensor": "dummy",
     "type": "sensor",
     "debug": True,
+    "wsn-generation-algorithm": "quadrants",
 }
 
 # Note: Cooja simulation file must be the last key in the following ordered dictionary

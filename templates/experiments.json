@@ -23,7 +23,8 @@ Available Malicious mote types :
     "simulation": {
       "number-motes": 10,
       "target": "z1",
-      "duration": 120
+      "duration": 120,
+      "wsn-generation-algorithm": "quadrants",
     }
   },
   "test": {

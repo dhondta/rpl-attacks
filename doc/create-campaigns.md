@@ -81,6 +81,7 @@ Or with Fabric:
  >  `transmission-range` | positive integer greater than or equal to `minimum-distance-from-root`
  >  `interference-range` | positive integer greater than or equal to `transmission-range`
  >  `area-square-side` | positive integer greater than or equal to `sqrt(2) * minimum-distance-from-root
+ >  `wsn-generation-algorithm` | string indicating the WSN topology generation algorithm to be used
  
  > **malicious**: **NOT** present in **BASE**
  >   (the experiments start after the **BASE** definition)

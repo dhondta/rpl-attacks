@@ -8,7 +8,7 @@ from re import findall, finditer, search, sub, DOTALL, MULTILINE
 from six import string_types
 
 from core.common.helpers import *
-from core.common.wsngenerator import generate_motes
+from core.common.wsngenerator import *
 from core.conf.constants import *
 from core.conf.logconfig import logger
 
@@ -263,6 +263,14 @@ def list_mote_types(mote_type, strip=True):
                    if f.endswith('.c') and f.startswith(mote_type)])
 
 
+def list_wsn_gen_algorithms():
+    """
+    This function gets all WSN generation functions from the WSN generation library.
+    """
+    from core.common.wsngenerator import __all__
+    return __all__
+
+
 # ************************************** TEMPLATE AND PARAMETER FUNCTIONS **************************************
 def apply_debug_flags(contiki_rpl, debug='NONE'):
     """
@@ -356,7 +364,7 @@ def render_templates(path, only_malicious=False, **params):
         write_template(join(path, "with-malicious"), env, template_malicious, **templates[template_malicious])
         return replacements
     # generate the list of motes (first one is the root, last one is the malicious mote)
-    motes = params['motes'] or generate_motes(defaults=DEFAULTS, **params)
+    motes = params['motes'] or eval(params["wsn_gen_algo"])(defaults=DEFAULTS, **params)
     # fill in simulation file templates
     templates["report.md"] = deepcopy(params)
     templates["motes/Makefile"]["target"] = params["target"]
@@ -426,21 +434,6 @@ def set_motes_to_simulation(simfile, motes):
     move_files('', '', (tmp, simfile))
 
 
-def write_template(path, env, name, **kwargs):
-    """
-    This function fills in a template and copy it to its destination.
-
-    :param path: folder where the template is to be copied
-    :param env: template environment
-    :param name: template's key in the templates dictionary
-    :param kwargs: parameters associated to this template
-    """
-    logger.debug(" > Setting template file: {}".format(name))
-    template = env.get_template(name).render(**kwargs)
-    with open(join(path, name), "w") as f:
-        f.write(template)
-
-
 def validated_parameters(dictionary):
     """
     This function validates all parameters coming from a JSON dictionary parsed from the simulation
@@ -483,6 +476,8 @@ def validated_parameters(dictionary):
                                      [lambda x: x in get_building_blocks()])
     params["ext_lib"] = get_parameter(dictionary, "malicious", "external-library",
                                       lambda x: x is None or exists(x), "does not exist")
+    params["wsn_gen_algo"] = get_parameter(dictionary, "simulation", "wsn-generation-algorithm",
+                                      lambda x: x in list_wsn_gen_algorithms(), "is not an available WSN generation algorithm")
     # area dimensions and limits
     params["min_range"] = get_parameter(dictionary, "simulation", "minimum-distance-from-root",
                                         lambda x: isinstance(x, (int, float)) and x > 0,
@@ -503,3 +498,18 @@ def validated_parameters(dictionary):
                                         "is not an integer or a float greater or equal to {:.0f}"
                                         .format(params["min_range"]))
     return params
+
+
+def write_template(path, env, name, **kwargs):
+    """
+    This function fills in a template and copy it to its destination.
+
+    :param path: folder where the template is to be copied
+    :param env: template environment
+    :param name: template's key in the templates dictionary
+    :param kwargs: parameters associated to this template
+    """
+    logger.debug(" > Setting template file: {}".format(name))
+    template = env.get_template(name).render(**kwargs)
+    with open(join(path, name), "w") as f:
+        f.write(template)

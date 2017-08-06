@@ -340,6 +340,8 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 >  `blocks`: building blocks for building the malicious mote, as defined in `./templates/building-blocks.json`
 >
 >  `ext_lib`: external RPL library for building the malicious mote
+>
+>  `wsn_gen_algo`: WSN topology generation algorithm
 
 - **`make_all`**`simulation-campaign-json-file`
 
