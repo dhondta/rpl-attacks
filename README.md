@@ -6,7 +6,7 @@
    * [RPL Attacks Framework](#rpl-attacks-framework)
    * [System Requirements](#system-requirements)
    * [VM Deployment](#vm-deployment)
-   * [Installation](#installation)
+   * [Normal Installation](#installation)
    * [Non-Standard Configuration](#non-standard-configuration)
    * [Quick Start (using the integrated console)](#quick-start-using-the-integrated-console)
    * [Quick Start (using fabric)](#quick-start-using-fabric)
@@ -62,18 +62,42 @@ It was tested with **Python 2 and 3**.
 
 ## VM Deployment
 
-> **Troubleshooting**:
-> 
-> - Ensure the latest version of Vagrant is installed
-> - If using `virtualbox` provider, ensure Oracle Extension Pack is installed (see [Oracle website](https://www.google.be/#q=virtualbox+oracle+extension+pack+install))
-
-
-## Installation
+**This section only applies if you want to deploy an appliance. If you want to install on your computer, please go to the next section.**
 
 1. Clone this repository
 
  ```
- git clone https://github.com/dhondta/rpl-attacks.git
+ $ git clone https://github.com/dhondta/rpl-attacks.git
+ ```
+ 
+ > **Behind a proxy ?**
+ > 
+ > Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
+ > 
+ > Unsetting: `git config --global --unset http.proxy`
+ > 
+ > Getting: `git config --global --get http.proxy`
+
+2. Create the VM
+
+ ```
+ $ vagrant up
+ ```
+
+ > **Troubleshooting**:
+ > 
+ > - Ensure the latest version of Vagrant is installed
+ > - If using `virtualbox` provider, ensure Oracle Extension Pack is installed (see [Oracle website](https://www.google.be/#q=virtualbox+oracle+extension+pack+install))
+
+
+## Normal Installation
+
+**This section only applies if did not followed the previous section.**
+
+1. Clone this repository
+
+ ```
+ $ git clone https://github.com/dhondta/rpl-attacks.git
  ```
  
  > **Behind a proxy ?**
@@ -87,11 +111,11 @@ It was tested with **Python 2 and 3**.
 2. Install system requirements
 
  ```
- sudo apt-get install gfortran libopenblas-dev liblapack-dev
- sudo apt-get install build-essential python-dev libffi-dev libssl-dev
- sudo apt-get install python-numpy python-scipy
- sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
- sudo apt-get install imagemagick libcairo2-dev libffi-dev
+ $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
+ $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
+ $ sudo apt-get install python-numpy python-scipy
+ $ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
+ $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
  ```
 
  > **Behind a proxy ?**
@@ -101,21 +125,21 @@ It was tested with **Python 2 and 3**.
    If not using InstantContiki appliance, also install :
 
  ```
- sudo apt-get install build-essential binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug binutils-avr gcc-avr gdb-avr avr-libc avrdude openjdk-7-jdk openjdk-7-jre ant libncurses5-dev lib32ncurses5
+ $ sudo apt-get install build-essential binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug binutils-avr gcc-avr gdb-avr avr-libc avrdude openjdk-7-jdk openjdk-7-jre ant libncurses5-dev lib32ncurses5
  ```
 
 3. Install Python requirements
 
  ```
- sudo apt-get install python-pip
- sudo pip install -r requirements.txt
+ $ sudo apt-get install python-pip
+ $ sudo pip install -r requirements.txt
  ```
 
  or
 
  ```
- sudo apt-get install python3-pip
- sudo pip3 install -r requirements.txt
+ $ sudo apt-get install python3-pip
+ $ sudo pip3 install -r requirements.txt
  ```
 
  > **Behind a proxy ?**
