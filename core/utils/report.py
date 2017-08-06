@@ -29,8 +29,9 @@ def generate_report(path, theme=None, intype='md'):
         html = open(join(path, 'report.html')).read()
     html = HTML(string=html, base_url='file://{}/'.format(abspath(path)))
     output = join(path, 'report.pdf')
-    theme = join(path, "themes", theme)
     kwargs = {}
-    if theme is not None and exists(theme):
-        kwargs['stylesheets'] = [theme]
+    if theme is not None:
+        theme = join(path, "themes", theme)
+        if exists(theme):
+            kwargs['stylesheets'] = [theme]
     html.write_pdf(output, **kwargs)
