@@ -19,15 +19,11 @@ def generate_report(path, theme=None):
     This function generates a "report.pdf" from a "report.md" template using markdown2 and weasyprint.
 
     :param path: path of report.md
+    :param theme: full or relative (to "[path]/themes/") path to the CSS theme
     """
-    html = markdown_path(join(path, 'report.md'))
-    assert exists(html)
+    html = HTML(string=markdown_path(join(path, 'report.md')))
     output = join(path, 'report.pdf')
-    assert exists(output)
-    html = HTML(string=html)
-    if theme is None:
-        html.write_pdf(output)
-    else:
-        theme = join(path, "themes", theme)
-        assert exists(theme)
-        html.write_pdf(output, stylesheets=[theme])
+    theme = join(path, "themes", theme)
+    if not exists(theme):
+        theme = None
+    html.write_pdf(output) if theme is None else html.write_pdf(output, stylesheets=[theme])    
