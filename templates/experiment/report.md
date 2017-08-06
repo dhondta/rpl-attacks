@@ -4,7 +4,7 @@
 
 ### 1. Introduction
 
-**Goal**: {{ goal if goal != None else '<font color="red">Not mentioned</font>' }}
+**Goal**: {{ goal if goal != None else '<span class="red">Not mentioned</span>' }}
 {% if notes %}
 {{ notes }}
 {% endif %}
@@ -16,9 +16,9 @@ The simulation lasts {{ duration }} seconds and is {% if repeat == 1 %}not repea
 
 The WSN contains:
 
-- 1 root node of type {{ mtype_root }} built upon a {{ target }}
-- {{ n }} sensors of type {{ mtype_sensor }} built upon a {{ target }}
-- 1 malicious mote of type {{ mtype_malicious }} built upon a {{ malicious_target }}
+- 1 root node of type *{{ mtype_root }}* built upon a *{{ target|upper }}*
+- {{ n }} sensors of type *{{ mtype_sensor }}* built upon a *{{ target|upper }}*
+- 1 malicious mote of type *{{ mtype_malicious }}* built upon a *{{ malicious_target|upper }}*
 
 The sensors are spread across an area of {{ area_side }} meters side and centered around the root node at a minimum distance of {{ min_range }} meters and a maximum distance of {{ max_range }} meters. They have a maximum transmission range of {{ tx_range }} meters and a maximum interference range of {{ int_range }} meters.
 
@@ -44,7 +44,7 @@ The attack is composed of the following building blocks:
 {% for block in blocks %}
 - {{ block}}{% endfor %}
 {% else %}
-<font color="red">No building block specified.</font>
+<span class="red">No building block specified.</span>
 {% endif %}
 {% if ext_lib %}
 The malicious mote is built with a custom RPL library located at {{ ext_lib }}.

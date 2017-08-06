@@ -65,6 +65,10 @@ p {
   margin: 0 0 30px;
 }
 
+span.red {
+  color: #C01313;
+}
+
 a {
   color: #f03838;
   text-decoration: none;
