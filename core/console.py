@@ -20,6 +20,8 @@ from core.commands import get_commands
 
 class FrameworkConsole(Console):
     """ Base command processor for the RPL Attacks Framework. """
+    banner = BANNER
+    pidfile = PIDFILE
     prompt = surround_ansi_escapes('{}{}{}{}{}{} '.format(
         colored(getuser(), 'magenta'),
         colored('@', 'cyan'),
@@ -97,8 +99,8 @@ class FrameworkConsole(Console):
             del self.tasklist[t]
 
     def cmdloop(self, intro=None):
-        if self.already_running:
-            with open(PIDFILE) as f:
+        if hasattr(self, "already_running") and self.already_running:
+            with open(self.pidfile) as f:
                 pid = f.read().strip()
             logger.warn('RPL Attacks Framework is already running in another terminal (PID: {})'.format(pid))
             self.graceful_exit()
@@ -167,7 +169,7 @@ class FrameworkConsole(Console):
     def graceful_exit(self):
         """ Exit handler for terminating the process pool gracefully. """
         try:
-            os.remove(PIDFILE)
+            os.remove(self.pidfile)
         except:
             pass
         try:

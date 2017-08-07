@@ -36,14 +36,16 @@ class Console(Cmd, object):
     def __init__(self, *args, **kwargs):
         super(Console, self).__init__(*args, **kwargs)
         self.__history = []
+        self.banner = banner
         self.pid = os.getpid()
-        self.already_running = os.path.isfile(PIDFILE)
-        if not self.already_running:
-            try:
-                with open(PIDFILE, 'w') as f:
-                    f.write(str(self.pid))
-            except IOError:
-                pass
+        if hasattr(self, "pidfile") and self.pidfile is not None:
+            self.already_running = os.path.isfile(self.pidfile)
+            if not self.already_running:
+                try:
+                    with open(self.pidfile, 'w') as f:
+                        f.write(str(self.pid))
+                except IOError:
+                    pass
 
     def cmdloop(self, intro=None):
         try:
@@ -70,8 +72,10 @@ class Console(Cmd, object):
     Clear the screen.
         """
         os.system("clear")
-        cprint(BANNER, 'cyan', 'on_grey')
-        print(self.welcome)
+        if hasattr(self, "banner") and self.banner is not None:
+            cprint(self.banner, 'cyan', 'on_grey')
+        if hasattr(self, "welcome") and self.welcome is not None:
+            print(self.welcome)
 
     @no_arg_command
     def do_EOF(self, line):
