@@ -34,8 +34,8 @@ Available Malicious mote types :
   "hello-flood-attack": {
     "simulation": {
       "title": "Flooding Attack",
-      "goal": "Demonstrate this attack through power tracking results.",
-      "notes": "The expected impact is that the nodes in the neighborhood of the malicious node exhaust their energy.",
+      "goal": "Demonstrate that this kind of attack can dramatically impact a WSN through an important energy exhaustion.",
+      "notes": "While entering the WSN, thanks to the ContikiRPL configuration constants set with the building block, the malicious node immediately starts sending DIS messages to its neighbors, then triggering DIO messages and trickle timers reset.",
       "comment-1": "As it can be seen, the malicious node (in violet) impacts nodes in its transmission range. One can now illustrate the attack efficiency using   this information to compare the power consumption in the simulation without (on the left) and with the malicious node (on the right).",
       "comment-2": "As it can easily be observed, nodes in the range of the malicious sensor are particularly impacted by the attack in terms of ON and RX times.<br><br><b>Important note</b>: However, these nodes are not impacted in term of TX time. The reason is that upon the reception of a DIS, the nodes reset immediately send a DIO, due to the multicast nature of the sent DIS.<br><br><b>Variant of the attack</b>: Another way of performing a flooding attack can be to unicast DIS to the neighbors, immediately triggering a DIO in response but not the trickle timer reset. This behavior can be verified in the ContikiRPL library, inside the file <pre>rpl­icmp6.c</pre>, in <pre>dis_input(void)</pre>.​"
     },
@@ -46,9 +46,10 @@ Available Malicious mote types :
   "version-number-attack": {
     "simulation": {
       "title": "Version Number Modification Attack",
-      "goal": "Demonstrate this attack through power tracking results.",
-      "notes": "The expected impact is that the nodes in the neighborhood of the malicious node exhaust their energy.",
-      "comments": ""
+      "goal": "Demonstrate that this attack through power tracking results.",
+      "notes": "With its modified RPL file, the malicious node increases the version number before forwarding received DIO messages, thus triggering unnecessary global repairs.",
+      "comment-1": "As it can be seen, the DODAG is impacted by the malicious node (in violet) due to the repeated global repairs.",
+      "comment-2": "By looking at the power consumption, one can ascertain that this attack enjoys a certain efficiency on the whole network as it triggers lots of messages because of the global repair mechanism."
     },
     "malicious": {
       "building-blocks": ["increased-version"]
@@ -57,9 +58,10 @@ Available Malicious mote types :
   "blackhole-attack": {
     "simulation": {
       "title": "Decreased Rank Attack",
-      "goal": "Demonstrate this attack through topology and DAG screenshots.",
-      "notes": "The expected impact is that the nodes in the neighborhood of the malicious node choose it as their parent.",
-      "comments": "",
+      "goal": "Demonstrate that this attack impacts the DODAG by channeling multiple links through the malicious node.",
+      "notes": "With the modified RPL configuration constant, the malicious node will advertise a better rank than neighbors, causing the DAG to be modified. This attack does not damage a network, however, combining with other building blocks could be very effective because it allows the attacker to tunnel some traffic through the malicious node (e.g. for eavesdropping).",
+      "comment-1": "On the left, one can see a typical construction of DODAG (at a time when this is maybe not stable yet and with potentially non­-optimal links). On the right side, one can easily observe that the traffic is channeled through the malicious node.",
+      "comment-2": "The power consumption does not tell anything relevant as this attack is not aimed to cause energy exhaustion.",
       "root": "echo",
       "sensor": "echo"
     },

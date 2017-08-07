@@ -399,14 +399,15 @@ def __run(name, **kwargs):
             network_images = {int(fn.split('.')[0].split('_')[-1]): fn for fn in listdir(data)
                               if fn.startswith('network_')}
             move_files(data, results, 'wsn-{}-malicious.gif'.format(sim))
-            net_start_old = network_images[min(network_images.keys())]
-            net_start, ext = splitext(net_start_old)
-            net_start_new = 'wsn-{}-malicious_start{}'.format(sim, ext)
-            net_end_old = network_images[max(network_images.keys())]
-            net_end, ext = splitext(net_end_old)
-            net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
-            move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
-            remove_files(data, *network_images.values())
+            if len(network_images) > 0:
+                net_start_old = network_images[min(network_images.keys())]
+                net_start, ext = splitext(net_start_old)
+                net_start_new = 'wsn-{}-malicious_start{}'.format(sim, ext)
+                net_end_old = network_images[max(network_images.keys())]
+                net_end, ext = splitext(net_end_old)
+                net_end_new = 'wsn-{}-malicious_end{}'.format(sim, ext)
+                move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
+                remove_files(data, *network_images.values())
             # then start the parsing functions to derive more results
             logger.debug(" > Parsing simulation results...")
             parsing_chain(sim_path)
@@ -754,13 +755,11 @@ def demo(**kwargs):
             continue
         comments = [sim[p] for p in sim.keys() if p.startswith('comment-')]
         report = join(EXPERIMENT_FOLDER, name, 'report.md')
-        with open(report) as fin:
-            content = fin.read()
+        with open(report) as f:
+            content = f.read()
         for comment in comments:
             content.replace("Insert your comments here.", comment, 1)
-        with open(report, 'w') as fout:
-            fout.seek(0)
-            fout.truncate()
-            fout.write(content)
+        with open(report, 'w') as f:
+            f.write(content)
     logger.debug(" > Running all simulations of 'rpl-attacks.json'...")
     run_all('rpl-attacks', **kwargs) if console is None else console.do_run_all('rpl-attacks', **kwargs)
