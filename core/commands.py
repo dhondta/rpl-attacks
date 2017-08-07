@@ -758,7 +758,7 @@ def demo(**kwargs):
         with open(report) as f:
             content = f.read()
         for comment in comments:
-            content.replace("Insert your comments here.", comment, 1)
+            content = content.replace("Insert your comments here.", comment, 1)
         with open(report, 'w') as f:
             f.write(content)
     logger.debug(" > Running all simulations of 'rpl-attacks.json'...")
