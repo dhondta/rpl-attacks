@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import atexit
 import os
-from cmd import Cmd
 from copy import copy
 from funcsigs import signature
 from getpass import getuser
@@ -11,83 +10,12 @@ from six.moves import zip_longest
 from socket import gethostname
 from subprocess import check_output, Popen, PIPE
 from sys import stdout
-from termcolor import colored, cprint
+from termcolor import colored
 from terminaltables import SingleTable
 from types import MethodType
 
 from core import *
 from core.commands import get_commands
-
-
-class Console(Cmd, object):
-    """ Simple command processor with standard commands. """
-    file = None
-    ruler = None
-    badcmd_msg = " [!] {} command: {}"
-    max_history_entries = 10
-
-    def __init__(self, *args, **kwargs):
-        super(Console, self).__init__(*args, **kwargs)
-        self.__history = []
-        self.pid = os.getpid()
-        self.already_running = os.path.isfile(PIDFILE)
-        if not self.already_running:
-            try:
-                with open(PIDFILE, 'w') as f:
-                    f.write(str(self.pid))
-            except IOError:
-                pass
-
-    def cmdloop(self, intro=None):
-        try:
-            import readline
-            readline.set_completer_delims(' ')
-            super(Console, self).cmdloop()
-        except (KeyboardInterrupt, EOFError):
-            print('')
-            self.cmdloop()
-
-    def precmd(self, line):
-        if len(self.__history) == 0 or (not line.startswith('history') and line != self.__history[-1] and line != ''):
-            if len(self.__history) >= self.max_history_entries:
-                del self.__history[0]
-            self.__history.append(line)
-        return line
-
-    def default(self, line):
-        print(self.badcmd_msg.format(["Unknown", "Invalid"][len(line.split()) > 1], line.lstrip('_')))
-
-    @no_arg_command
-    def do_clear(self, line):
-        """
-    Clear the screen.
-        """
-        os.system("clear")
-        cprint(BANNER, 'cyan', 'on_grey')
-        print(self.welcome)
-
-    @no_arg_command
-    def do_EOF(self, line):
-        """
-    Exit the console by hitting Ctrl+D.
-        """
-        print('')
-        return True
-
-    @no_arg_command
-    def do_exit(self, line):
-        """
-    Exit the console.
-        """
-        return True
-
-    @no_arg_command
-    def do_history(self, line):
-        """
-    Print the history of commands.
-        """
-        print('Last {} commands'.format(len(self.__history)))
-        print(' > ' + '\n > '.join(self.__history))
 
 
 class FrameworkConsole(Console):
