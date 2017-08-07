@@ -14,6 +14,13 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+# Beware that the following lines require Vagrant proxy plugin to be installed ;
+#  this can be done by executing 'vagrant plugin install vagrant-proxyconf'
+#
+#  config.proxy.http     = "http://yourproxy:8080"
+#  config.proxy.https    = "http://yourproxy:8080"
+#  config.proxy.no_proxy = "localhost,127.0.0.1"
+
   config.vm.box = "bento/ubuntu-16.04"
   config.vm.network :private_network, ip: "192.168.27.100"
   config.vm.host_name = "rpl-attacks-framework"

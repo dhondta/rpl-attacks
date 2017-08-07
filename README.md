@@ -83,6 +83,12 @@ It was tested with **Python 2 and 3**.
  ```
  $ vagrant up
  ```
+ 
+ > **Behind a proxy ?**
+ > 
+ > Install the plugin: `vagrant plugin install vagrant-proxyconf`
+ > 
+ > Configure Vagrant: Uncomment the lines starting with `config.proxy` in the `Vagrantfile`
 
  > **Troubleshooting**:
  > 
