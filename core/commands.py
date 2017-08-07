@@ -748,6 +748,9 @@ def demo(**kwargs):
     copy_files((FRAMEWORK_FOLDER, 'examples'), EXPERIMENT_FOLDER, 'rpl-attacks.json')
     logger.debug(" > Making all simulations of 'rpl-attacks.json'...")
     make_all('rpl-attacks', **kwargs) if console is None else console.do_make_all('rpl-attacks', **kwargs)
+    if console is not None:
+        while any([i['task'] == "make" and i['status'] == 'PENDING' for i in console.tasklist.values()]):
+            sleep(.1)
     logger.debug(" > Running all simulations of 'rpl-attacks.json'...")
     run_all('rpl-attacks', **kwargs) if console is None else console.do_run_all('rpl-attacks', **kwargs)
     return "Demo over"
