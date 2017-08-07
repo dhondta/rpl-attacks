@@ -743,7 +743,7 @@ def demo(**kwargs):
     copy_files((FRAMEWORK_FOLDER, 'examples'), EXPERIMENT_FOLDER, 'rpl-attacks.json')
     logger.debug(" > Making all simulations of 'rpl-attacks.json'...")
     make_all('rpl-attacks', **kwargs) if console is None else console.do_make_all('rpl-attacks', **kwargs)
-    experiments = get_experiments(exp_file, silent=True)
+    experiments = get_experiments('rpl-attacks', silent=True)
     del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
         if params.get('simulation') is None:
