@@ -3,6 +3,12 @@ from pygments.lexer import RegexLexer, bygroups, using
 from pygments.token import Error, Keyword, Name, Number, Operator, String, Whitespace
 
 
+__all__ = [
+    'ArgumentsLexer',
+    'ValueLexer',
+]
+
+
 class ValueLexer(RegexLexer):
     """ A small lexer to analyze string, number, boolean and variable name. """
     tokens = {
