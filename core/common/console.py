@@ -36,7 +36,7 @@ class Console(Cmd, object):
     def __init__(self, *args, **kwargs):
         super(Console, self).__init__(*args, **kwargs)
         self.__history = []
-         self.pid = os.getpid()
+        self.pid = os.getpid()
         if hasattr(self, "pidfile") and self.pidfile is not None:
             self.already_running = os.path.isfile(self.pidfile)
             if not self.already_running:
