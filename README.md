@@ -427,7 +427,9 @@ Example JSON for a campaign of heterogeneous simulations (with randomized topolo
  ![RPL Attacks Framework console](doc/imgs/json-randomized-simulations.png)
  
  ## Issues management
+
+In case of bug, there should be a crash report generated in the folder of the experiment that the framework was processing. By convention, this is named '`crash-report-[...].txt`. Please copy its content (without the title) in a [new Issue](https://github.com/dhondta/rpl-attacks/issues/new).
  
-Please [open an Issue](https://github.com/dhondta/rpl-attacks/issues/new) if you want to contribute or submit suggestions. 
+For contributions or suggestions, please [open an Issue](https://github.com/dhondta/rpl-attacks/issues/new) and clearly explain, using an example or a use case if appropriate. 
 
 If you want to build new RPL attacks, please refer to the [*How to make new building blocks ?*](https://github.com/dhondta/rpl-attacks/blob/master/doc/building-blocks.md) section. In this case, please submit your new attack through a Pull Request.

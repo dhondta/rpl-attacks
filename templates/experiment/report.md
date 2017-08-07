@@ -5,9 +5,8 @@
 ### 1. Introduction
 
 **Goal**: {{ goal if goal|trim != '' else '<span class="red">Not mentioned</span>' }}
-{% if notes %}
-{{ notes }}
-{% endif %}
+{% if notes %}{{ notes }}{% endif %}
+
 ### 2. Configuration
 
 #### Wireless Sensor Network
