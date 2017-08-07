@@ -749,9 +749,10 @@ def demo(**kwargs):
     experiments = get_experiments('rpl-attacks', silent=True)
     del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
-        if params.get('simulation') is None:
+        sim = params.get('simulation')
+        if sim is None:
             continue
-        comments = [params[p] for p in params['simulation'].keys() if p.startswith('comment-')]
+        comments = [sim[p] for p in sim.keys() if p.startswith('comment-')]
         report = join(EXPERIMENT_FOLDER, name, 'report.md')
         with open(report) as fin:
             content = fin.read()
