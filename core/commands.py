@@ -750,7 +750,7 @@ def demo(**kwargs):
     logger.debug(" > Making all simulations of 'rpl-attacks.json'...")
     make_all('rpl-attacks', **kwargs) if console is None else console.do_make_all('rpl-attacks', **kwargs)
     if console is not None:
-        while any([i['command'] == "make" and i['status'] == 'PENDING' for i in console.tasklist.values()]):
+        while any([i['command'].lstrip('_') == "make" and i['status'] == 'PENDING' for i in console.tasklist.values()]):
             sleep(.1)
     logger.debug(" > Running all simulations of 'rpl-attacks.json'...")
     run_all('rpl-attacks', **kwargs) if console is None else console.do_run_all('rpl-attacks', **kwargs)
