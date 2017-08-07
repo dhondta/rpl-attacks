@@ -9,6 +9,22 @@ __all__ = [
 ]
 
 
+def no_arg_command(f):
+    """
+    This small decorator is aimed to invalidate some badly formatted console commands, accepted by the base
+     Cmd class' methods as these do not handler special characters. E.g. 'clear$erlgihsevg' makes 'clear' apply.
+
+    :param f: the decorated console method
+    """
+    @wraps(f)
+    def wrapper(console, line):
+        if line != '':
+            console.default(console.lastcmd)
+        else:
+            return f(console, line)
+    return wrapper
+
+
 class Console(Cmd, object):
     """ Simple command processor with standard commands. """
     file = None
