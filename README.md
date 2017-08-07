@@ -5,11 +5,12 @@
 
    * [RPL Attacks Framework](#rpl-attacks-framework)
    * [System Requirements](#system-requirements)
-   * [VM Deployment](#vm-deployment)
+   * [Virtual Machine Deployment](#vm-deployment)
    * [Normal Installation](#installation)
    * [Non-Standard Configuration](#non-standard-configuration)
    * [Quick Start (using the integrated console)](#quick-start-using-the-integrated-console)
    * [Quick Start (using fabric)](#quick-start-using-fabric)
+   * [Demonstration](#demonstration)
    * [Commands](#commands)
    * [Simulation campaign](#simulation-campaign)
    * [Issues management](#issues-management)
@@ -60,7 +61,7 @@ This framework was tested on an **InstantContiki** appliance (that is, an Ubuntu
 It was tested with **Python 2 and 3**.
 
 
-## VM Deployment
+## Virtual Machine Deployment
 
 **This section only applies if you want to deploy an appliance. If you want to install on your computer, please go to the next section.**
 
@@ -277,6 +278,21 @@ experiments_folder = ~/simulations
  ``[EXPERIMENTS_FOLDER]/[experiment_name]/with-malicious/results/``
 
 
+## Demonstration
+
+Open the console like before and type:
+
+ ```
+ user@instant-contiki:rpl-attacks>> demo
+ ```
+
+Or simply launch the `demo` command with Fabric:
+
+ ```
+ ../rpl-attacks$ fab demo
+ ```
+
+
 ## Commands
 
 Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-flood``) or in the framework's console (e.g. ``launch hello-flood``).
@@ -302,6 +318,10 @@ Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-
 > This will open Cooja and load simulation named 'name' in its version with or without the malicious mote.
 >
 >  `with-malicious-mote`: flag for starting the simulation with/without the malicious mote [default: false]
+
+- **`demo`**
+
+> This will process (copy, `make_all` then `run_all`) the campaign file named 'rpl-attacks.json' contained in the 'examples' folder of the framework.
 
 - **`drop`**`simulation-campaign-json-file`
 

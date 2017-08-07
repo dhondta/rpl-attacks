@@ -488,7 +488,7 @@ def make_all(exp_file, **kwargs):
     if 'BASE' in experiments.keys():
         experiments['BASE']['silent'] = True
         sim_json = dict(experiments['BASE']['simulation'])
-        wsn_gen = eval(experiments['BASE'].get('wsn-generation-algorithm', DEFAULTS['wsn-generation-algorithm']))
+        wsn_gen = eval(sim_json.get('wsn-generation-algorithm', DEFAULTS['wsn-generation-algorithm']))
         motes = wsn_gen(defaults=DEFAULTS, **validated_parameters(experiments['BASE']))
         del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
@@ -585,7 +585,7 @@ def list(item_type, **kwargs):
         print(table.table)
 
 
-# ***************************************** SETUP COMMANDS *****************************************
+# ***************************************** SETUP COMMANDS ****************************************
 @command(examples=["/opt/contiki", "~/contiki ~/Documents/experiments"],
          start_msg="CREATING CONFIGURATION FILE AT '~/.rpl-attacks.conf'")
 def config(contiki_folder='~/contiki', experiments_folder='~/Experiments', silent=False, **kwargs):
@@ -735,3 +735,19 @@ def versions(**kwargs):
         with lcd(FRAMEWORK_FOLDER):
             cversion = local('git --git-dir .git describe --tags --always', capture=True)
         logger.warn("RPL Attacks Framework: {}".format(cversion))
+
+
+# **************************************** MAGICAL COMMANDS ***************************************
+@command(start_msg="STARTING THE DEMO")
+def demo(**kwargs):
+    """
+    Prepare the example campaign 'rpl-attacks.json' contained in the 'examples' folder of the framework.
+    """
+    console = kwargs.get('console')
+    logger.debug(" > Copying 'rpl-attacks.json' to the experiments folder...")
+    copy_files((FRAMEWORK_FOLDER, 'examples'), EXPERIMENT_FOLDER, 'rpl-attacks.json')
+    logger.debug(" > Making all simulations of 'rpl-attacks.json'...")
+    make_all('rpl-attacks', **kwargs) if console is None else console.do_make_all('rpl-attacks', **kwargs)
+    logger.debug(" > Running all simulations of 'rpl-attacks.json'...")
+    run_all('rpl-attacks', **kwargs) if console is None else console.do_run_all('rpl-attacks', **kwargs)
+    return "Demo over"
