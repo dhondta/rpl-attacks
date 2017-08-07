@@ -141,7 +141,7 @@ def cooja(name, with_malicious=True, **kwargs):
     motes_before = get_motes_from_simulation(join(sim_path, 'simulation.csc'), as_dictionary=True)
     with hide(*HIDDEN_ALL):
         with lcd(sim_path):
-            local("make cooja TASK={}".format(kwargs['task']))
+            local("make cooja TASK={}".format(kwargs.get('task', "cooja")))
     motes_after = get_motes_from_simulation(join(sim_path, 'simulation.csc'), as_dictionary=True)
     # if there was a change, update the other simulation in this experiment
     if len(set(motes_before.items()) & set(motes_after.items())) > 0:
@@ -373,9 +373,10 @@ def __run(name, **kwargs):
             data, results = join(sim_path, 'data'), join(sim_path, 'results')
             # the Makefile is at experiment's root ('path')
             logger.debug(" > Running simulation {} the malicious mote...".format(sim))
+            task = kwargs.get('task', "run")
             with lcd(sim_path):
-                output = local("make run TASK={}".format(kwargs['task']), capture=True)
-            remove_files(sim_path, '.{}'.format(kwargs['task']))
+                output = local("make run TASK={}".format(task), capture=True)
+            remove_files(sim_path, '.{}'.format(task))
             error, interrupt, error_buffer = False, False, []
             for line in output.split('\n'):
                 if line.strip().startswith("FATAL") or line.strip().startswith("ERROR"):
