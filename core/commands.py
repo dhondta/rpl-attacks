@@ -446,7 +446,6 @@ def clean_all(exp_file, **kwargs):
     experiments = {k: v for k, v in get_experiments(exp_file).items() if k != 'BASE'}
     for name, params in experiments.items():
         clean(name, ask=False, silent=silent) if console is None else console.do_clean(name, ask=False, silent=silent)
-    return "All cleaned"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -464,7 +463,6 @@ def drop(exp_file, ask=True, **kwargs):
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     remove_files(EXPERIMENT_FOLDER, exp_file)
-    return "JSON campaign file removed"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -501,7 +499,6 @@ def make_all(exp_file, **kwargs):
                     params['simulation'][k] = v
             params['motes'] = motes
         make(name, ask=False, **params) if console is None else console.do_make(name, ask=False, **params)
-    return "All made"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -520,7 +517,6 @@ def prepare(exp_file, ask=True, **kwargs):
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     render_campaign(exp_file)
-    return "JSON campaign file created"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -540,7 +536,6 @@ def remake_all(exp_file, **kwargs):
     experiments = {k: v for k, v in get_experiments(exp_file).items() if k != 'BASE'}
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
         remake(name, **params) if console is None else console.do_remake(name, **params)
-    return "All remade"
 
 
 @command(autocomplete=lambda: list_campaigns(),
@@ -560,7 +555,6 @@ def run_all(exp_file, **kwargs):
     for name in get_experiments(exp_file).keys():
         if name != 'BASE':
             run(name) if console is None else console.do_run(name)
-    return "All Cooja executions succeeded"
 
 
 # ************************************** INFORMATION COMMANDS *************************************
@@ -749,9 +743,23 @@ def demo(**kwargs):
     copy_files((FRAMEWORK_FOLDER, 'examples'), EXPERIMENT_FOLDER, 'rpl-attacks.json')
     logger.debug(" > Making all simulations of 'rpl-attacks.json'...")
     make_all('rpl-attacks', **kwargs) if console is None else console.do_make_all('rpl-attacks', **kwargs)
+    experiments = get_experiments(exp_file, silent=True)
+    del experiments['BASE']
+    for name, params in sorted(experiments.items(), key=lambda x: x[0]):
+        if params.get('simulation') is None:
+            continue
+        comments = [params[p] for p in params['simulation'].keys() if p.startswith('comment-')]
+        report = join(EXPERIMENT_FOLDER, name, 'report.md')
+        with open(report) as fin:
+            content = fin.read()
+        for comment in comments:
+            content.replace("Insert your comments here.", comment, 1)
+        with open(report, 'w') as fout:
+            fout.seek(0)
+            fout.truncate()
+            fout.write(content)
     if console is not None:
         while any([i['command'].lstrip('_') == "make" and i['status'] == 'PENDING' for i in console.tasklist.values()]):
             sleep(.1)
     logger.debug(" > Running all simulations of 'rpl-attacks.json'...")
     run_all('rpl-attacks', **kwargs) if console is None else console.do_run_all('rpl-attacks', **kwargs)
-    return "Demo over"
