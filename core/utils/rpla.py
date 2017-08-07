@@ -24,6 +24,7 @@ __all__ = [
     'get_path',
     'list_campaigns',
     'list_experiments',
+    'list_wsn_gen_algorithms',
     'render_campaign',
     'render_templates',
     'validated_parameters',

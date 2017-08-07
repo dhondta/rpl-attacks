@@ -559,14 +559,14 @@ def run_all(exp_file, **kwargs):
 
 
 # ************************************** INFORMATION COMMANDS *************************************
-@command(autocomplete=["campaigns", "experiments"],
-         examples=["experiments", "campaigns"],
+@command(autocomplete=["campaigns", "experiments", "wsn-generation-algorithms"],
+         examples=["experiments", "campaigns", "wsn-generation-algorithms"],
          reexec_on_emptyline=True)
 def list(item_type, **kwargs):
     """
     List all available items of a specified type.
 
-    :param item_type: experiment/campaign
+    :param item_type: experiment/campaign/wsn-generation-algorithm
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     data, title = [['Name']], None
@@ -576,6 +576,9 @@ def list(item_type, **kwargs):
     elif item_type == 'campaigns':
         title = 'Available campaigns'
         data.extend([['- {}'.format(x).ljust(25)] for x in list_campaigns()])
+    elif item_type == 'wsn-generation-algorithms':
+        title = 'Available WSN generation algorithms'
+        data.extend([['- {}'.format(x).ljust(25)] for x in list_wsn_gen_algorithms()])
     if title is not None:
         table = SingleTable(data, title)
         print(table.table)
