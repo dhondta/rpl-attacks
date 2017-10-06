@@ -16,6 +16,7 @@ from time import gmtime, strftime
 __all__ = [
     'copy_files',
     'copy_folder',
+    'hash_file',
     'is_valid_commented_json',
     'make_crash_report',
     'move_files',
@@ -136,6 +137,23 @@ def copy_folder(src_path, dst_path, includes=None):
                 sh.cp('-R', join(src_path, include), sub_dst_path)
         else:
             sh.cp('-R', src_path, dst_path)
+
+
+def hash_file(filename, algo="sha1", bsize=65536):
+    """
+    This helper function is aimed to hash a file.
+
+    :param path: name of the file to be hashed
+    :param algo: hashing algorithm (among those implemented in hashlib)
+    :param bsize: block size
+    """
+    h = getattr(hashlib, algo)()
+    with open(filename, 'rb') as f:
+        b = f.read(bsize)
+        while len(b) > 0:
+            h.update(b)
+            b = f.read(bsize)
+    return h.hexdigest()
 
 
 def move_files(src_path, dst_path, *files):
