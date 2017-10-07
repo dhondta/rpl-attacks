@@ -611,6 +611,7 @@ def test(**kwargs):
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     with settings(warn_only=True):
+        print(FRAMEWORK_FOLDER)
         with lcd(FRAMEWORK_FOLDER):
             local("python -m unittest -v tests")
 
@@ -716,8 +717,9 @@ def update(silent=False, **kwargs):
                 remove_files(folder, "Vagrantfile")
                 remove_folder(join(folder, "provisioning"))
             logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
-    logger.warn("Restarting the framework...")
-    restart(PIDFILE)
+    if not silent:
+        logger.warn("Restarting the framework...")
+        restart(PIDFILE)
 
 
 @command(start_msg="CHECKING VERSIONS")
