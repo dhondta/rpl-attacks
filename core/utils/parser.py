@@ -168,5 +168,5 @@ def draw_power_barchart(path):
     pyplot.xticks(ind + width / 2., tuple(sorted(averages.keys())))
     pyplot.yticks(numpy.arange(0, 31, 10))
     pyplot.ylabel("Consumed power (%)")
-    pyplot.legend((p[0] for p in plots), (i.upper() for i in items))
+    pyplot.legend(tuple(p[0] for p in plots), tuple(i.upper() for i in items))
     pyplot.savefig(join(path, 'results', 'powertracking.png'))
