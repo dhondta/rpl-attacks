@@ -50,7 +50,7 @@ def convert_pcap_to_csv(path):
                    '-r', join(data, 'output.pcap')], stdout=PIPE)
         out, _ = p.communicate()
     except OSError:
-        out = "[ERROR] Tshark is not installed !"
+        out = b"[ERROR] Tshark is not installed !"
     with open(join(results, 'pcap.csv'), 'wb') as f:
         f.write(out)
 
