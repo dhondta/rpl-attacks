@@ -179,7 +179,7 @@ class FrameworkConsole(Console):
                     os.kill(int(line.split()[1]), SIGTERM)
         except:
             pass
-        if 'PENDING' in [x['status'] for x in self.tasklist.values()]:
+        if hasattr(self, "tasklist") and 'PENDING' in [x['status'] for x in self.tasklist.values()]:
             logger.info(" > Waiting for opened processes to finish...")
             logger.warning("Hit CTRL+C a second time to force process termination.")
             try:
