@@ -199,6 +199,14 @@ class FrameworkConsole(Console):
                 self.pool.terminate()
                 self.pool.join()
 
+    def task_pending(self, name):
+        return self.parallel and any([i['name'] == name and i['status'] == 'PENDING' for i in self.tasklist.values()])
+
+    def wait_for_task(self, name):
+        """ Wait for pending tasks with the given name until finished. """
+        while self.task_pending(name):
+            sleep(.1)
+
     @staticmethod
     def complete_template(lazy_values):
         """ Template method for handling auto-completion. """

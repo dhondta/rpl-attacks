@@ -156,7 +156,7 @@ def command(**params):
                                  not std_input(attrs['confirm'], 'yellow') == 'yes'):
                             return
             # run the command and catch exception if any
-            if console is not None and len(args) > 0:
+            if console is not None and len(args) > 0 and console.parallel:
                 console.clean_tasks()
                 pending_tasks = {i['name']: str(o) for o, i in console.tasklist.items() if i['status'] == 'PENDING'}
                 if args[0] not in pending_tasks.keys():

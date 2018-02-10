@@ -115,7 +115,7 @@ def clean(name, ask=True, **kwargs):
     """
     path = kwargs.get('path')
     console = kwargs.get('console')
-    if console is None or not any([i['name'] == name and i['status'] == 'PENDING' for i in console.tasklist.values()]):
+    if console is None or not console.task_pending(name):
         logger.debug(" > Cleaning folder...")
         with hide(*HIDDEN_ALL):
             local("rm -rf {}".format(path))
@@ -752,8 +752,7 @@ def demo(**kwargs):
     logger.debug(" > Making all simulations of 'rpl-attacks.json'...")
     make_all('rpl-attacks', **kwargs) if console is None else console.do_make_all('rpl-attacks', **kwargs)
     if console is not None:
-        while any([i['command'].lstrip('_') == "make" and i['status'] == 'PENDING' for i in console.tasklist.values()]):
-            sleep(.1)
+       console.wait_for_task("make")
     experiments = get_experiments('rpl-attacks', silent=True)
     del experiments['BASE']
     for name, params in sorted(experiments.items(), key=lambda x: x[0]):
