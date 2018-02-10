@@ -46,7 +46,7 @@ Available Malicious mote types :
   "version-number-attack": {
     "simulation": {
       "title": "Version Number Modification Attack",
-      "goal": "Demonstrate that this attack through power tracking results.",
+      "goal": "Demonstrate that this attack can dramatically impact the DODAG by triggering unnecessary global repairs.",
       "notes": "With its modified RPL file, the malicious node increases the version number before forwarding received DIO messages, thus triggering unnecessary global repairs.",
       "comment-1": "As it can be seen, the DODAG is impacted by the malicious node (in violet) due to the repeated global repairs.",
       "comment-2": "By looking at the power consumption, one can ascertain that this attack enjoys a certain efficiency on the whole network as it triggers lots of messages because of the global repair mechanism."
