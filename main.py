@@ -4,4 +4,4 @@ from core.console import FrameworkConsole
 
 
 if __name__ == '__main__':
-    FrameworkConsole(parallel=True).cmdloop()
+    FrameworkConsole(parallel=False).cmdloop()
