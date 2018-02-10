@@ -694,6 +694,7 @@ def update(silent=False, **kwargs):
     :param silent: run command silently
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
+    updated = False
     for folder, repository in zip([CONTIKI_FOLDER, FRAMEWORK_FOLDER], ["Contiki-OS", "RPL Attacks Framework"]):
         with hide(*HIDDEN_ALL):
             with lcd(folder):
@@ -713,11 +714,12 @@ def update(silent=False, **kwargs):
                         local('git pull')
                         if req_exists and hash_file("requirements.txt") != req_md5:
                             local('pip install -r requirements.txt')
+                        updated = True
             if repository == "RPL Attacks Framework":
                 remove_files(folder, "Vagrantfile")
                 remove_folder(join(folder, "provisioning"))
             logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
-    if not silent:
+    if not silent and updated:
         logger.warn("Restarting the framework...")
         restart(PIDFILE)
 
