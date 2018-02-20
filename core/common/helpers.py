@@ -286,17 +286,11 @@ def replace_in_file(path, replacements, logger=None):
                                     skip = True
                                 try:
                                     line = line.replace(match.groups(0)[0], replacement[1])
-                                    if logger:
-                                        log_replacement(match.groups(0)[0], path, replacement[1])
+                                    log_replacement(match.groups(0)[0], path, replacement[1])
                                 except IndexError:
                                     line = line.replace(match.group(), replacement[1])
                                     log_replacement(match.group(), path, replacement[1])
                                 break
-                            # failed to replace something
-                            else:
-                                log_replacement(replacement[0], path, "", success=False)
-                        else:
-                            log_replacement(replacement[0], path, "", success=False)
                 if not skip:
                     nf.write(line)
     sh.rm(path)
