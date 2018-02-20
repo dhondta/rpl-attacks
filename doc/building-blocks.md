@@ -131,6 +131,32 @@ The building block can for example be the following :
    }
  ...
  ```
+ 
+ ### Decreased Rank
+ This attack consists of attracting traffic by advertising a low rank. We proceed to explain the building block:
+ - Set `RPL_CONF_MIN_HOPRANKINC` to 0. MinHopRankIncrease is the minimum increase in Rank between a node and any of its DODAG parents
+ - Set `RPL_MAX_RANKINC` to 0, instead of `7 * RPL_MIN_HOPRANKINC`. 
+    Thus, our malicious node will now advertise the parent's rank, incremented by any value between the min and max rank increase values,
+    both of which we just set to 0. Thus, it'll advertise the same rank as its parent.
+ - Set `INFINITE_RANK` to 256, which will limit the node's rank to no more than 256 (which is comparatively low)
+ - Remove the function call to `rpl_recalculate_ranks`, which normally is called periodically and is responsible to remove
+    parents whose rank is lower than you own. Since we artificially limit our rank to 256, we must make sure not to drop
+    parents with a larger rank, since this would isolate us.
+ 
+ 
+ 
+```
+...
+"decreased-rank": {
+    "RPL_CONF_MIN_HOPRANKINC": 0,
+    "rpl-private.h": [
+      ["#define RPL_MAX_RANKINC             (7 * RPL_MIN_HOPRANKINC)", "#define RPL_MAX_RANKINC 0"],
+      ["#define INFINITE_RANK                   0xffff", "#define INFINITE_RANK 256"]
+    ],
+    "rpl-timers.c": ["rpl_recalculate_ranks();", null]
+  }
+  ...
+```
 
 
 ## 3. Building your own blocks - Methodology
