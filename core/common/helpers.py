@@ -273,6 +273,9 @@ def replace_in_file(path, replacements, logger=None):
                     if replacement[0] in line:
                         if replacement[1] in (None, ''):
                             skip = True
+                            # we have to replace, otherwise blocks like ""rpl_recalculate_ranks();", null" are ignored
+                            line = line.replace(replacement[0], "")
+                            log_replacement(replacement[0], path, "")
                         else:
                             line = line.replace(replacement[0], replacement[1])
                             log_replacement(replacement[0], path, replacement[1])
