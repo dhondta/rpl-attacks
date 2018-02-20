@@ -229,13 +229,31 @@ def remove_folder(path):
         pass
 
 
-def replace_in_file(path, replacements):
+def replace_in_file(path, replacements, logger=None):
     """
     This helper function performs a line replacement in the file located at 'path'.
 
     :param path: path to the file to be altered
     :param replacements: list of string pairs formatted as [old_line_pattern, new_line_replacement]
+    :param logger: logger object, optional. If not none, used to output if replacement is successful
     """
+    def log_replacement(to_replace, where, rep, success=True):
+        """
+        Internal function to tidy up the code down below. Logging to debug if replacement was successful.
+        :param success:
+        :param to_replace:
+        :param where:
+        :param rep:
+        :return:
+        """
+        if logger and success:
+            logger.debug("Replacing: \"{}\" in \"{}\" with \"{}\"".format(to_replace,
+                                                                          where,
+                                                                          rep))
+        if logger and not success:
+            logger.error("Replacement failed: \"{}\" in \"{}\"".format(to_replace, where))
+
+    # ========================================================
     tmp = path + '.tmp'
     if isinstance(replacements[0], string_types):
         replacements = [replacements]
@@ -257,6 +275,7 @@ def replace_in_file(path, replacements):
                             skip = True
                         else:
                             line = line.replace(replacement[0], replacement[1])
+                            log_replacement(replacement[0], path, replacement[1])
                         break
                     # then try a regex match
                     else:
@@ -267,9 +286,17 @@ def replace_in_file(path, replacements):
                                     skip = True
                                 try:
                                     line = line.replace(match.groups(0)[0], replacement[1])
+                                    if logger:
+                                        log_replacement(match.groups(0)[0], path, replacement[1])
                                 except IndexError:
                                     line = line.replace(match.group(), replacement[1])
+                                    log_replacement(match.group(), path, replacement[1])
                                 break
+                            # failed to replace something
+                            else:
+                                log_replacement(replacement[0], path, "", success=False)
+                        else:
+                            log_replacement(replacement[0], path, "", success=False)
                 if not skip:
                     nf.write(line)
     sh.rm(path)

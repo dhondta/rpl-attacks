@@ -293,7 +293,7 @@ def apply_replacements(contiki_rpl, replacements):
     :param replacements: dictionary of replacement entries
     """
     for filename, replacement in replacements.items():
-        replace_in_file(join(contiki_rpl, filename), replacement)
+        replace_in_file(join(contiki_rpl, filename), replacement, logger=logger)
 
 
 def check_structure(path, files=None, create=False, remove=False):
