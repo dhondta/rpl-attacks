@@ -11,7 +11,7 @@ from os.path import exists, expanduser, join, split
 from six import string_types
 from termcolor import colored
 from time import gmtime, strftime
-
+from collections import Counter
 
 __all__ = [
     'copy_files',
@@ -233,27 +233,11 @@ def replace_in_file(path, replacements, logger=None):
     """
     This helper function performs a line replacement in the file located at 'path'.
 
+    :param is_debug_flag: true if method is called from apply_debug_flag. Needed only for managing logger output
     :param path: path to the file to be altered
     :param replacements: list of string pairs formatted as [old_line_pattern, new_line_replacement]
     :param logger: logger object, optional. If not none, used to output if replacement is successful
     """
-    def log_replacement(to_replace, where, rep, success=True):
-        """
-        Internal function to tidy up the code down below. Logging to debug if replacement was successful.
-        :param success:
-        :param to_replace:
-        :param where:
-        :param rep:
-        :return:
-        """
-        if logger and success:
-            logger.debug("Replacing: \"{}\" in \"{}\" with \"{}\"".format(to_replace,
-                                                                          where,
-                                                                          rep))
-        if logger and not success:
-            logger.error("Replacement failed: \"{}\" in \"{}\"".format(to_replace, where))
-
-    # ========================================================
     tmp = path + '.tmp'
     if isinstance(replacements[0], string_types):
         replacements = [replacements]
@@ -264,40 +248,35 @@ def replace_in_file(path, replacements, logger=None):
         except re.error:
             regex = None
         regexs.append(regex)
+    replacements_found = []
     with open(tmp, 'w+') as nf:
         with open(path) as of:
             for line in of.readlines():
-                skip = False
                 for replacement, regex in zip(replacements, regexs):
                     # try a simple string match
                     if replacement[0] in line:
-                        if replacement[1] in (None, ''):
-                            skip = True
-                            # we have to replace, otherwise blocks like ""rpl_recalculate_ranks();", null" are ignored
-                            line = line.replace(replacement[0], "")
-                            log_replacement(replacement[0], path, "")
-                        else:
-                            line = line.replace(replacement[0], replacement[1])
-                            log_replacement(replacement[0], path, replacement[1])
-                        break
+                        line = line.replace(replacement[0], "" if replacement[1] in (None, '') else replacement[1])
+                        replacements_found.append(replacement[0])
                     # then try a regex match
                     else:
                         if regex is not None:
                             match = regex.search(line)
                             if match is not None:
-                                if replacement[1] in (None, ''):
-                                    skip = True
                                 try:
-                                    line = line.replace(match.groups(0)[0], replacement[1])
-                                    log_replacement(match.groups(0)[0], path, replacement[1])
+                                    line = line.replace(match.groups(0)[0], "" if replacement[1] in (None, '') else replacement[1])
+                                    replacements_found.append(match.groups(0)[0])
                                 except IndexError:
                                     line = line.replace(match.group(), replacement[1])
-                                    log_replacement(match.group(), path, replacement[1])
+                                    replacements_found.append([match.group()])
                                 break
-                if not skip:
-                    nf.write(line)
+                # write changed line back
+                nf.write(line)
     sh.rm(path)
     sh.mv(tmp, path)
+    if logger:
+        c = Counter(replacements_found)
+        for k in c.keys():
+            logger.debug("Found and replaced {} times: \t{} ".format(c[k], k))
 
 
 # **************************************** JSON-RELATED HELPER *****************************************
