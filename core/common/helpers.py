@@ -11,7 +11,7 @@ from os.path import exists, expanduser, join, split
 from six import string_types
 from termcolor import colored
 from time import gmtime, strftime
-
+from collections import Counter
 
 __all__ = [
     'copy_files',
@@ -229,12 +229,14 @@ def remove_folder(path):
         pass
 
 
-def replace_in_file(path, replacements):
+def replace_in_file(path, replacements, logger=None):
     """
     This helper function performs a line replacement in the file located at 'path'.
 
+    :param is_debug_flag: true if method is called from apply_debug_flag. Needed only for managing logger output
     :param path: path to the file to be altered
     :param replacements: list of string pairs formatted as [old_line_pattern, new_line_replacement]
+    :param logger: logger object, optional. If not none, used to output if replacement is successful
     """
     tmp = path + '.tmp'
     if isinstance(replacements[0], string_types):
@@ -246,34 +248,35 @@ def replace_in_file(path, replacements):
         except re.error:
             regex = None
         regexs.append(regex)
+    replacements_found = []
     with open(tmp, 'w+') as nf:
         with open(path) as of:
             for line in of.readlines():
-                skip = False
                 for replacement, regex in zip(replacements, regexs):
                     # try a simple string match
                     if replacement[0] in line:
-                        if replacement[1] in (None, ''):
-                            skip = True
-                        else:
-                            line = line.replace(replacement[0], replacement[1])
-                        break
+                        line = line.replace(replacement[0], "" if replacement[1] in (None, '') else replacement[1])
+                        replacements_found.append(replacement[0])
                     # then try a regex match
                     else:
                         if regex is not None:
                             match = regex.search(line)
                             if match is not None:
-                                if replacement[1] in (None, ''):
-                                    skip = True
                                 try:
-                                    line = line.replace(match.groups(0)[0], replacement[1])
+                                    line = line.replace(match.groups(0)[0], "" if replacement[1] in (None, '') else replacement[1])
+                                    replacements_found.append(match.groups(0)[0])
                                 except IndexError:
                                     line = line.replace(match.group(), replacement[1])
+                                    replacements_found.append([match.group()])
                                 break
-                if not skip:
-                    nf.write(line)
+                # write changed line back
+                nf.write(line)
     sh.rm(path)
     sh.mv(tmp, path)
+    if logger:
+        c = Counter(replacements_found)
+        for k in c.keys():
+            logger.debug("Found and replaced {} times: \t{} ".format(c[k], k))
 
 
 # **************************************** JSON-RELATED HELPER *****************************************
