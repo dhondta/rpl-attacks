@@ -65,7 +65,7 @@ def restart(to_be_removed=None):
     if geteuid() == 0:
         execvp("sudo", ["sudo"] + python + sys.argv)
     else:
-        execv(sys.executable, ['python'] + sys.argv)
+        execv(sys.executable, python + sys.argv)
 
 
 # ******************** SIMPLE INPUT HELPERS (FOR SUPPORT IN BOTH PYTHON 2.X AND 3.Y) *******************
