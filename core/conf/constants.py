@@ -189,8 +189,8 @@ MIN_TERM_SIZE = (40, len(BANNER.split('\n')[0]) + 10)
 # Multi-processing constants
 TASK_EXPIRATION = 60  # seconds
 
-# Desktop shortcut
-SHORTCUT = """[Desktop Entry]
+# Desktop shortcuts
+SHORTCUT_RPLA = """[Desktop Entry]
 Comment=Framework for building attack simulations and motes against the Contiki implementation of RPL
 Terminal=true
 Name=RPL Attacks Framework
@@ -199,6 +199,23 @@ Exec=python main.py
 Type=Application
 Icon=rpla-icon
 """
+
+SHORTCUT_COOJA = """[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=Cooja: The Contiki Network Simulator
+Icon=cooja-icon
+Path={path}
+Exec=/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Xmx512m -Duser.language=en -classpath %s org.contikios.cooja.Cooja
+StartupNotify=false
+StartupWMClass=org-contikios-cooja-Cooja
+OnlyShowIn=Unity;
+X-UnityGenerated=true
+""" % ':'.join(join(CONTIKI_FOLDER, "tools", "cooja", p) for p in \
+    ["build", "lib/jdom.jar", "lib/log4j.jar", "lib/jsyntaxpane.jar", "lib/swingx-all-1.6.4.jar"])
+
+
 
 # PDF report CSS theme
 REPORT_THEME = join(TEMPLATES_FOLDER, "report", "default.css")

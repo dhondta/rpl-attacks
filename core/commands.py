@@ -679,11 +679,24 @@ def setup(silent=False, **kwargs):
                   .format(join(FRAMEWORK_FOLDER, 'src/rpla-icon.svg')))
             local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
         with open(shortcut, 'w+') as f:
-            f.write(SHORTCUT.format(path=abspath(FRAMEWORK_FOLDER)))
+            f.write(SHORTCUT_RPLA.format(path=abspath(FRAMEWORK_FOLDER)))
         chmod(shortcut, int('775', 8))
-        logger.debug(" > Desktop shortcut created")
+        logger.debug(" > Desktop shortcut for RPLA created")
     else:
-        logger.debug(" > Desktop shortcut already exists")
+        logger.debug(" > Desktop shortcut for RPLA already exists")
+    # create a new desktop shortcut for the Cooja simulator
+    shortcut = join(desktop, 'cooja-simulator.desktop')
+    if not exists(shortcut):
+        with hide(*HIDDEN_ALL):
+            local('sudo cp {} /usr/share/icons/hicolor/scalable/apps/'
+                  .format(join(FRAMEWORK_FOLDER, 'src/cooja-icon.png')))
+            local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
+        with open(shortcut, 'w+') as f:
+            f.write(SHORTCUT_COOJA.format(path=join(CONTIKI_FOLDER, "tools", "cooja", "build")))
+        chmod(shortcut, int('775', 8))
+        logger.debug(" > Desktop shortcut for Cooja created")
+    else:
+        logger.debug(" > Desktop shortcut for Cooja already exists")
 
 
 @command(start_msg="UPDATING CONTIKI-OS AND RPL ATTACKS FRAMEWORK")
