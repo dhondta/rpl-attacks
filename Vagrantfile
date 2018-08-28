@@ -2,9 +2,6 @@
 # vi: set ft=ruby :
 
 # IMPORTANT :
-#  Don't forget to run the following commands to get the provider plugin installed !
-#  $ vagrant plugin install vagrant-vmware-workstation
-#  $ vagrant plugin license vagrant-vmware-workstation /path/to/license.lic
 #  If you want to get the VMs installed in a specific directory, type:
 #  Not working: $ export VAGRANT_VMWARE_CLONE_DIRECTORY=/path/to/your/vm/library
 #  $ mkdir .vagrant && cd .vagrant
@@ -26,9 +23,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.host_name = "rpl-attacks-framework"
 
   # customize VM
-  #  when --provider virtualbox
   config.vm.provider "virtualbox" do |v|
-    config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/ubuntu-16.04/versions/2.3.4/providers/virtualbox.box"
+    config.vm.box = "ubuntu/bionic64"
     # config.vm.box = "ubuntu/xenial64"
     v.gui = true
     v.name = "RPL Attacks Framework"
@@ -36,16 +32,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.cpus = 2
     v.customize ["modifyvm", :id, "--usb", "on"]
     v.customize ["modifyvm", :id, "--usbehci", "on"]
-  end
-  #  when --provider vmware_workstation
-  config.vm.provider "vmware_workstation" do |v|
-    config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/ubuntu-16.04/versions/2.3.4/providers/vmware_desktop.box"
-    v.gui = true
-    v.vmx["displayName"] = "RPL Attacks Framework"
-    v.vmx["name"] = "rpl-attacks-framework"
-    v.vmx["memsize"] = 2048
-    v.vmx["numvcpus"] = 2
-    v.vmx["usb.vbluetooth.startConnected"] = false # disable BlueTooth
   end
 
   # baseline provisioning
