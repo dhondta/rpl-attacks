@@ -9,7 +9,7 @@ funcsigs
 grip
 jinja2
 jsmin
-markdown2
+markdown
 matplotlib
 networkx
 numpy

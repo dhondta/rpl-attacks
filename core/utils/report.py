@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 import logging
-from markdown2 import markdown_path
+from markdown import markdownFromFile
 from os.path import abspath, exists, join
 from weasyprint import HTML
 
@@ -24,7 +24,7 @@ def generate_report(path, theme=None, intype='md'):
     """
     assert intype in ['html', 'md']
     if intype == 'md':
-        html = markdown_path(join(path, 'report.md'))
+        html = markdownFromFile(join(path, 'report.md'))
     else:
         html = open(join(path, 'report.html')).read()
     html = HTML(string=html, base_url='file://{}/'.format(abspath(path)))
