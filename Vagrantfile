@@ -29,6 +29,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #  when --provider virtualbox
   config.vm.provider "virtualbox" do |v|
     config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/ubuntu-16.04/versions/2.3.4/providers/virtualbox.box"
+    # config.vm.box = "ubuntu/xenial64"
     v.gui = true
     v.name = "RPL Attacks Framework"
     v.memory = 2048

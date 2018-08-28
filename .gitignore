@@ -63,3 +63,4 @@ target/
 .idea
 .vagrant
 tmp
+doc/dev/
