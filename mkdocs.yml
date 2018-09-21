@@ -18,4 +18,3 @@ markdown_extensions:
   - admonition
   - codehilite:
       linenums: true
-requirements_file: ""

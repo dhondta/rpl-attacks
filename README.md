@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/dhondta/rpl-attacks.svg?branch=master)](https://travis-ci.org/dhondta/rpl-attacks)
+[![Read The Docs](https://readthedocs.org/projects/rpl-attacks/badge/?version=latest)](https://rpl-attacks.readthedocs.io/en/latest/?badge=latest)
 [![Known Vulnerabilities](https://snyk.io/test/github/dhondta/rpl-attacks/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/rpl-attacks?targetFile=requirements.txt)
 [![DOI](https://zenodo.org/badge/22624/dhondta/rpl-attacks.svg)](https://zenodo.org/badge/latestdoi/22624/dhondta/rpl-attacks)
 [![Donate](https://img.shields.io/badge/donate-paypal-orange.svg)](https://www.paypal.me/dhondta)
