@@ -3,7 +3,7 @@ This section explains how to build a campaign of simulations. Hence, it details 
 
 ## Creation Process
 
-### (1) Prepare your JSON
+#### (1) Prepare your JSON
 
 With the interactive console:
  
@@ -25,9 +25,9 @@ Or with Fabric:
  - Malicious mote types (the C files prefixed with `malicious-` in `[FRAMEWORK_FOLDER]/templates/experiment/motes/`)
 
 
-### (2) Tune the JSON according to the following structure
+#### (2) Tune the JSON according to the following structure
 
-#### With a common topology for all simulations
+##### With a common topology for all simulations
  
  ```javascript
  {
@@ -108,7 +108,7 @@ Or with Fabric:
  >> This means that the malicious mote can be compiled with a platform different than the rest of the WSN.
 
 
-#### With a specific topology for each simulation
+##### With a specific topology for each simulation
  
 Same as for the structure with **BASE**, except that this block is not present and each experiment holds a **simulation** section with the same available parameters (if this section is not mentioned, default parameters are use
 

@@ -20,13 +20,13 @@ Here is its current literature:
 
 The following subsections show a few test cases already implemented in the current version of the framework. These attacks are available in a predefined simulation campaign file (`examples/rpl-attacks.json`).
 
-### Flooding Attack
+**Test Case 1: Flooding Attack**
 
 The malicious mote has 3, 7, 10 in its range                               |  Power tracking without the malicious mote                                                |  Power tracking with the malicious mote
 :-------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------:
 ![The malicious mote has 3, 7, 10 in its range](imgs/flooding-dag.png) | ![Power tracking without the malicious mote](imgs/flooding-powertracking-without.png) | ![Power tracking with the malicious mote](imgs/flooding-powertracking-with.png)
 
-### Versioning Attack
+**Test Case 2: Versioning Attack**
 
 Legitimate DODAG                                         |  Versioning attack in action (global repair)
 :-------------------------------------------------------:|:-----------------------------------------------------:
@@ -36,13 +36,13 @@ Power tracking without the malicious mote                          |  Power trac
 :-----------------------------------------------------------------:|:---------------------------------------------------------------:
 ![Power tracking without the malicious mote](imgs/versioning-powertracking-without.png) | ![Power tracking with the malicious mote](imgs/versioning-powertracking-with.png)
 
-### Blackhole Attack
+**Test Case 3a: Blackhole Attack**
 
 Legitimate DODAG                                               |  Blackhole attack in action
 :-------------------------------------------------------------:|:-----------------------------------------------------------:
 ![Legitimate DODAG](imgs/blackhole-attack-ex1-without.png) | ![Blackhole attack](imgs/blackhole-attack-ex1-with.png)
 
-### Test case 3b: blackhole attack
+**Test Case 3b: blackhole attack**
 
 Legitimate DODAG                                               |  Blackhole attack in action
 :-------------------------------------------------------------:|:-----------------------------------------------------------:

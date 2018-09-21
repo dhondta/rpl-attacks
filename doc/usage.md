@@ -1,6 +1,6 @@
 This section shows how to use the framework for making simulations and campaigns of simulation.
 
-## Quick Start (using the integrated console)
+## Quick Start (using the console)
 
 1. Open the console (you should see something like in the following screenshot)
 

@@ -3,7 +3,7 @@ This section explains how to generate a simulation report and how to fine-tune i
 
 ## Reporting Process
 
-### (1) Run the experiment/campaign
+#### (1) Run the experiment/campaign
 
 With the interactive console:
  
@@ -19,7 +19,7 @@ Or with Fabric:
  
  When the processing will be done, a first PDF report will be generated and available in each related experiment folder.
 
-### (2) Fine-tune the report(s)
+#### (2) Fine-tune the report(s)
 
 In each experiment folder, edit `report.md`. Especially,
 

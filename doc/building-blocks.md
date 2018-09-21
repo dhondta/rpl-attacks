@@ -18,7 +18,7 @@ The sample JSON provided in `[RPL_ATTACKS_FRAMEWORK]/templates/experiments.json`
 
 ## Tuning
 
-### Altering constants
+#### Altering constants
 
 This is about altering **RPL configuration constants** and therefore, if choosing this way to make a building block, the altered constant **MUST** start with `RPL_CONF_...` like in the example below.
 
@@ -58,7 +58,7 @@ Configurable constants can be found in `~/Contiki/core/net/rpl/rpl-conf.h` :
 
 **RFC References**: 6206, 6550
 
-### Altering code
+#### Altering code
 
 Another way to tune a mote is to perform a **line replacement**, like in the example below. Just use the targeted file as the key and a tuple with the old and the new line.
 
@@ -116,26 +116,26 @@ The tarting point is the **attack** you want to implement. This could be either 
 
 The ending point is then the new **building block**, that is, the key-value pair to be added to the `building-blocks.json`.
 
-### (1) Decompose
+#### (1) Decompose
 
 Decompose your attack according to ContikiRPL, that is, identifying where the attack should impact the workflow of the particular implementation of RPL in Contiki.
 
-### (2) Identify
+#### (2) Identify
 
 Identify the constants to be tuned (as shown in section *1. Making building blocks -- Altering constants*) and the lines of code to be replaced (as shown in section *1. Making building blocks -- Altering code*).
 
-### (3) Write
+#### (3) Write
 
 Write the building block in the JSON format like presented in the examples provided in section *2. Real Examples*.
 
-### (4) Test
+#### (4) Test
 
 Test your new building block by running multiple simulations and reviewing the results to determine if it provides what is expected.
 
 
 ## Real Examples
 
-### Increased Version
+#### Increased Version
 
 This attack can be simply simulated by using a malicious mote that increases the DAG version when receiving a DIO message and then sends a new (poisoned) DIO message to its neighbours, forcing a DAG recomputation. By this mechanism, it is easy to find the line with `dag->version;` in `rpl-icmp6.c` such that simply adding a `++` will increase the DAG version by 1 and thus implement the attack.
 
@@ -149,7 +149,7 @@ The building block is then :
 ...
 ```
 
-### Hello Flood
+#### Hello Flood
 
 This attack consists in repeatedly sending DIS messages to neighbours such that they will consume their power. The malicious could then immediately start sending DIS messages with a short interval of time, hence some RPL configuration constants, `RPL_CONF_DIS_START_DELAY` and `RPL_CONF_DIS_INTERVAL`, could be set to a low value. There only remains to find the place where DIS messages are triggered, that is, `rpl-timers.c`, and to add the triggering of a bunch of DIS messages.
 
@@ -165,7 +165,7 @@ The building block can for example be the following :
 ...
 ```
  
-### Decreased Rank
+#### Decreased Rank
 
 > **Credit**: Many thanks to [Nicolas Müller](https://github.com/mueller91), for documenting this building block and also providing a few improvements to some core modules of the framework.
 
