@@ -22,7 +22,7 @@ This section shows how to use the framework for making simulations and campaigns
  ../rpl-attacks$ python3 main.py
  ```
 
- ![RPL Attacks Framework console](doc/imgs/rpl-attacks.png)
+ ![RPL Attacks Framework console](imgs/rpl-attacks.png)
 
 2. Create a campaign of simulations
 
@@ -32,7 +32,7 @@ This section shows how to use the framework for making simulations and campaigns
 
 3. Go to your experiments folder (default: `~/Experiments`) and edit your new `sample-attacks.json` to suit your needs
 
-  See [*How to create a campaign of simulations ?*](doc/create-campaigns.md) for more information.
+  See [*How to create a campaign of simulations ?*](campaigns.md) for more information.
 
 4. Make the simulations
 

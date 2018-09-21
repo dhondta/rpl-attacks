@@ -119,8 +119,8 @@ Same as for the structure with **BASE**, except that this block is not present a
 
 Example JSON for a campaign with a BASE simulation as a template for the other simulations (with the same topology) :
 
- ![RPL Attacks Framework console](doc/imgs/json-base-simulations.png)
+ ![RPL Attacks Framework console](imgs/json-base-simulations.png)
 
 Example JSON for a campaign of heterogeneous simulations (with randomized topologies) :
 
- ![RPL Attacks Framework console](doc/imgs/json-randomized-simulations.png)d).
+ ![RPL Attacks Framework console](imgs/json-randomized-simulations.png)d).
