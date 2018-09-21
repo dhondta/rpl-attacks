@@ -17,6 +17,8 @@
    * [Simulation campaign](#simulation-campaign)
    * [Issues management](#issues-management)
 
+**Note**: In case of problem, please refer to *[Issues management](#issues-management)* first !
+
 # RPL Attacks Framework
 
 This project is aimed to provide a simple and convenient way to generate simulations and deploy malicious motes for a Wireless Sensor Network (WSN) that uses Routing Protocol for Low-power and lossy devices (RPL) as its network layer.
@@ -442,7 +444,7 @@ Example JSON for a campaign of heterogeneous simulations (with randomized topolo
  
  ## Issues management
 
-In case of bug, there should be a crash report generated in the folder of the experiment that the framework was processing. By convention, this is named '`crash-report-[...].txt`. Please copy its content (without the title) in a [new Issue](https://github.com/dhondta/rpl-attacks/issues/new).
+In case of bug, there should be a **crash report generated in the folder of the experiment** that the framework was processing. By convention, this is named **`crash-report-[...].txt`**. Please copy its content (without the title) in a [new Issue](https://github.com/dhondta/rpl-attacks/issues/new).
  
 For contributions or suggestions, please [open an Issue](https://github.com/dhondta/rpl-attacks/issues/new) and clearly explain, using an example or a use case if appropriate. 
 
