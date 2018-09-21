@@ -1,5 +1,3 @@
-# Building Blocks
-
 This section details how to build new building blocks for making attacks (by defining the building blocks to be used in the simulations).
 
 > **Note**: Do not hesitate to submit your new building blocks via a Pull Request for integration in *RPL Attacks Framework* !

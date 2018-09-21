@@ -1,5 +1,3 @@
-# Installation
-
 This section explains how to install the framework and how to tune its configuration.
 
 ## System Requirements

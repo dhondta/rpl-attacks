@@ -1,5 +1,3 @@
-# Simulation Report
-
 This section explains how to generate a simulation report and how to fine-tune it.
 
 

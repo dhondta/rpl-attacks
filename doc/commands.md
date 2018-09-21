@@ -1,5 +1,3 @@
-# Framework Commands
-
 This section explains each command included in the console of the framework.
 
 Commands are used by typing **``fab [command here]``** (e.g. ``fab launch:hello-flood``) or in the framework's console (e.g. ``launch hello-flood``).

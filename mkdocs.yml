@@ -1,4 +1,4 @@
-site_name: "RPL Attacks Framework - For simulating WSN with a malicious mote attacking RPL based on Contiki"
+site_name: "RPL Attacks Framework"
 repo_url: https://github.com/dhondta/rpl-attacks
 site_author: dhondta
 docs_dir: doc

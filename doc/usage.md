@@ -1,5 +1,3 @@
-# Usage
-
 This section shows how to use the framework for making simulations and campaigns of simulation.
 
 ## Quick Start (using the integrated console)

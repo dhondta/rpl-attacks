@@ -1,5 +1,3 @@
-# Campaigns of Simulations
-
 This section explains how to build a campaign of simulations. Hence, it details the possible parameters and how to use them for tuning the simulations.
 
 
