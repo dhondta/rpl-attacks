@@ -1,6 +1,10 @@
-# How to make new building blocks ?
+# Building Blocks
 
-## 1. Making building blocks
+This section details how to build new building blocks for making attacks (by defining the building blocks to be used in the simulations).
+
+> **Note**: Do not hesitate to submit your new building blocks via a Pull Request for integration in *RPL Attacks Framework* !
+
+## Basics
 
 Building blocks are made in the JSON file located at `[RPL_ATTACKS_FRAMEWORK]/templates/building-blocks.json`.
 
@@ -12,6 +16,9 @@ The sample JSON provided in `[RPL_ATTACKS_FRAMEWORK]/templates/experiments.json`
 > Both altering a mote file or altering Contiki are possible in an automated way with this framework. This simply performs moves of code files or replacements in source files before compiling, then restoring Contiki state after the motes are compiled. Unless there is a bug, RPL Attacks Framework does modify Contiki while making motes but restores it afterwards.
 > 
 > Note that using an alternative ContikiRPL library is done through an `ext_lib` parameter in a JSON of an experiment, not in building blocks.
+
+
+## Tuning
 
 ### Altering constants
 
@@ -100,7 +107,35 @@ The possible keys are :
 > 
 > Beware that if the line to be replaced appears several times, it will be replaced for each found instance.
 
-## 2. Real Examples
+
+## Build Process
+
+Building blocks nearly always contain a mix of several ways to alter the code. Creating a building block can always be processed according to the following process:
+
+![Building-block Creation Process](imgs/bb-creation-process.png)
+
+The tarting point is the **attack** you want to implement. This could be either a new or existent attack.
+
+The ending point is then the new **building block**, that is, the key-value pair to be added to the `building-blocks.json`.
+
+### (1) Decompose
+
+Decompose your attack according to ContikiRPL, that is, identifying where the attack should impact the workflow of the particular implementation of RPL in Contiki.
+
+### (2) Identify
+
+Identify the constants to be tuned (as shown in section *1. Making building blocks -- Altering constants*) and the lines of code to be replaced (as shown in section *1. Making building blocks -- Altering code*).
+
+### (3) Write
+
+Write the building block in the JSON format like presented in the examples provided in section *2. Real Examples*.
+
+### (4) Test
+
+Test your new building block by running multiple simulations and reviewing the results to determine if it provides what is expected.
+
+
+## Real Examples
 
 ### Increased Version
 
@@ -108,13 +143,13 @@ This attack can be simply simulated by using a malicious mote that increases the
 
 The building block is then :
 
- ```
- ...
-   "increased-version": {
-     "rpl-icmp6.c": ["dag->version;", "dag->version++;"]
-   }
- ...
- ```
+```
+...
+  "increased-version": {
+    "rpl-icmp6.c": ["dag->version;", "dag->version++;"]
+  }
+...
+```
 
 ### Hello Flood
 
@@ -122,29 +157,27 @@ This attack consists in repeatedly sending DIS messages to neighbours such that 
 
 The building block can for example be the following :
 
- ```
- ...
-   "hello-flood": {
-     "RPL_CONF_DIS_INTERVAL": 0,
-     "RPL_CONF_DIS_START_DELAY": 0,
-     "rpl-timers.c": ["next_dis++;", "next_dis++; int i=0; while (i<20) {i++; dis_output(NULL);}"]
-   }
- ...
- ```
+```
+...
+  "hello-flood": {
+    "RPL_CONF_DIS_INTERVAL": 0,
+    "RPL_CONF_DIS_START_DELAY": 0,
+    "rpl-timers.c": ["next_dis++;", "next_dis++; int i=0; while (i<20) {i++; dis_output(NULL);}"]
+  }
+...
+```
  
- ### Decreased Rank
- This attack consists of attracting traffic by advertising a low rank. We proceed to explain the building block:
- - Set `RPL_CONF_MIN_HOPRANKINC` to 0. MinHopRankIncrease is the minimum increase in Rank between a node and any of its DODAG parents
- - Set `RPL_MAX_RANKINC` to 0, instead of `7 * RPL_MIN_HOPRANKINC`. 
-    Thus, our malicious node will now advertise the parent's rank, incremented by any value between the min and max rank increase values,
-    both of which we just set to 0. Thus, it'll advertise the same rank as its parent.
- - Set `INFINITE_RANK` to 256, which will limit the node's rank to no more than 256 (which is comparatively low)
- - Remove the function call to `rpl_recalculate_ranks`, which normally is called periodically and is responsible to remove
-    parents whose rank is lower than you own. Since we artificially limit our rank to 256, we must make sure not to drop
-    parents with a larger rank, since this would isolate us.
+### Decreased Rank
+
+> **Credit**: Many thanks to [Nicolas Müller](https://github.com/mueller91), for documenting this building block and also providing a few improvements to some core modules of the framework.
+
+This attack consists of attracting traffic by advertising a low rank. This building block is made the following way:
+- Set `RPL_CONF_MIN_HOPRANKINC` to 0. MinHopRankIncrease is the minimum increase in Rank between a node and any of its DODAG parents.
+- Set `RPL_MAX_RANKINC` to 0, instead of `7 * RPL_MIN_HOPRANKINC`. Thus, our malicious node will now advertise the parent's rank, incremented by any value between the min and max rank increase values, both of which we just set to 0. Thus, it'll advertise the same rank as its parent.
+- Set `INFINITE_RANK` to 256, which will limit the node's rank to no more than 256 (which is comparatively low).
+- Remove the function call to `rpl_recalculate_ranks`, which normally is called periodically and is responsible to remove parents whose rank is lower than you own. Since we artificially limit our rank to 256, we must make sure not to drop parents with a larger rank, since this would isolate us.
  
- 
- 
+
 ```
 ...
 "decreased-rank": {
@@ -155,27 +188,6 @@ The building block can for example be the following :
     ],
     "rpl-timers.c": ["rpl_recalculate_ranks();", null]
   }
-  ...
+...
 ```
 
-
-## 3. Building your own blocks - Methodology
-
-Building blocks nearly always contain a mix of several ways to alter the code. Creating a build block can always be processed according to the following process :
-
-![Building-block Creation Process](imgs/bb-creation-process.png)
-
-The tarting point is the **attack** you want to implement. This could be either a new or existent attack.
-
-1. **Decompose** your attack according to ContikiRPL, that is, identifying where the attack should impact the workflow of the particular implementation of RPL in Contiki.
-
-2. **Identify** the constants to be tuned (as shown in section *1. Making building blocks -- Altering constants*) and the lines of code to be replaced (as shown in section *1. Making building blocks -- Altering code*).
-
-3. **Write** the building block in the JSON format like presented in the examples provided in section *2. Real Examples*.
-
-4. **Test** your new building block by running multiple simulations and reviewing the results to determine if it provides what is expected.
-
-The ending point is then the new **building block**, that is, the key-value pair to be added to the `building-blocks.json`.
-
-
-Do not hesitate to submit your new building blocks via a Pull Request for integration in *RPL Attacks Framework* !

@@ -442,7 +442,7 @@ Example JSON for a campaign of heterogeneous simulations (with randomized topolo
 
  ![RPL Attacks Framework console](doc/imgs/json-randomized-simulations.png)
  
- ## Issues management
+## Issues management
 
 In case of bug, there should be a **crash report generated in the folder of the experiment** that the framework was processing. By convention, this is named **`crash-report-[...].txt`**. Please copy its content (without the title) in a [new Issue](https://github.com/dhondta/rpl-attacks/issues/new).
  

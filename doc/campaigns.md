@@ -1,6 +1,11 @@
-# How to create a campaign of simulations ?
+# Campaigns of Simulations
 
-## 1. Prepare your JSON
+This section explains how to build a campaign of simulations. Hence, it details the possible parameters and how to use them for tuning the simulations.
+
+
+## Creation Process
+
+### (1) Prepare your JSON
 
 With the interactive console:
  
@@ -22,9 +27,9 @@ Or with Fabric:
  - Malicious mote types (the C files prefixed with `malicious-` in `[FRAMEWORK_FOLDER]/templates/experiment/motes/`)
 
 
-## 2. Tune the JSON according to the following structure
+### (2) Tune the JSON according to the following structure
 
-### With a common topology for all simulations
+#### With a common topology for all simulations
  
  ```javascript
  {
@@ -105,6 +110,17 @@ Or with Fabric:
  >> This means that the malicious mote can be compiled with a platform different than the rest of the WSN.
 
 
-### With a specific topology for each simulation
+#### With a specific topology for each simulation
  
-Same as for the structure with **BASE**, except that this block is not present and each experiment holds a **simulation** section with the same available parameters (if this section is not mentioned, default parameters are used).
+Same as for the structure with **BASE**, except that this block is not present and each experiment holds a **simulation** section with the same available parameters (if this section is not mentioned, default parameters are use
+
+
+## Examples
+
+Example JSON for a campaign with a BASE simulation as a template for the other simulations (with the same topology) :
+
+ ![RPL Attacks Framework console](doc/imgs/json-base-simulations.png)
+
+Example JSON for a campaign of heterogeneous simulations (with randomized topologies) :
+
+ ![RPL Attacks Framework console](doc/imgs/json-randomized-simulations.png)d).
