@@ -65,6 +65,8 @@ It was tested with **Python 2 and 3**.
 
 ## Virtual Machine Deployment
 
+**Important Note**: This section is subject to withdrawal
+
 **This section only applies if you want to deploy an appliance. If you want to install on your computer, please go to the next section.**
 
 1. Clone this repository
@@ -103,7 +105,9 @@ It was tested with **Python 2 and 3**.
 
 **This section only applies if did not followed the previous section.**
 
-1. Clone this repository
+**Important Note**: For more ease, it is advised to download and deploy [InstantContiki at Sourceforge.net](https://sourceforge.net/projects/contiki/files/Instant%20Contiki/)
+
+1. Clone the repository
 
  ```
  $ git clone https://github.com/dhondta/rpl-attacks.git
@@ -116,6 +120,12 @@ It was tested with **Python 2 and 3**.
  > Unsetting: `git config --global --unset http.proxy`
  > 
  > Getting: `git config --global --get http.proxy`
+ 
+   If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
+
+ ```
+ $ git clone https://github.com/contiki-os/contiki.git
+ ```
 
 2. Install system requirements
 
@@ -140,15 +150,17 @@ It was tested with **Python 2 and 3**.
 3. Install Python requirements
 
  ```
- $ sudo apt-get install python-pip
- $ sudo pip install -r requirements.txt
+ $ cd rpl-attacks
+ rpl-attacks$ sudo apt-get install python-pip
+ rpl-attacks$ sudo pip install -r requirements.txt
  ```
 
  or
 
  ```
- $ sudo apt-get install python3-pip
- $ sudo pip3 install -r requirements.txt
+ $ cd rpl-attacks
+ rpl-attacks$ sudo apt-get install python3-pip
+ rpl-attacks$ sudo pip3 install -r requirements.txt
  ```
 
  > **Behind a proxy ?**
@@ -158,8 +170,8 @@ It was tested with **Python 2 and 3**.
 4. Setup dependencies and test the framework
 
  ```
- ../rpl-attacks$ fab setup
- ../rpl-attacks$ fab test
+ rpl-attacks$ fab setup
+ rpl-attacks$ fab test
  ```
 
 
