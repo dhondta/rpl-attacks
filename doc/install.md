@@ -17,7 +17,7 @@ It was tested with **Python 2 and 3**.
 
 1. Clone the repository
 
-``` bash tab="Bash"
+```bash tab="Bash"
 $ git clone https://github.com/dhondta/rpl-attacks.git
 ```
  
@@ -31,13 +31,13 @@ $ git clone https://github.com/dhondta/rpl-attacks.git
  
 If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
 
-``` bash tab="Bash"
+```bash tab="Bash"
 $ git clone https://github.com/contiki-os/contiki.git
 ```
 
 2. Install system requirements
 
-``` bash tab="Bash"
+```bash tab="Bash"
 $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
 $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
 $ sudo apt-get install python-numpy python-scipy
@@ -51,13 +51,13 @@ $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
  
 If not using InstantContiki appliance, also install :
 
-``` bash tab="Bash"
+```bash tab="Bash"
 $ sudo apt-get install build-essential binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug binutils-avr gcc-avr gdb-avr avr-libc avrdude openjdk-7-jdk openjdk-7-jre ant libncurses5-dev lib32ncurses5
 ```
 
 3. Install Python requirements
 
-``` bash tab="Bash"
+```bash tab="Bash"
 $ cd rpl-attacks
 rpl-attacks$ sudo apt-get install python-pip
 rpl-attacks$ sudo pip install -r requirements.txt
@@ -65,7 +65,7 @@ rpl-attacks$ sudo pip install -r requirements.txt
 
 or
 
-``` bash tab="Bash"
+```bash tab="Bash"
 $ cd rpl-attacks
 rpl-attacks$ sudo apt-get install python3-pip
 rpl-attacks$ sudo pip3 install -r requirements.txt
@@ -77,7 +77,7 @@ rpl-attacks$ sudo pip3 install -r requirements.txt
  
 4. Setup dependencies and test the framework
 
-``` bash tab="Bash"
+```bash tab="Bash"
 rpl-attacks$ fab setup
 rpl-attacks$ fab test
 ```
@@ -88,13 +88,13 @@ rpl-attacks$ fab test
 
 Create a default configuration file
 
-``` bash tab="Bash"
+```bash tab="Bash"
 ../rpl-attacks$ fab config
 ```
 
  or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
 
-``` bash tab="Bash"
+```bash tab="Bash"
 ../rpl-attacks$ fab config:/opt/contiki,~/simulations
 ```
 
