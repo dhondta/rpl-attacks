@@ -21,7 +21,7 @@ It was tested with **Python 2 and 3**.
  $ git clone https://github.com/dhondta/rpl-attacks.git
  ```
  
-!!! reminder "Behind a proxy ?"
+!!! tip "Behind a proxy ?"
     
     Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
     
@@ -45,7 +45,7 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
  $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
  ```
 
-!!! reminder "Behind a proxy ?"
+!!! tip "Behind a proxy ?"
 
     Do not forget to configure your Network system settings (or manually edit `/etc/apt/apt.conf`).
  
@@ -71,7 +71,7 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
  rpl-attacks$ sudo pip3 install -r requirements.txt
  ```
 
-!!! reminder "Behind a proxy ?"
+!!! tip "Behind a proxy ?"
 
     Do not forget to add option `--proxy=http://[user]:[pwd]@[host]:[port]` to your pip command.
  
@@ -95,7 +95,7 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
  $ git clone https://github.com/dhondta/rpl-attacks.git
  ```
  
-!!! reminder "Behind a proxy ?"
+!!! tip "Behind a proxy ?"
 
     Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
     
@@ -109,7 +109,7 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
  $ vagrant up
  ```
  
-!!! reminder "Behind a proxy ?"
+!!! tip "Behind a proxy ?"
 
     Install the plugin: `vagrant plugin install vagrant-proxyconf`
     
@@ -141,11 +141,11 @@ Parameters :
 
 - `contiki_folder`: the path to your contiki installation
 
->  [default: ~/contiki]
+>  [default: `~/contiki`]
 
 - `experiments_fodler`: the path to your experiments folder
 
->  [default: ~/Experiments]
+>  [default: `~/Experiments`]
 
 These parameters can be later tuned by editing ``~/.rpl-attacks.conf``. These are written in a section named "RPL Attacks Framework Configuration".
 
