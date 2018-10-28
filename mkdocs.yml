@@ -16,5 +16,4 @@ theme: readthedocs
 markdown_extensions:
   - admonition
   - fenced_code
-  - codehilite:
-      linenums: true
+  - codehilite

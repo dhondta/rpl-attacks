@@ -7,6 +7,7 @@ With this framework, it is possible to easily define campaign of simulations eit
 This framework is based on an academical project that occured in 2016 in the scope of a course of *Mobile and Embedded Devices*.
 
 Here is its current literature:
+
 - [Academical report](report.pdf)
 
 ## Objectives
