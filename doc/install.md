@@ -17,8 +17,14 @@ It was tested with **Python 2 and 3**.
 
 1. Clone the repository
 
-```session
+```sh
 $ git clone https://github.com/dhondta/rpl-attacks.git
+```
+ 
+If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
+
+```sh
+$ git clone https://github.com/contiki-os/contiki.git
 ```
  
 !!! tip "Behind a proxy ?"
@@ -28,36 +34,33 @@ $ git clone https://github.com/dhondta/rpl-attacks.git
     Unsetting: `git config --global --unset http.proxy`
     
     Getting: `git config --global --get http.proxy`
- 
-If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
-
-```session
-$ git clone https://github.com/contiki-os/contiki.git
-```
 
 2. Install system requirements
 
-```session
+```sh
 $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
 $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
 $ sudo apt-get install python-numpy python-scipy
 $ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
 $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
 ```
+ 
+If not using InstantContiki appliance, also install :
+
+```sh
+$ sudo apt-get install binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug
+$ sudo apt-get install binutils-avr gcc-avr gdb-avr avr-libc avrdude
+$ sudo apt-get install openjdk-7-jdk openjdk-7-jre ant
+$ sudo apt-get install libncurses5-dev lib32ncurses5
+```
 
 !!! tip "Behind a proxy ?"
 
     Do not forget to configure your Network system settings (or manually edit `/etc/apt/apt.conf`).
- 
-If not using InstantContiki appliance, also install :
-
-```session
-$ sudo apt-get install build-essential binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug binutils-avr gcc-avr gdb-avr avr-libc avrdude openjdk-7-jdk openjdk-7-jre ant libncurses5-dev lib32ncurses5
-```
 
 3. Install Python requirements
 
-```session
+```sh
 $ cd rpl-attacks
 rpl-attacks$ sudo apt-get install python-pip
 rpl-attacks$ sudo pip install -r requirements.txt
@@ -65,7 +68,7 @@ rpl-attacks$ sudo pip install -r requirements.txt
 
 or
 
-```session
+```sh
 $ cd rpl-attacks
 rpl-attacks$ sudo apt-get install python3-pip
 rpl-attacks$ sudo pip3 install -r requirements.txt
@@ -77,7 +80,7 @@ rpl-attacks$ sudo pip3 install -r requirements.txt
  
 4. Setup dependencies and test the framework
 
-```session
+```sh
 rpl-attacks$ fab setup
 rpl-attacks$ fab test
 ```
@@ -88,13 +91,13 @@ rpl-attacks$ fab test
 
 Create a default configuration file
 
-```session
+```sh
 ../rpl-attacks$ fab config
 ```
 
  or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
 
-```session
+```sh
 ../rpl-attacks$ fab config:/opt/contiki,~/simulations
 ```
 
