@@ -365,7 +365,16 @@ def render_templates(path, only_malicious=False, **params):
         write_template(join(path, "with-malicious"), env, template_malicious, **templates[template_malicious])
         return replacements
     # generate the list of motes (first one is the root, last one is the malicious mote)
-    motes = params['motes'] or eval(params["wsn_gen_algo"])(defaults=DEFAULTS, **params)
+    motes = params['motes']
+    if motes is None:
+        # strictly check for WSN generation function (for avoiding code injection in 'eval')
+        from core.common.wsngenerator import __all__ as wsn_algos
+        wsn_algo = params["wsn_gen_algo"]
+        if wsn_algo in wsn_algos:
+            motes = eval(wsn_algo)(defaults=DEFAULTS, **params)
+        else:
+            logger.error("Bad list of motes")
+            return
     # fill in simulation file templates
     templates["report.md"] = deepcopy(params)
     templates["motes/Makefile"]["target"] = params["target"]
