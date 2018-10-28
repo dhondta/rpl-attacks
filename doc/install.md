@@ -17,7 +17,7 @@ It was tested with **Python 2 and 3**.
 
 1. Clone the repository
 
- ```sh
+ ```session
  $ git clone https://github.com/dhondta/rpl-attacks.git
  ```
  
@@ -31,13 +31,13 @@ It was tested with **Python 2 and 3**.
  
 If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
 
- ```sh
+ ```session
  $ git clone https://github.com/contiki-os/contiki.git
  ```
 
 2. Install system requirements
 
- ```sh
+ ```session
  $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
  $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
  $ sudo apt-get install python-numpy python-scipy
@@ -51,13 +51,13 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
  
    If not using InstantContiki appliance, also install :
 
- ```sh
+ ```session
  $ sudo apt-get install build-essential binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug binutils-avr gcc-avr gdb-avr avr-libc avrdude openjdk-7-jdk openjdk-7-jre ant libncurses5-dev lib32ncurses5
  ```
 
 3. Install Python requirements
 
- ```sh
+ ```session
  $ cd rpl-attacks
  rpl-attacks$ sudo apt-get install python-pip
  rpl-attacks$ sudo pip install -r requirements.txt
@@ -65,7 +65,7 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
 
  or
 
- ```sh
+ ```session
  $ cd rpl-attacks
  rpl-attacks$ sudo apt-get install python3-pip
  rpl-attacks$ sudo pip3 install -r requirements.txt
@@ -77,7 +77,7 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
  
 4. Setup dependencies and test the framework
 
- ```sh
+ ```session
  rpl-attacks$ fab setup
  rpl-attacks$ fab test
  ```
@@ -88,13 +88,13 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
 
 Create a default configuration file
 
- ```sh
+ ```session
  ../rpl-attacks$ fab config
  ```
 
  or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
 
- ```sh
+ ```session
  ../rpl-attacks$ fab config:/opt/contiki,~/simulations
  ```
 
