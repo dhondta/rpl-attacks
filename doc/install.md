@@ -17,15 +17,15 @@ It was tested with **Python 2 and 3**.
 
 1. Clone the repository
 
-    ```sh
-    $ git clone https://github.com/dhondta/rpl-attacks.git
-    ```
+        ```sh
+        $ git clone https://github.com/dhondta/rpl-attacks.git
+        ```
      
     If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
 
-    ```sh
-    $ git clone https://github.com/contiki-os/contiki.git
-    ```
+        ```sh
+        $ git clone https://github.com/contiki-os/contiki.git
+        ```
      
     !!! tip "Behind a proxy ?"
         
@@ -37,22 +37,22 @@ It was tested with **Python 2 and 3**.
 
 2. Install system requirements
 
-    ```sh
-    $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
-    $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
-    $ sudo apt-get install python-numpy python-scipy
-    $ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
-    $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
-    ```
+        ```sh
+        $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
+        $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
+        $ sudo apt-get install python-numpy python-scipy
+        $ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
+        $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
+        ```
      
     If not using InstantContiki appliance, also install :
 
-    ```sh
-    $ sudo apt-get install binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug
-    $ sudo apt-get install binutils-avr gcc-avr gdb-avr avr-libc avrdude
-    $ sudo apt-get install openjdk-7-jdk openjdk-7-jre ant
-    $ sudo apt-get install libncurses5-dev lib32ncurses5
-    ```
+        ```sh
+        $ sudo apt-get install binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug
+        $ sudo apt-get install binutils-avr gcc-avr gdb-avr avr-libc avrdude
+        $ sudo apt-get install openjdk-7-jdk openjdk-7-jre ant
+        $ sudo apt-get install libncurses5-dev lib32ncurses5
+        ```
 
     !!! tip "Behind a proxy ?"
 
@@ -60,19 +60,19 @@ It was tested with **Python 2 and 3**.
 
 3. Install Python requirements
 
-    ```sh
-    $ cd rpl-attacks
-    rpl-attacks$ sudo apt-get install python-pip
-    rpl-attacks$ sudo pip install -r requirements.txt
-    ```
+        ```sh
+        $ cd rpl-attacks
+        rpl-attacks$ sudo apt-get install python-pip
+        rpl-attacks$ sudo pip install -r requirements.txt
+        ```
 
     or
 
-    ```sh
-    $ cd rpl-attacks
-    rpl-attacks$ sudo apt-get install python3-pip
-    rpl-attacks$ sudo pip3 install -r requirements.txt
-    ```
+        ```sh
+        $ cd rpl-attacks
+        rpl-attacks$ sudo apt-get install python3-pip
+        rpl-attacks$ sudo pip3 install -r requirements.txt
+        ```
 
     !!! tip "Behind a proxy ?"
 
@@ -80,10 +80,10 @@ It was tested with **Python 2 and 3**.
      
 4. Setup dependencies and test the framework
 
-    ```sh
-    rpl-attacks$ fab setup
-    rpl-attacks$ fab test
-    ```
+        ```sh
+        rpl-attacks$ fab setup
+        rpl-attacks$ fab test
+        ```
 
 ## Non-Standard Configuration
 
@@ -91,15 +91,15 @@ It was tested with **Python 2 and 3**.
 
 Create a default configuration file
 
-    ```sh
-    ../rpl-attacks$ fab config
-    ```
+        ```sh
+        ../rpl-attacks$ fab config
+        ```
 
     or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
 
-    ```sh
-    ../rpl-attacks$ fab config:/opt/contiki,~/simulations
-    ```
+        ```sh
+        ../rpl-attacks$ fab config:/opt/contiki,~/simulations
+        ```
 
 Parameters :
 
