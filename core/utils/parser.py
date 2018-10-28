@@ -4,7 +4,7 @@ import numpy
 from csv import DictReader, DictWriter
 from matplotlib import pyplot
 from matplotlib.patches import FancyArrowPatch
-from os.path import basename, join, normpath
+from os.path import basename, isdir, join, normpath
 from re import finditer, match, MULTILINE
 from subprocess import Popen, PIPE
 
@@ -18,14 +18,21 @@ __all__ = [
 
 # *************************************** MAIN PARSING FUNCTION ****************************************
 def parsing_chain(path):
-    convert_pcap_to_csv(path)
-    convert_powertracker_log_to_csv(path)
-    draw_dodag(path)
-    draw_power_barchart(path)
+    """
+    This function chains the conversion and drawings for exploiting the data collected while running a Cooja
+     simulation into relevant results.
+
+    :param path: path to the experiment (including [with-|without-malicious])
+    """
+    assert isdir(path)
+    __convert_pcap_to_csv(path)
+    __convert_powertracker_log_to_csv(path)
+    __draw_dodag(path)
+    __draw_power_barchart(path)
 
 
 # *********************************** SIMULATION PARSING FUNCTIONS *************************************
-def convert_pcap_to_csv(path):
+def __convert_pcap_to_csv(path):
     """
     This function creates a CSV file (to ./results) from a PCAP file (from ./data).
     This is inspired from https://github.com/sieben/makesense/blob/master/makesense/parser.py.
@@ -59,7 +66,7 @@ PT_ITEMS = ['monitored', 'on', 'tx', 'rx', 'int']
 PT_REGEX = r'^({})_(?P<mote_id>\d+) {} (?P<{}>\d+)'
 
 
-def convert_powertracker_log_to_csv(path):
+def __convert_powertracker_log_to_csv(path):
     """
     This function creates a CSV file (to ./results) from a PowerTracker log file (from ./data).
     This is inspired from https://github.com/sieben/makesense/blob/master/makesense/parser.py.
@@ -91,7 +98,7 @@ def convert_powertracker_log_to_csv(path):
 RELATIONSHIP_REGEX = r'^\d+\s+ID\:(?P<mote_id>\d+)\s+#L\s+(?P<parent_id>\d+)\s+(?P<flag>\d+)$'
 
 
-def draw_dodag(path):
+def __draw_dodag(path):
     """
     This function draws the DODAG (to ./results) from the list of motes (from ./simulation.csc) and the list of
      edges (from ./data/relationships.log).
@@ -134,7 +141,7 @@ def draw_dodag(path):
     pyplot.savefig(join(results, 'dodag.png'), arrow_style=FancyArrowPatch)
 
 
-def draw_power_barchart(path):
+def __draw_power_barchart(path):
     """
     This function plots the average power tracking data from the CSV at:
      [EXPERIMENT]/[with-|without-malicious]/results/powertracker.csv
