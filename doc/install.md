@@ -17,9 +17,9 @@ It was tested with **Python 2 and 3**.
 
 1. Clone the repository
 
- ```session
- $ git clone https://github.com/dhondta/rpl-attacks.git
- ```
+``` bash tab="Bash"
+$ git clone https://github.com/dhondta/rpl-attacks.git
+```
  
 !!! tip "Behind a proxy ?"
     
@@ -31,45 +31,45 @@ It was tested with **Python 2 and 3**.
  
 If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
 
- ```session
- $ git clone https://github.com/contiki-os/contiki.git
- ```
+``` bash tab="Bash"
+$ git clone https://github.com/contiki-os/contiki.git
+```
 
 2. Install system requirements
 
- ```session
- $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
- $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
- $ sudo apt-get install python-numpy python-scipy
- $ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
- $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
- ```
+``` bash tab="Bash"
+$ sudo apt-get install gfortran libopenblas-dev liblapack-dev
+$ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
+$ sudo apt-get install python-numpy python-scipy
+$ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
+$ sudo apt-get install imagemagick libcairo2-dev libffi-dev
+```
 
 !!! tip "Behind a proxy ?"
 
     Do not forget to configure your Network system settings (or manually edit `/etc/apt/apt.conf`).
  
-   If not using InstantContiki appliance, also install :
+If not using InstantContiki appliance, also install :
 
- ```session
- $ sudo apt-get install build-essential binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug binutils-avr gcc-avr gdb-avr avr-libc avrdude openjdk-7-jdk openjdk-7-jre ant libncurses5-dev lib32ncurses5
- ```
+``` bash tab="Bash"
+$ sudo apt-get install build-essential binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug binutils-avr gcc-avr gdb-avr avr-libc avrdude openjdk-7-jdk openjdk-7-jre ant libncurses5-dev lib32ncurses5
+```
 
 3. Install Python requirements
 
- ```session
- $ cd rpl-attacks
- rpl-attacks$ sudo apt-get install python-pip
- rpl-attacks$ sudo pip install -r requirements.txt
- ```
+``` bash tab="Bash"
+$ cd rpl-attacks
+rpl-attacks$ sudo apt-get install python-pip
+rpl-attacks$ sudo pip install -r requirements.txt
+```
 
- or
+or
 
- ```session
- $ cd rpl-attacks
- rpl-attacks$ sudo apt-get install python3-pip
- rpl-attacks$ sudo pip3 install -r requirements.txt
- ```
+``` bash tab="Bash"
+$ cd rpl-attacks
+rpl-attacks$ sudo apt-get install python3-pip
+rpl-attacks$ sudo pip3 install -r requirements.txt
+```
 
 !!! tip "Behind a proxy ?"
 
@@ -77,10 +77,10 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
  
 4. Setup dependencies and test the framework
 
- ```session
- rpl-attacks$ fab setup
- rpl-attacks$ fab test
- ```
+``` bash tab="Bash"
+rpl-attacks$ fab setup
+rpl-attacks$ fab test
+```
 
 ## Non-Standard Configuration
 
@@ -88,15 +88,15 @@ If not using InstantContiki appliance, also clone the [repository of Contiki](ht
 
 Create a default configuration file
 
- ```session
- ../rpl-attacks$ fab config
- ```
+``` bash tab="Bash"
+../rpl-attacks$ fab config
+```
 
  or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
 
- ```session
- ../rpl-attacks$ fab config:/opt/contiki,~/simulations
- ```
+``` bash tab="Bash"
+../rpl-attacks$ fab config:/opt/contiki,~/simulations
+```
 
 Parameters :
 
@@ -117,4 +117,3 @@ Example configuration file :
 contiki_folder = /opt/contiki
 experiments_folder = ~/simulations
 ```
-
