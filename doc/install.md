@@ -11,7 +11,9 @@ It was tested with **Python 2 and 3**.
 
 **This section only applies if did not followed the previous section.**
 
-**Important Note**: For more ease, it is advised to download and deploy [InstantContiki at Sourceforge.net](https://sourceforge.net/projects/contiki/files/Instant%20Contiki/)
+!!! warning "Important Note"
+
+    For more ease, it is advised to download and deploy [InstantContiki at Sourceforge.net](https://sourceforge.net/projects/contiki/files/Instant%20Contiki/)
 
 1. Clone the repository
 
@@ -19,15 +21,15 @@ It was tested with **Python 2 and 3**.
  $ git clone https://github.com/dhondta/rpl-attacks.git
  ```
  
- > **Behind a proxy ?**
- > 
- > Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
- > 
- > Unsetting: `git config --global --unset http.proxy`
- > 
- > Getting: `git config --global --get http.proxy`
+!!! reminder "Behind a proxy ?"
+    
+    Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
+    
+    Unsetting: `git config --global --unset http.proxy`
+    
+    Getting: `git config --global --get http.proxy`
  
-   If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
+If not using InstantContiki appliance, also clone the [repository of Contiki](https://github.com/contiki-os/contiki) :
 
  ```
  $ git clone https://github.com/contiki-os/contiki.git
@@ -43,9 +45,9 @@ It was tested with **Python 2 and 3**.
  $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
  ```
 
- > **Behind a proxy ?**
- > 
- > Do not forget to configure your Network system settings (or manually edit `/etc/apt/apt.conf`).
+!!! reminder "Behind a proxy ?"
+
+    Do not forget to configure your Network system settings (or manually edit `/etc/apt/apt.conf`).
  
    If not using InstantContiki appliance, also install :
 
@@ -69,9 +71,9 @@ It was tested with **Python 2 and 3**.
  rpl-attacks$ sudo pip3 install -r requirements.txt
  ```
 
- > **Behind a proxy ?**
- > 
- > Do not forget to add option `--proxy=http://[user]:[pwd]@[host]:[port]` to your pip command.
+!!! reminder "Behind a proxy ?"
+
+    Do not forget to add option `--proxy=http://[user]:[pwd]@[host]:[port]` to your pip command.
  
 4. Setup dependencies and test the framework
 
@@ -93,13 +95,13 @@ It was tested with **Python 2 and 3**.
  $ git clone https://github.com/dhondta/rpl-attacks.git
  ```
  
- > **Behind a proxy ?**
- > 
- > Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
- > 
- > Unsetting: `git config --global --unset http.proxy`
- > 
- > Getting: `git config --global --get http.proxy`
+!!! reminder "Behind a proxy ?"
+
+    Setting: `git config --global http.proxy http://[user]:[pwd]@[host]:[port]`
+    
+    Unsetting: `git config --global --unset http.proxy`
+    
+    Getting: `git config --global --get http.proxy`
 
 2. Create the VM
 
@@ -107,16 +109,16 @@ It was tested with **Python 2 and 3**.
  $ vagrant up
  ```
  
- > **Behind a proxy ?**
- > 
- > Install the plugin: `vagrant plugin install vagrant-proxyconf`
- > 
- > Configure Vagrant: Uncomment the lines starting with `config.proxy` in the `Vagrantfile`
+!!! reminder "Behind a proxy ?"
 
- > **Troubleshooting**:
- > 
- > - Ensure the latest version of Vagrant is installed
- > - If using `virtualbox` provider, ensure Oracle Extension Pack is installed (see [Oracle website](https://www.google.be/#q=virtualbox+oracle+extension+pack+install))
+    Install the plugin: `vagrant plugin install vagrant-proxyconf`
+    
+    Configure Vagrant: Uncomment the lines starting with `config.proxy` in the `Vagrantfile`
+
+!!! danger "Troubleshooting"
+
+    - Ensure the latest version of Vagrant is installed
+    - If using `virtualbox` provider, ensure Oracle Extension Pack is installed (see [Oracle website](https://www.google.be/#q=virtualbox+oracle+extension+pack+install))
 
 
 ## Non-Standard Configuration
