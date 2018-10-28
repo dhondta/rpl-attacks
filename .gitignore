@@ -62,5 +62,6 @@ target/
 # RPL-Attacks
 .idea
 .vagrant
+.obsolete
 tmp
 doc/dev/
