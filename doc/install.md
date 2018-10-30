@@ -33,6 +33,7 @@ It was tested with **Python 2 and 3**.
 
 2. Install system requirements
 
+        :::shell
         $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
         $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
         $ sudo apt-get install python-numpy python-scipy
@@ -41,6 +42,7 @@ It was tested with **Python 2 and 3**.
      
     If not using InstantContiki appliance, also install :
 
+        :::shell
         $ sudo apt-get install binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug
         $ sudo apt-get install binutils-avr gcc-avr gdb-avr avr-libc avrdude
         $ sudo apt-get install openjdk-7-jdk openjdk-7-jre ant
