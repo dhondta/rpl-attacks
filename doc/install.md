@@ -33,20 +33,20 @@ It was tested with **Python 2 and 3**.
 
 2. Install system requirements
 
-        :::shell
-        $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
-        $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
-        $ sudo apt-get install python-numpy python-scipy
-        $ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
-        $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
+    :::console
+    $ sudo apt-get install gfortran libopenblas-dev liblapack-dev
+    $ sudo apt-get install build-essential python-dev libffi-dev libssl-dev
+    $ sudo apt-get install python-numpy python-scipy
+    $ sudo apt-get install libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
+    $ sudo apt-get install imagemagick libcairo2-dev libffi-dev
      
     If not using InstantContiki appliance, also install :
 
-        :::shell
-        $ sudo apt-get install binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug
-        $ sudo apt-get install binutils-avr gcc-avr gdb-avr avr-libc avrdude
-        $ sudo apt-get install openjdk-7-jdk openjdk-7-jre ant
-        $ sudo apt-get install libncurses5-dev lib32ncurses5
+    :::console
+    $ sudo apt-get install binutils-msp430 gcc-msp430 msp430-libc msp430mcu mspdebug
+    $ sudo apt-get install binutils-avr gcc-avr gdb-avr avr-libc avrdude
+    $ sudo apt-get install openjdk-7-jdk openjdk-7-jre ant
+    $ sudo apt-get install libncurses5-dev lib32ncurses5
 
     !!! tip "Behind a proxy ?"
 
