@@ -14,7 +14,7 @@ user@instant-contiki:rpl-attacks>> run_all sample-attacks
 Or with Fabric:
 
 ```shell-session
-../rpl-attacks$ fab run_all:test-campaign
+rpl-attacks$ fab run_all:test-campaign
 ```
 
 When the processing will be done, a first PDF report will be generated and available in each related experiment folder.
@@ -35,6 +35,6 @@ user@instant-contiki:rpl-attacks>> report my-experiment
 Or with Fabric:
 
 ```shell-session
-../rpl-attacks$ fab report:my-experiment
+rpl-attacks$ fab report:my-experiment
 ```
 
