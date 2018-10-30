@@ -79,7 +79,7 @@ Create a default configuration file
 
         rpl-attacks$ fab config
 
-    or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
+or create a configuration file with your own parameters (respectively, *contiki_folder* and *experiments_folder*)
 
         rpl-attacks$ fab config:/opt/contiki,~/simulations
 
