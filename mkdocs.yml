@@ -2,7 +2,7 @@ site_name: "RPL Attacks Framework"
 repo_url: https://github.com/dhondta/rpl-attacks
 site_author: dhondta
 docs_dir: doc
-pages:
+nav:
   - Introduction: index.md
   - Installation: install.md
   - Usage: usage.md
@@ -15,5 +15,3 @@ extra:
 theme: readthedocs
 markdown_extensions:
   - admonition
-  - codehilite:
-      linenums: false
