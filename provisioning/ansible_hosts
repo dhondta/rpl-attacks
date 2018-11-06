@@ -1,2 +1,0 @@
-[rpl-attacks-framework]
-192.168.27.100          ansible_sudo_pass=vagrant
