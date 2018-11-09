@@ -676,7 +676,7 @@ def setup(silent=False, **kwargs):
     if not exists(shortcut):
         with hide(*HIDDEN_ALL):
             local('sudo cp {} /usr/share/icons/hicolor/scalable/apps/'
-                  .format(join(FRAMEWORK_FOLDER, 'src/rpla-icon.svg')))
+                  .format(join(FRAMEWORK_FOLDER, 'src/rpla-icon.png')))
             local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
         with open(shortcut, 'w+') as f:
             f.write(SHORTCUT_RPLA.format(path=abspath(FRAMEWORK_FOLDER)))
