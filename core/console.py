@@ -50,7 +50,6 @@ class FrameworkConsole(Console):
         self.__bind_commands()
         super(FrameworkConsole, self).__init__()
         self.do_loglevel('info')
-        self.__start_docserver()
         self.do_clear('')
 
     def __bind_commands(self):
@@ -82,16 +81,6 @@ class FrameworkConsole(Console):
                         MethodType(FrameworkConsole.complete_template(func.autocomplete), self))
             if hasattr(func, 'reexec_on_emptyline') and func.reexec_on_emptyline:
                 self.reexec.append(name)
-
-    def __start_docserver(self, title="RPL Attacks Framework - Documentation"):
-        try:
-            out, _ = Popen(['grip', '-V'], stdout=PIPE, stderr=PIPE).communicate()
-        except:
-            return
-        cmd = "grip {} --wide --norefresh --title=\"{}\"".format(DOCSERVER_PORT, title)
-        self.__docserver = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-        self.__docserver.cmd = "grip {} --wide --norefresh".format(DOCSERVER_PORT)
-        self.welcome += colored("Documentation is available at: http://localhost:{}\n".format(DOCSERVER_PORT), 'yellow')
 
     def clean_tasks(self):
         """ Method for cleaning the list of tasks. """
@@ -170,12 +159,6 @@ class FrameworkConsole(Console):
         """ Exit handler for terminating the process pool gracefully. """
         try:
             os.remove(self.pidfile)
-        except:
-            pass
-        try:
-            self.__docserver.terminate()
-            pid = int(check_output(['pgrep', 'grip']).strip())
-            os.kill(pid, SIGTERM)
         except:
             pass
         if hasattr(self, "tasklist") and 'PENDING' in [x['status'] for x in self.tasklist.values()]:
