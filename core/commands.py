@@ -409,8 +409,7 @@ def __run(name, **kwargs):
                 move_files(data, results, (net_start_old, net_start_new), (net_end_old, net_end_new))
                 remove_files(data, *network_images.values())
             # then start the parsing functions to derive more results
-            logger.debug(" > Parsing simulation results...")
-            parsing_chain(sim_path)
+            parsing_chain(sim_path, logger)
             move_files(sim_path, results, 'COOJA.log')
         # finally, generate the PDF report
         generate_report(path, REPORT_THEME)
@@ -625,8 +624,8 @@ def setup(silent=False, **kwargs):
     :param kwargs: simulation keyword arguments (see the documentation for more information)
     """
     recompile = False
-    # adapt IPv6 debug mode
-    modify_ipv6_debug(CONTIKI_FOLDER)
+    # adapt RPL debug mode
+    modify_rpl_debug(CONTIKI_FOLDER)
     # install Cooja modifications
     if not check_cooja(COOJA_FOLDER):
         logger.debug(" > Installing Cooja add-ons...")
@@ -643,11 +642,11 @@ def setup(silent=False, **kwargs):
         recompile = True
     # recompile Cooja for making the changes take effect
     if recompile:
-        with lcd(CONTIKI_FOLDER):
-            local('git submodule update --init')
-        with lcd(COOJA_FOLDER):
-            logger.debug(" > Recompiling Cooja...")
-            with hide(*HIDDEN_ALL):
+        with hide(*HIDDEN_ALL):
+            with lcd(CONTIKI_FOLDER):
+                local('git submodule update --init')
+            with lcd(COOJA_FOLDER):
+                logger.debug(" > Recompiling Cooja...")
                 for cmd in ["clean", "jar"]:
                     output = local("ant {}".format(cmd), capture=True)
                     info, error = False, False
@@ -736,9 +735,11 @@ def update(silent=False, **kwargs):
                 remove_files(folder, "Vagrantfile")
                 remove_folder(join(folder, "provisioning"))
             logger.debug(" > {} {}".format(repository, ["updated", "already up-to-date"][uptodate]))
-    if not silent and updated:
-        logger.warn("Restarting the framework...")
-        restart(PIDFILE)
+    if updated:
+        setup(silent)
+        if not silent:
+            logger.warn("Restarting the framework...")
+            restart(PIDFILE)
 
 
 @command(start_msg="CHECKING VERSIONS")
