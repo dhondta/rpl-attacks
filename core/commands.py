@@ -680,6 +680,8 @@ def setup(silent=False, **kwargs):
             local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
         with open(shortcut, 'w+') as f:
             f.write(SHORTCUT_RPLA.format(path=abspath(FRAMEWORK_FOLDER)))
+        with hide(*HIDDEN_ALL):  # (Ubuntu 18.04 fix to automatically trust the new shortcut)
+            local('gio set {} "metadata::trusted" yes'.format(shortcut))
         chmod(shortcut, int('775', 8))
         logger.debug(" > Desktop shortcut for RPLA created")
     else:
@@ -693,6 +695,8 @@ def setup(silent=False, **kwargs):
             local('sudo gtk-update-icon-cache /usr/share/icons/hicolor')
         with open(shortcut, 'w+') as f:
             f.write(SHORTCUT_COOJA.format(path=join(CONTIKI_FOLDER, "tools", "cooja", "build")))
+        with hide(*HIDDEN_ALL):  # (Ubuntu 18.04 fix to automatically trust the new shortcut)
+            local('gio set {} "metadata::trusted" yes'.format(shortcut))
         chmod(shortcut, int('775', 8))
         logger.debug(" > Desktop shortcut for Cooja created")
     else:
