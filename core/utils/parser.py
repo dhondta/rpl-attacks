@@ -17,28 +17,32 @@ __all__ = [
 
 
 # *************************************** MAIN PARSING FUNCTION ****************************************
-def parsing_chain(path):
+def parsing_chain(path, logger=None):
     """
     This function chains the conversion and drawings for exploiting the data collected while running a Cooja
      simulation into relevant results.
 
     :param path: path to the experiment (including [with-|without-malicious])
+    :param logger: logging.Logger instance
     """
     assert isdir(path)
-    __convert_pcap_to_csv(path)
-    __convert_powertracker_log_to_csv(path)
-    __draw_dodag(path)
-    __draw_power_barchart(path)
+    __convert_pcap_to_csv(path, logger)
+    __convert_powertracker_log_to_csv(path, logger)
+    __draw_dodag(path, logger)
+    __draw_power_barchart(path, logger)
 
 
 # *********************************** SIMULATION PARSING FUNCTIONS *************************************
-def __convert_pcap_to_csv(path):
+def __convert_pcap_to_csv(path, logger=None):
     """
     This function creates a CSV file (to ./results) from a PCAP file (from ./data).
     This is inspired from https://github.com/sieben/makesense/blob/master/makesense/parser.py.
 
     :param path: path to the experiment (including [with-|without-malicious])
+    :param logger: logging.Logger instance
     """
+    if logger:
+        logger.debug(" > Converting PCAP to CSV...")
     data, results = join(path, 'data'), join(path, 'results')
     try:
         p = Popen(['tshark',
@@ -57,7 +61,9 @@ def __convert_pcap_to_csv(path):
                    '-r', join(data, 'output.pcap')], stdout=PIPE)
         out, _ = p.communicate()
     except OSError:
-        out = b"[ERROR] Tshark is not installed !"
+        out = b"Tshark is not installed !"
+        if logger:
+            logger.warn(out)
     with open(join(results, 'pcap.csv'), 'wb') as f:
         f.write(out)
 
@@ -66,13 +72,16 @@ PT_ITEMS = ['monitored', 'on', 'tx', 'rx', 'int']
 PT_REGEX = r'^({})_(?P<mote_id>\d+) {} (?P<{}>\d+)'
 
 
-def __convert_powertracker_log_to_csv(path):
+def __convert_powertracker_log_to_csv(path, logger=None):
     """
     This function creates a CSV file (to ./results) from a PowerTracker log file (from ./data).
     This is inspired from https://github.com/sieben/makesense/blob/master/makesense/parser.py.
 
     :param path: path to the experiment (including [with-|without-malicious])
+    :param logger: logging.Logger instance
     """
+    if logger:
+        logger.debug(" > Converting power tracking log to CSV...")
     platforms = [p.capitalize() for p in get_available_platforms()]
     data, results = join(path, 'data'), join(path, 'results')
     with open(join(data, 'powertracker.log')) as f:
@@ -98,13 +107,16 @@ def __convert_powertracker_log_to_csv(path):
 RELATIONSHIP_REGEX = r'^\d+\s+ID\:(?P<mote_id>\d+)\s+#L\s+(?P<parent_id>\d+)\s+(?P<flag>\d+)$'
 
 
-def __draw_dodag(path):
+def __draw_dodag(path, logger=None):
     """
     This function draws the DODAG (to ./results) from the list of motes (from ./simulation.csc) and the list of
      edges (from ./data/relationships.log).
 
     :param path: path to the experiment (including [with-|without-malicious])
+    :param logger: logging.Logger instance
     """
+    if logger:
+        logger.debug(" > Drawing DODAG to PNG...")
     pyplot.clf()
     with_malicious = (basename(normpath(path)) == 'with-malicious')
     data, results = join(path, 'data'), join(path, 'results')
@@ -112,6 +124,8 @@ def __draw_dodag(path):
         relationships = f.read()
     # first, check if the mote relationships were recorded
     if len(relationships.strip()) == 0:
+        if logger:
+            logger.warn("Relationships log file is empty !")
         return
     # retrieve motes and their colors
     dodag = networkx.DiGraph()
@@ -141,14 +155,16 @@ def __draw_dodag(path):
     pyplot.savefig(join(results, 'dodag.png'), arrow_style=FancyArrowPatch)
 
 
-def __draw_power_barchart(path):
+def __draw_power_barchart(path, logger=None):
     """
     This function plots the average power tracking data from the CSV at:
      [EXPERIMENT]/[with-|without-malicious]/results/powertracker.csv
 
     :param path: path to the experiment (including [with-|without-malicious])
-    :return:
+    :param logger: logging.Logger instance
     """
+    if logger:
+        logger.debug(" > Drawing power bar chart to PNG...")
     pyplot.clf()
     items = ['on', 'tx', 'rx', 'int']
     series = {i: [] for i in items}
