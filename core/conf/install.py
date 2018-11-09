@@ -7,7 +7,7 @@ from core.conf.logconfig import logger
 __all__ = [
     'check_cooja',
     'modify_cooja',
-    'modify_ipv6_debug',
+    'modify_rpl_debug',
     'register_new_path_in_profile',
     'update_cooja_build',
     'update_cooja_user_properties',
@@ -56,7 +56,7 @@ def modify_cooja(cooja_dir):
     logger.debug(" > Cooja.java modified" if changed else " > Cooja.java already up-to-date")
 
 
-def modify_ipv6_debug(contiki_dir):
+def modify_rpl_debug(contiki_dir):
     """
     This function checks and modifies, if necessary, the DEBUG constant in
      [CONTIKI]/core/net/ipv6/uip-ds6-route.c in order to enable mote relationships logging.
@@ -67,20 +67,21 @@ def modify_ipv6_debug(contiki_dir):
     :return: None
     """
     pattern = '#define DEBUG DEBUG_NONE'
-    ipv6_route_file = join(contiki_dir, 'core', 'net', 'ipv6', 'uip-ds6-route.c')
-    changed = False
-    with open(ipv6_route_file) as f:
-        source = f.read()
-    buffer = []
-    for line in source.split('\n'):
-        if pattern in line:
-            buffer.append(line.replace(pattern, '#define DEBUG DEBUG_ANNOTATE'))
-            changed = True
-        else:
-            buffer.append(line)
-    with open(ipv6_route_file, 'w') as f:
-        f.write('\n'.join(buffer))
-    logger.debug(" > IPv6 Debug modified" if changed else " > IPv6 Debug already up-to-date")
+    for module, descr in zip([('ipv6', 'uip-ds6-route.c'), ('rpl', 'rpl.c')], ["IPv6", "RPL"]):
+        filepath = join(contiki_dir, 'core', 'net', *module)
+        changed = False
+        with open(filepath) as f:
+            source = f.read()
+        buffer = []
+        for line in source.split('\n'):
+            if pattern in line:
+                buffer.append(line.replace(pattern, '#define DEBUG DEBUG_ANNOTATE'))
+                changed = True
+            else:
+                buffer.append(line)
+        with open(filepath, 'w') as f:
+            f.write('\n'.join(buffer))
+        logger.debug((" > {} debug modified" if changed else " > {} debug already up-to-date").format(descr))
 
 
 def register_new_path_in_profile():

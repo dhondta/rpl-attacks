@@ -276,7 +276,7 @@ def replace_in_file(path, replacements, logger=None):
     if logger:
         c = Counter(replacements_found)
         for k in c.keys():
-            logger.debug("Found and replaced {} times: \t{} ".format(c[k], k))
+            logger.debug("Found and replaced {} occurrence{}: \t{} ".format(c[k], ['', 's'][c[k] > 1], k))
 
 
 # **************************************** JSON-RELATED HELPER *****************************************
