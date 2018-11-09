@@ -45,7 +45,7 @@ class FrameworkConsole(Console):
             self.__last_tasklist = None
             self.tasklist = {}
             self.pool = Pool(processes, lambda: signal(SIGINT, SIG_IGN))
-            atexit.register(self.graceful_exit)
+        atexit.register(self.graceful_exit)
         self.reexec = ['status']
         self.__bind_commands()
         super(FrameworkConsole, self).__init__()
@@ -174,9 +174,8 @@ class FrameworkConsole(Console):
             pass
         try:
             self.__docserver.terminate()
-            for line in check_output('ps aux | grep grip', shell=True).split('\n'):
-                if self.__docserver.cmd in line:
-                    os.kill(int(line.split()[1]), SIGTERM)
+            pid = int(check_output(['pgrep', 'grip']).strip())
+            os.kill(pid, SIGTERM)
         except:
             pass
         if hasattr(self, "tasklist") and 'PENDING' in [x['status'] for x in self.tasklist.values()]:
