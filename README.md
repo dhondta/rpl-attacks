@@ -3,7 +3,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/dhondta/rpl-attacks/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/rpl-attacks?targetFile=requirements.txt)
 [![DOI](https://zenodo.org/badge/22624/dhondta/rpl-attacks.svg)](https://zenodo.org/badge/latestdoi/22624/dhondta/rpl-attacks)
 [![Vagrant](https://img.shields.io/badge/vagrant-1.0.0-blue.svg)](https://app.vagrantup.com/dhondta/boxes/rpl-attacks)
-[![Beerpay](https://beerpay.io/dhondta/rpl-attacks/badge.svg)](https://beerpay.io/dhondta/rpl-attacks)
+[![Beerpay](https://img.shields.io/beerpay/hashdog/scrapfy-chrome-extension.svg)](https://beerpay.io/dhondta/rpl-attacks)
 [![Donate](https://img.shields.io/badge/donate-paypal-orange.svg)](https://www.paypal.me/dhondta)
 
 ## Table of Contents
