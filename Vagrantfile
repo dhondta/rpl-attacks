@@ -18,13 +18,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 #  config.proxy.https    = "http://yourproxy:8080"
 #  config.proxy.no_proxy = "localhost,127.0.0.1"
 
-  config.vm.box = "bento/ubuntu-16.04"
-  config.vm.network :private_network, ip: "192.168.27.100"
+  config.vm.box = "dhondta/rpl-attacks"
   config.vm.host_name = "rpl-attacks-framework"
+#  config.vm.network :private_network, ip: "192.168.27.100"
 
   # customize VM
   config.vm.provider "virtualbox" do |v|
-    config.vm.box = "ubuntu/bionic64"
     v.gui = true
     v.name = "RPL Attacks Framework"
     v.memory = 2048
@@ -32,15 +31,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.customize ["modifyvm", :id, "--usb", "on"]
     v.customize ["modifyvm", :id, "--usbehci", "on"]
   end
-
-  # baseline provisioning
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "provisioning/rpl-attacks.yml"
-    ansible.inventory_path = "provisioning/ansible_hosts"
-    ansible.limit = "all"
-    ansible.host_key_checking = false
-    ansible.verbose = "v"
-  end
-
-  config.vm.synced_folder '.', '/vagrant', disabled: true
 end
