@@ -11,7 +11,7 @@
    * [Quick Installation](#quick-installation)
    * [Demonstration](#demonstration)
    * [Quick Start (using the integrated console)](#quick-start-using-the-integrated-console)
-   * [Quick Start (using `fabric` only)](#quick-start-using-fabric)
+   * [Quick Start (using `fabric` only)](#quick-start-using-fabric-only)
    * [Issues management](#issues-management)
 
 **Note**: In case of problem, please refer to *[Issues management](#issues-management)* first !
@@ -106,7 +106,7 @@ It was tested with **Python 2 and 3**.
 
 ## Demonstration
 
-This will make 3 complete examples of attacks : hello flood, 
+This will make 3 complete examples of attacks : hello flood, version number and blackhole.
 
 Open the console like before and type:
 
@@ -117,7 +117,7 @@ Open the console like before and type:
 Or simply launch the `demo` command with Fabric:
 
  ```
- ../rpl-attacks$ fab demo
+ ./rpl-attacks$ fab demo
  ```
 
 
@@ -126,19 +126,19 @@ Or simply launch the `demo` command with Fabric:
 1. Open the console (you should see something like in the following screenshot)
 
  ```
- ../rpl-attacks$ fab console
+ ./rpl-attacks$ fab console
  ```
 
  or
 
  ```
- ../rpl-attacks$ python main.py
+ ./rpl-attacks$ python main.py
  ```
 
  or
 
  ```
- ../rpl-attacks$ python3 main.py
+ ./rpl-attacks$ python3 main.py
  ```
 
  ![RPL Attacks Framework console](doc/imgs/rpl-attacks.png)
@@ -178,7 +178,7 @@ Or simply launch the `demo` command with Fabric:
 1. Create a simulation campaign file from the template
 
  ```
- ../rpl-attacks$ fab prepare:test-campaign
+ ./rpl-attacks$ fab prepare:test-campaign
  ```
 
 2. Edit the simulation campaign file to suit your needs
@@ -186,13 +186,13 @@ Or simply launch the `demo` command with Fabric:
 3. Create the simulations
 
  ```
- ../rpl-attacks$ fab make_all:test-campaign
+ ./rpl-attacks$ fab make_all:test-campaign
  ```
 
 4. Run the simulations (not multi-processed)
 
  ```
- ../rpl-attacks$ fab run_all:test-campaign
+ ./rpl-attacks$ fab run_all:test-campaign
  ```
 
 5. Once done, just go to the experiment's ``results`` folders to get pictures and logs of the simulations. The related paths are the followings :
