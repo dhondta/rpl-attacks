@@ -341,7 +341,7 @@ def render_campaign(exp_file):
                    available_building_blocks='\n'.join([' - {}'.format(b) for b in get_building_blocks()]),
                    available_root_mote_types='\n'.join(list_of('root')),
                    available_sensor_mote_types='\n'.join(list_of('sensor')),
-                   available_malicious_mote_type='\n'.join(list_of('malicious', 'type')),
+                   available_malicious_mote_types='\n'.join(list_of('malicious', 'type')),
                    area_side=DEFAULTS["area-square-side"], tx_range=DEFAULTS["transmission-range"])
     rename(join(path, 'experiments.json'), exp_file)
 
