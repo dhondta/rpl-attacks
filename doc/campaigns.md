@@ -123,4 +123,4 @@ Example JSON for a campaign with a BASE simulation as a template for the other s
 
 Example JSON for a campaign of heterogeneous simulations (with randomized topologies) :
 
-![RPL Attacks Framework console](imgs/json-randomized-simulations.png)d).
+![RPL Attacks Framework console](imgs/json-randomized-simulations.png)
