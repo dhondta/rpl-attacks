@@ -69,9 +69,9 @@ The resulting Destination Oriented Directed Acyclic Graph (DODAG) is depicted in
   </figure> 
 </div>
 
-<textarea>
+<p class="textbox">
 Insert your comments here.
-</textarea>
+</p>
 
 > **Important note**: The resulting DODAG's could be not representative if the duration is not long enough. Ensure that it is set appropriately.
 
@@ -92,7 +92,7 @@ The power tracking is depicted in the following pictures:
   </figure> 
 </div>
 
-<textarea>
+<p class="textbox">
 Insert your comments here.
-</textarea>
+</p>
 
