@@ -167,20 +167,23 @@ def __draw_power_barchart(path, logger=None):
         logger.debug(" > Drawing power bar chart to PNG...")
     pyplot.clf()
     items = ['on', 'tx', 'rx', 'int']
-    series = {i: [] for i in items}
-    averages, c = {}, 0
+    # aggregate power tracker measures per mote
+    data, c = {}, 0
     with open(join(path, 'results', 'powertracker.csv')) as f:
         for row in DictReader(f):
             mid = int(row['mote_id'])
-            averages.setdefault(mid, {i: 0.0 for i in items})
-            for s, k in zip(items, [i + '_time' for i in items]):
-                averages[mid][s] += float(row[k])
+            data.setdefault(mid, {i: 0.0 for i in items})
+            for i in items:
+                data[mid][i] += float(row[i + '_time'])
             c += 1
-    n = len(averages)
+    n = len(data)
+    c //= n  # number of measures per mote
+    # normalize measures
+    data = {mid: {i: measure / c for i, measure in totals.items()} for mid, totals in data.items()}
+    # prepare series' data for the chart
     ind = numpy.arange(n)
-    c //= n
-    averages = {mid: {k: v / c for k, v in avg.items()} for mid, avg in averages.items()}
-    for mid, avg in sorted(averages.items(), key=lambda x: x[0]):
+    series = {i: [] for i in items}
+    for mid, avg in sorted(data.items(), key=lambda x: x[0]):
         for k, v in series.items():
             v.append(avg[k])
     width = 0.5
@@ -188,7 +191,7 @@ def __draw_power_barchart(path, logger=None):
     for s, color in zip(items, ['r', 'b', 'g', 'y']):
         plots.append(pyplot.bar(ind, series[s], width, color=color))
     pyplot.title("Power tracking per mote")
-    pyplot.xticks(ind + width / 2., tuple(sorted(averages.keys())))
+    pyplot.xticks(ind + width / 2., tuple(sorted(data.keys())))
     pyplot.yticks(numpy.arange(0, 31, 10))
     pyplot.ylabel("Consumed power (%)")
     pyplot.legend(tuple(p[0] for p in plots), tuple(i.upper() for i in items))
