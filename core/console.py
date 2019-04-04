@@ -30,8 +30,7 @@ class FrameworkConsole(Console):
         colored('rpl-attacks', 'red'),
         colored('>>', 'cyan'),
     ))
-    welcome = "\nType help or ? to list commands.\n" + \
-              colored("NB: Spaces are separators ; DO NOT use spaces in arguments !\n", 'white')
+    welcome = "\nType help or ? to list commands.\n"
 
     def __init__(self, parallel):
         self.continuation_prompt = self.prompt
