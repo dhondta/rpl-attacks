@@ -1,5 +1,5 @@
 cffi
-cairocffi==0.6
+cairocffi
 coloredlogs
 cryptography
 dill
