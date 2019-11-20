@@ -5,7 +5,7 @@
 [![DOI](https://zenodo.org/badge/22624/dhondta/rpl-attacks.svg)](https://zenodo.org/badge/latestdoi/22624/dhondta/rpl-attacks)
 [![Black Hat Arsenal Europe 2018](https://img.shields.io/badge/Black%20Hat%20Arsenal-EU%202018-blue.svg)](https://www.blackhat.com/eu-18/arsenal/schedule/index.html#rpl-attacks-framework-attacking-rpl-in-wsns-12671)
 [![Vagrant](https://img.shields.io/badge/vagrant-1.0.0-blue.svg)](https://app.vagrantup.com/dhondta/boxes/rpl-attacks)
-[![License](https://img.shields.io/pypi/l/rpl-attacks.svg)](https://pypi.python.org/pypi/sploitkit/)
+[![License](https://img.shields.io/badge/license-AGPLv3-lightgrey)](https://github.com/dhondta/rpl-attacks/blob/master/LICENSE)
 [![Beerpay](https://img.shields.io/beerpay/hashdog/scrapfy-chrome-extension.svg)](https://beerpay.io/dhondta/rpl-attacks)
 [![Donate](https://img.shields.io/badge/donate-paypal-orange.svg)](https://www.paypal.me/dhondta)
 
