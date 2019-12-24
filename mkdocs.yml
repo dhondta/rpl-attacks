@@ -15,3 +15,5 @@ extra:
 theme: readthedocs
 markdown_extensions:
   - admonition
+  - toc:
+      permalink: true
