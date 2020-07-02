@@ -13,20 +13,18 @@
 ## Table of Contents
 
    * [RPL Attacks Framework](#rpl-attacks-framework)
-   * [System Requirements](#system-requirements)
-   * [Quick Installation](#quick-installation)
+   * [Installation](#installation)
    * [Demonstration](#demonstration)
-   * [Quick Start (using the integrated console)](#quick-start-using-the-integrated-console)
-   * [Quick Start (using `fabric` only)](#quick-start-using-fabric-only)
+   * [Quick Start](#quick-start)
    * [Issues management](#issues-management)
 
 **Note**: In case of problem, please refer to *[Issues management](#issues-management)* first !
 
 # RPL Attacks Framework
 
-This project is aimed to provide a simple and convenient way to generate simulations and deploy malicious motes for a Wireless Sensor Network (WSN) that uses Routing Protocol for Low-power and lossy devices (RPL) as its network layer.
+This project aims to provide a simple and convenient interface relying on [Contiki OS](https://github.com/contiki-os/contiki) to generate [Cooja simulations](https://anrg.usc.edu/contiki/index.php/Cooja_Simulator) and deploy malicious motes for a [Wireless Sensor Network (WSN)](https://en.wikipedia.org/wiki/Wireless_sensor_network) that uses [Routing Protocol for Low-power and lossy devices (RPL)](https://www.ietf.org/proceedings/94/slides/slides-94-rtgarea-2.pdf) ([RFC 6550](https://tools.ietf.org/html/rfc6550)) as its network layer.
 
-With this framework, it is possible to easily define campaign of simulations either redefining RPL configuration constants, modifying single lines from the ContikiRPL library or using an own external RPL library. Moreover, experiments in a campaign can be generated either based on a same or a randomized topology for each simulation.
+With this framework, it is possible to easily define campaign of simulations (in JSON format) either redefining RPL configuration constants, modifying single lines from the [ContikiRPL library](https://github.com/contiki-os/contiki/tree/master/core/net/rpl) or using an own external RPL library. Moreover, experiments in a campaign can be generated either based on a same or a randomized topology for each simulation.
 
 ## ![Additional Documentation](doc/README.md)
 
@@ -61,7 +59,7 @@ Legitimate DODAG                                               |  Blackhole atta
 ![Legitimate DODAG](doc/imgs/blackhole-attack-ex2-without.png) | ![Blackhole attack](doc/imgs/blackhole-attack-ex2-with.png)
 
 
-## Quick Installation
+## Installation
 
 1. Clone this repository
 
@@ -102,6 +100,10 @@ Legitimate DODAG                                               |  Blackhole atta
  > - Ensure the latest version of Vagrant is installed
  > - If using `virtualbox` provider, ensure Oracle Extension Pack is installed (see [Oracle website](https://www.google.be/#q=virtualbox+oracle+extension+pack+install))
 
+ > **Using Instant Contiki or another distribution**:
+ > 
+ > The full manual installation procedure is available [here](https://rpl-attacks.readthedocs.io/en/latest/install/#manual-installation) and mentions [InstantContiki](https://sourceforge.net/projects/contiki/files/Instant%20Contiki/) but it is advised to use the [Vagrant box](https://app.vagrantup.com/dhondta/boxes/rpl-attacks) as it was fully tested.
+
 
 ## Demonstration
 
@@ -120,15 +122,9 @@ Or simply launch the `demo` command with Fabric:
  ```
 
 
-## Quick Start (using the integrated console)
+## Quick Start
 
 1. Open the console (you should see something like in the following screenshot)
-
- ```
- ./rpl-attacks$ fab console
- ```
-
- or
 
  ```
  ./rpl-attacks$ python main.py
@@ -137,7 +133,7 @@ Or simply launch the `demo` command with Fabric:
  or
 
  ```
- ./rpl-attacks$ python3 main.py
+ ./rpl-attacks$ fab console
  ```
 
  ![RPL Attacks Framework console](doc/imgs/rpl-attacks.png)
@@ -171,39 +167,12 @@ Or simply launch the `demo` command with Fabric:
  ``[EXPERIMENTS_FOLDER]/[experiment_name]/without-malicious/results/``
  ``[EXPERIMENTS_FOLDER]/[experiment_name]/with-malicious/results/``
 
-
-## Quick Start (using `fabric` only)
-
-1. Create a simulation campaign file from the template
-
- ```
- ./rpl-attacks$ fab prepare:test-campaign
- ```
-
-2. Edit the simulation campaign file to suit your needs
-
-3. Create the simulations
-
- ```
- ./rpl-attacks$ fab make_all:test-campaign
- ```
-
-4. Run the simulations (not multi-processed)
-
- ```
- ./rpl-attacks$ fab run_all:test-campaign
- ```
-
-5. Once done, just go to the experiment's ``results`` folders to get pictures and logs of the simulations. The related paths are the followings :
-
- ``[EXPERIMENTS_FOLDER]/[experiment_name]/without-malicious/results/``
- ``[EXPERIMENTS_FOLDER]/[experiment_name]/with-malicious/results/``
-
  
 ## Issues management
 
 In case of bug, there should be a **crash report generated in the folder of the experiment** that the framework was processing. By convention, this is named **`crash-report-[...].txt`**. Please copy its content (without the title) in a [new Issue](https://github.com/dhondta/rpl-attacks/issues/new).
  
-For contributions or suggestions, please [open an Issue](https://github.com/dhondta/rpl-attacks/issues/new) and clearly explain, using an example or a use case if appropriate. 
+For contributions or suggestions, please [open an Issue](https://github.com/dhondta/rpl-attacks/issues/new) and clearly explain, using an example or a use case if appropriate.
 
 If you want to build new RPL attacks, please refer to the [*How to make new building blocks ?*](https://github.com/dhondta/rpl-attacks/blob/master/doc/building-blocks.md) section. In this case, please submit your new attack through a Pull Request.
+
