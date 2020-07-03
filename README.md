@@ -18,7 +18,7 @@
    * [Quick Start](#quick-start)
    * [Issues management](#issues-management)
 
-**Note**: In case of problem, please refer to *[Issues management](#issues-management)* first !
+**Note**: In case of problem, please refer to [*Issues management*](#issues-management) first !
 
 # RPL Attacks Framework
 
