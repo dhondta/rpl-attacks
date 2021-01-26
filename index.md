@@ -17,7 +17,7 @@ use-site-title: false
 
 ## Table of Contents
 
-   * [RPL Attacks Framework](#rpl-attacks-framework)
+   * [Introduction](#introduction)
    * [Installation](#installation)
    * [Demonstration](#demonstration)
    * [Quick Start](#quick-start)
@@ -25,7 +25,7 @@ use-site-title: false
 
 **Note**: In case of problem, please refer to [*Issues management*](#issues-management) first !
 
-# RPL Attacks Framework
+## Introduction
 
 This project aims to provide a simple and convenient interface relying on [Contiki OS](https://github.com/contiki-os/contiki) to generate [Cooja simulations](https://anrg.usc.edu/contiki/index.php/Cooja_Simulator) and deploy malicious motes for a [Wireless Sensor Network (WSN)](https://en.wikipedia.org/wiki/Wireless_sensor_network) that uses [Routing Protocol for Low-power and lossy devices (RPL)](https://www.ietf.org/proceedings/94/slides/slides-94-rtgarea-2.pdf) ([RFC 6550](https://tools.ietf.org/html/rfc6550)) as its network layer.
 
