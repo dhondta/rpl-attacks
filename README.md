@@ -12,7 +12,7 @@
 
 ## Table of Contents
 
-   * [RPL Attacks Framework](#rpl-attacks-framework)
+   * [Introduction](#introduction)
    * [Installation](#installation)
    * [Demonstration](#demonstration)
    * [Quick Start](#quick-start)
@@ -20,7 +20,7 @@
 
 **Note**: In case of problem, please refer to [*Issues management*](#issues-management) first !
 
-# RPL Attacks Framework
+## Introduction
 
 This project aims to provide a simple and convenient interface relying on [Contiki OS](https://github.com/contiki-os/contiki) to generate [Cooja simulations](https://anrg.usc.edu/contiki/index.php/Cooja_Simulator) and deploy malicious motes for a [Wireless Sensor Network (WSN)](https://en.wikipedia.org/wiki/Wireless_sensor_network) that uses [Routing Protocol for Low-power and lossy devices (RPL)](https://www.ietf.org/proceedings/94/slides/slides-94-rtgarea-2.pdf) ([RFC 6550](https://tools.ietf.org/html/rfc6550)) as its network layer.
 
@@ -34,29 +34,29 @@ With this framework, it is possible to easily define campaign of simulations (in
 
 The malicious mote has 3, 7, 10 in its range                               |  Power tracking without the malicious mote                                                |  Power tracking with the malicious mote
 :-------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------:
-![The malicious mote has 3, 7, 10 in its range](doc/imgs/flooding-dag.png) | ![Power tracking without the malicious mote](doc/imgs/flooding-powertracking-without.png) | ![Power tracking with the malicious mote](doc/imgs/flooding-powertracking-with.png)
+![The malicious mote has 3, 7, 10 in its range](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/flooding-dag.png) | ![Power tracking without the malicious mote](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/flooding-powertracking-without.png) | ![Power tracking with the malicious mote](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/flooding-powertracking-with.png)
 
 #### Test case 2: versioning attack
 
 Legitimate DODAG                                         |  Versioning attack in action (global repair)
 :-------------------------------------------------------:|:-----------------------------------------------------:
-![Legitimate DODAG](doc/imgs/versioning-dag-without.png) | ![Versioning attack](doc/imgs/versioning-dag-with.png)
+![Legitimate DODAG](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/versioning-dag-without.png) | ![Versioning attack](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/versioning-dag-with.png)
 
 Power tracking without the malicious mote                          |  Power tracking with the malicious mote
 :-----------------------------------------------------------------:|:---------------------------------------------------------------:
-![Power tracking without the malicious mote](doc/imgs/versioning-powertracking-without.png) | ![Power tracking with the malicious mote](doc/imgs/versioning-powertracking-with.png)
+![Power tracking without the malicious mote](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/versioning-powertracking-without.png) | ![Power tracking with the malicious mote](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/versioning-powertracking-with.png)
 
 #### Test case 3a: blackhole attack
 
 Legitimate DODAG                                               |  Blackhole attack in action
 :-------------------------------------------------------------:|:-----------------------------------------------------------:
-![Legitimate DODAG](doc/imgs/blackhole-attack-ex1-without.png) | ![Blackhole attack](doc/imgs/blackhole-attack-ex1-with.png)
+![Legitimate DODAG](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/blackhole-attack-ex1-without.png) | ![Blackhole attack](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/blackhole-attack-ex1-with.png)
 
 #### Test case 3b: blackhole attack
 
 Legitimate DODAG                                               |  Blackhole attack in action
 :-------------------------------------------------------------:|:-----------------------------------------------------------:
-![Legitimate DODAG](doc/imgs/blackhole-attack-ex2-without.png) | ![Blackhole attack](doc/imgs/blackhole-attack-ex2-with.png)
+![Legitimate DODAG](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/blackhole-attack-ex2-without.png) | ![Blackhole attack](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/blackhole-attack-ex2-with.png)
 
 
 ## Installation
@@ -135,8 +135,8 @@ Or simply launch the `demo` command with Fabric:
  ```
  ./rpl-attacks$ fab console
  ```
-
- ![RPL Attacks Framework console](doc/imgs/rpl-attacks.png)
+ 
+ <p align="center"><img src="https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/rpl-attacks.png"></p>
 
 2. Create a campaign of simulations
 
@@ -146,7 +146,7 @@ Or simply launch the `demo` command with Fabric:
 
 3. Go to your experiments folder (default: `~/Experiments`) and edit your new `sample-attacks.json` to suit your needs
 
-  See [*How to create a campaign of simulations ?*](doc/create-campaigns.md) for more information.
+  See [*How to create a campaign of simulations ?*](https://github.com/dhondta/rpl-attacks/blob/master/doc/campaigns.md) for more information.
 
 4. Make the simulations
 
