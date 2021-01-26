@@ -1,0 +1,8 @@
+TODO: Create a "quick-start" or "wizard" command for chaining steps of
+        - preparing a campaign
+        - editing the campaign JSON
+        - making experiments
+        - running experiments
+        - editing reports
+        - remaking reports
+TODO: checkout https://github.com/mueller91/rpl-attacks/commit/f8df0216a49ee512c51e57eb3dbd2e7bd74add56 for additional building blocks
