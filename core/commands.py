@@ -203,7 +203,7 @@ def __make(name, ask=True, **kwargs):
         with_malicious = join(path, 'with-malicious', 'motes')
         without_malicious = join(path, 'without-malicious', 'motes')
         contiki = join(with_malicious, split(CONTIKI_FOLDER)[-1])
-        contiki_rpl = join(contiki, 'core', 'net', 'rpl')
+        contiki_ip, contiki_rpl = join(contiki, 'core', 'net', 'ip'), join(contiki, 'core', 'net', 'rpl')
         # copy a reduced version of Contiki where the debug flags can be set for RPL files set in DEBUG_FILES
         copy_folder(CONTIKI_FOLDER, with_malicious,
                     includes=get_contiki_includes(params["target"], params["malicious_target"]))
@@ -291,7 +291,7 @@ def __remake(name, build=False, **kwargs):
         with_malicious = join(path, 'with-malicious', 'motes')
         without_malicious = join(path, 'without-malicious', 'motes')
         contiki = join(with_malicious, split(CONTIKI_FOLDER)[-1])
-        contiki_rpl = join(contiki, 'core', 'net', 'rpl')
+        contiki_ip, contiki_rpl = join(contiki, 'core', 'net', 'ip'), join(contiki, 'core', 'net', 'rpl')
         with lcd(with_malicious):
             malicious = 'malicious.{}'.format(params["malicious_target"])
             croot, csensor = 'root.{}'.format(params["target"]), 'sensor.{}'.format(params["target"])

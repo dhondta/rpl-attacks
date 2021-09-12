@@ -1,7 +1,7 @@
 cffi
 cairocffi
 coloredlogs
-cryptography
+cryptography>3.3.2
 dill
 fabric>=2.6.0
 fabric3
@@ -11,7 +11,7 @@ jinja2
 jsmin
 markdown
 matplotlib
-networkx
+networkx>=2.6
 numpy
 pandas
 pygments>=2.7.4

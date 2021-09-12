@@ -10,23 +10,13 @@
 [![Donate](https://img.shields.io/badge/donate-paypal-orange.svg)](https://www.paypal.me/dhondta)
 
 
-## Table of Contents
-
-   * [Introduction](#introduction)
-   * [Installation](#installation)
-   * [Demonstration](#demonstration)
-   * [Quick Start](#quick-start)
-   * [Issues management](#issues-management)
-
-**Note**: In case of problem, please refer to [*Issues management*](#issues-management) first !
-
 ## Introduction
 
 This project aims to provide a simple and convenient interface relying on [Contiki OS](https://github.com/contiki-os/contiki) to generate [Cooja simulations](https://anrg.usc.edu/contiki/index.php/Cooja_Simulator) and deploy malicious motes for a [Wireless Sensor Network (WSN)](https://en.wikipedia.org/wiki/Wireless_sensor_network) that uses [Routing Protocol for Low-power and lossy devices (RPL)](https://www.ietf.org/proceedings/94/slides/slides-94-rtgarea-2.pdf) ([RFC 6550](https://tools.ietf.org/html/rfc6550)) as its network layer.
 
 With this framework, it is possible to easily define campaign of simulations (in JSON format) either redefining RPL configuration constants, modifying single lines from the [ContikiRPL library](https://github.com/contiki-os/contiki/tree/master/core/net/rpl) or using an own external RPL library. Moreover, experiments in a campaign can be generated either based on a same or a randomized topology for each simulation.
 
-## ![Additional Documentation](doc/README.md)
+### ![Additional Documentation](doc/README.md)
 
 ### A few test cases made with the framework:
 
