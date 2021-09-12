@@ -3,10 +3,10 @@ cairocffi
 coloredlogs
 cryptography
 dill
-fabric
+fabric>=2.6.0
 fabric3
 funcsigs
-grip
+grip>=4.5.2
 jinja2
 jsmin
 markdown
@@ -14,7 +14,7 @@ matplotlib
 networkx
 numpy
 pandas
-pygments
+pygments>=2.7.4
 pypng
 readline
 sh
