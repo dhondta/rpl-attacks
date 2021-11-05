@@ -1,3 +1,6 @@
+<h1 align="center">RPL Attacks Framework <a href="https://twitter.com/intent/tweet?text=RPL%20Attacks%20Framework%20-%20Framework%20for%20simulating%20WSN%20with%20a%20malicious%20mote%20based%20on%20Contiki%20for%20attacking%20the%20RPL%20protocol.%0D%0Ahttps%3a%2f%2fgithub%2ecom%2fdhondta%2frpl-attacks%0D%0A&hashtags=python,simulation,framework,contiki,rpl,wsn,sensors"><img src="https://img.shields.io/badge/Tweet--lightgrey?logo=twitter&style=social" alt="Tweet" height="20"/></a></h1>
+<h3 align="center">Make simulations of a WSN with a malicious mote for attacking the RPL protocol.</h3>
+
 [![Read The Docs](https://readthedocs.org/projects/rpl-attacks/badge/?version=latest)](https://rpl-attacks.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.com/dhondta/rpl-attacks.svg?branch=master)](https://travis-ci.com/dhondta/rpl-attacks)
 [![Requirements Status](https://requires.io/github/dhondta/rpl-attacks/requirements.svg?branch=master)](https://requires.io/github/dhondta/rpl-attacks/requirements/?branch=master)
@@ -9,8 +12,6 @@
 [![Beerpay](https://img.shields.io/beerpay/hashdog/scrapfy-chrome-extension.svg)](https://beerpay.io/dhondta/rpl-attacks)
 [![Donate](https://img.shields.io/badge/donate-paypal-orange.svg)](https://www.paypal.me/dhondta)
 
-
-## Introduction
 
 This project aims to provide a simple and convenient interface relying on [Contiki OS](https://github.com/contiki-os/contiki) to generate [Cooja simulations](https://anrg.usc.edu/contiki/index.php/Cooja_Simulator) and deploy malicious motes for a [Wireless Sensor Network (WSN)](https://en.wikipedia.org/wiki/Wireless_sensor_network) that uses [Routing Protocol for Low-power and lossy devices (RPL)](https://www.ietf.org/proceedings/94/slides/slides-94-rtgarea-2.pdf) ([RFC 6550](https://tools.ietf.org/html/rfc6550)) as its network layer.
 
@@ -49,7 +50,7 @@ Legitimate DODAG                                               |  Blackhole atta
 ![Legitimate DODAG](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/blackhole-attack-ex2-without.png) | ![Blackhole attack](https://github.com/dhondta/rpl-attacks/raw/master/doc/imgs/blackhole-attack-ex2-with.png)
 
 
-## Installation
+## :cd: Installation
 
 1. Clone this repository
 
@@ -95,7 +96,7 @@ Legitimate DODAG                                               |  Blackhole atta
  > The full manual installation procedure is available [here](https://rpl-attacks.readthedocs.io/en/latest/install/#manual-installation) and mentions [InstantContiki](https://sourceforge.net/projects/contiki/files/Instant%20Contiki/) but it is advised to use the [Vagrant box](https://app.vagrantup.com/dhondta/boxes/rpl-attacks) as it was fully tested.
 
 
-## Demonstration
+## :sunglasses: Demonstration
 
 This will make 3 complete examples of attacks : hello flood, version number and blackhole.
 
@@ -112,7 +113,7 @@ Or simply launch the `demo` command with Fabric:
  ```
 
 
-## Quick Start
+## :fast_forward: Quick Start
 
 1. Open the console (you should see something like in the following screenshot)
 
@@ -158,7 +159,7 @@ Or simply launch the `demo` command with Fabric:
  ``[EXPERIMENTS_FOLDER]/[experiment_name]/with-malicious/results/``
 
  
-## Issues management
+## :grimacing: Issues management
 
 In case of bug, there should be a **crash report generated in the folder of the experiment** that the framework was processing. By convention, this is named **`crash-report-[...].txt`**. Please copy its content (without the title) in a [new Issue](https://github.com/dhondta/rpl-attacks/issues/new).
  
@@ -166,3 +167,11 @@ For contributions or suggestions, please [open an Issue](https://github.com/dhon
 
 If you want to build new RPL attacks, please refer to the [*How to make new building blocks ?*](https://github.com/dhondta/rpl-attacks/blob/master/doc/building-blocks.md) section. In this case, please submit your new attack through a Pull Request.
 
+
+## :clap:  Supporters
+
+[![Stargazers repo roster for @dhondta/rpl-attacks](https://reporoster.com/stars/dark/dhondta/rpl-attacks)](https://github.com/dhondta/rpl-attacks/stargazers)
+
+[![Forkers repo roster for @dhondta/rpl-attacks](https://reporoster.com/forks/dark/dhondta/rpl-attacks)](https://github.com/dhondta/rpl-attacks/network/members)
+
+<p align="center"><a href="#"><img src="https://img.shields.io/badge/Back%20to%20top--lightgrey?style=social" alt="Back to top" height="20"/></a></p>
