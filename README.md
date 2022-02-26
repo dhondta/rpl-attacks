@@ -18,7 +18,7 @@ This project aims to provide a simple and convenient interface relying on [Conti
 
 With this framework, it is possible to easily define campaign of simulations (in JSON format) either redefining RPL configuration constants, modifying single lines from the [ContikiRPL library](https://github.com/contiki-os/contiki/tree/master/core/net/rpl) or using an own external RPL library. Moreover, experiments in a campaign can be generated either based on a same or a randomized topology for each simulation.
 
-### ![Additional Documentation](doc/README.md)
+See the [Wiki](https://github.com/dhondta/rpl-attacks/wiki) for additional documentation.
 
 ### A few test cases made with the framework:
 
