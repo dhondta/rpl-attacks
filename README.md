@@ -3,15 +3,11 @@
 <h3 align="center">Make simulations of a WSN with a malicious mote for attacking the RPL protocol.</h3>
 
 [![Read The Docs](https://readthedocs.org/projects/rpl-attacks/badge/?version=latest)](https://rpl-attacks.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.com/dhondta/rpl-attacks.svg?branch=master)](https://travis-ci.com/dhondta/rpl-attacks)
-[![Requirements Status](https://requires.io/github/dhondta/rpl-attacks/requirements.svg?branch=master)](https://requires.io/github/dhondta/rpl-attacks/requirements/?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/dhondta/rpl-attacks/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/rpl-attacks?targetFile=requirements.txt)
 [![DOI](https://zenodo.org/badge/22624/dhondta/rpl-attacks.svg)](https://zenodo.org/badge/latestdoi/22624/dhondta/rpl-attacks)
 [![Black Hat Arsenal Europe 2018](https://img.shields.io/badge/Black%20Hat%20Arsenal-EU%202018-blue.svg)](https://www.blackhat.com/eu-18/arsenal/schedule/index.html#rpl-attacks-framework-attacking-rpl-in-wsns-12671)
 [![Vagrant](https://img.shields.io/badge/vagrant-1.0.0-blue.svg)](https://app.vagrantup.com/dhondta/boxes/rpl-attacks)
 [![License](https://img.shields.io/badge/license-AGPLv3-lightgrey)](https://github.com/dhondta/rpl-attacks/blob/master/LICENSE)
-[![Beerpay](https://img.shields.io/beerpay/hashdog/scrapfy-chrome-extension.svg)](https://beerpay.io/dhondta/rpl-attacks)
-[![Donate](https://img.shields.io/badge/donate-paypal-orange.svg)](https://www.paypal.me/dhondta)
 
 
 This project aims to provide a simple and convenient interface relying on [Contiki OS](https://github.com/contiki-os/contiki) to generate [Cooja simulations](https://anrg.usc.edu/contiki/index.php/Cooja_Simulator) and deploy malicious motes for a [Wireless Sensor Network (WSN)](https://en.wikipedia.org/wiki/Wireless_sensor_network) that uses [Routing Protocol for Low-power and lossy devices (RPL)](https://www.ietf.org/proceedings/94/slides/slides-94-rtgarea-2.pdf) ([RFC 6550](https://tools.ietf.org/html/rfc6550)) as its network layer.
