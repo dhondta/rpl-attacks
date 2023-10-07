@@ -5,7 +5,7 @@
 [![Read The Docs](https://readthedocs.org/projects/rpl-attacks/badge/?version=latest)](https://rpl-attacks.readthedocs.io/en/latest/?badge=latest)
 [![Known Vulnerabilities](https://snyk.io/test/github/dhondta/rpl-attacks/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/dhondta/rpl-attacks?targetFile=requirements.txt)
 [![DOI](https://zenodo.org/badge/22624/dhondta/rpl-attacks.svg)](https://zenodo.org/badge/latestdoi/22624/dhondta/rpl-attacks)
-[![Black Hat Arsenal Europe 2018](https://img.shields.io/badge/Black%20Hat%20Arsenal-EU%202018-blue.svg)](https://www.blackhat.com/eu-18/arsenal/schedule/index.html#rpl-attacks-framework-attacking-rpl-in-wsns-12671)
+[![Black Hat Arsenal Europe 2018](https://raw.githubusercontent.com/toolswatch/badges/master/arsenal/europe/2018.svg?sanitize=true)](https://www.blackhat.com/eu-18/arsenal/schedule/index.html#rpl-attacks-framework-attacking-rpl-in-wsns-12671)
 [![Vagrant](https://img.shields.io/badge/vagrant-1.0.0-blue.svg)](https://app.vagrantup.com/dhondta/boxes/rpl-attacks)
 [![License](https://img.shields.io/badge/license-AGPLv3-lightgrey)](https://github.com/dhondta/rpl-attacks/blob/master/LICENSE)
 
